@@ -3,101 +3,296 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Policy Tracker V3 — Screen YAML</title>
+  <title>Policy Tracker — PowerApps</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f6f8; color: #1e1e1e; }
-    header {
-      background: #00402f;
-      color: #fff;
-      padding: 20px 32px;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f1a;
+      color: #e8e8f0;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    h1 { font-size: 1.8rem; font-weight: 600; color: #c8b8ff; margin-bottom: 8px; }
+    .subtitle { color: #888; font-size: 0.95rem; margin-bottom: 40px; }
+    h2 { font-size: 1.2rem; color: #a0c0e0; margin: 40px 0 16px; border-bottom: 1px solid #2a2a3a; padding-bottom: 8px; }
+    h3 { font-size: 1rem; color: #e8e8f0; margin: 24px 0 8px; }
+    p { color: #aaa; line-height: 1.6; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 24px; }
+    th { background: #1a1a2e; color: #c8b8ff; text-align: left; padding: 8px 12px; border: 1px solid #2a2a3a; }
+    td { padding: 8px 12px; border: 1px solid #2a2a3a; color: #d0d0e0; vertical-align: top; }
+    tr:nth-child(even) td { background: #131320; }
+    code { background: #1e1e30; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #c8d8f0; font-family: 'Cascadia Code', 'Consolas', monospace; }
+    .code-block { position: relative; margin: 12px 0 24px; }
+    pre {
+      background: #1a1a2e;
+      color: #c8d8f0;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 12px;
+      background: #7c4dff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: #6a3de8; }
+    .copy-btn.ok { background: #2a7d4e; }
+    .screen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
+    .screen-card {
       display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    header h1 { font-size: 22px; font-weight: 800; }
-    header .badge {
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 20px;
-      padding: 3px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-    main { max-width: 860px; margin: 40px auto; padding: 0 24px; }
-    h2 { font-size: 15px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 40px; }
-    .card {
-      background: #fff;
-      border: 1px solid #dde0e4;
-      border-radius: 10px;
-      padding: 20px 20px 16px;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #1a1a2e;
+      border: 1px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 20px;
       text-decoration: none;
       color: inherit;
-      display: block;
-      transition: box-shadow 0.15s, border-color 0.15s;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); border-color: #00402f; }
-    .card-icon { font-size: 28px; margin-bottom: 10px; }
-    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-    .card-desc { font-size: 12px; color: #777; line-height: 1.5; }
-    .note {
-      background: #fffbe6;
-      border: 1px solid #f0d060;
-      border-left: 4px solid #d4a800;
-      border-radius: 8px;
-      padding: 14px 18px;
-      font-size: 13px;
-      line-height: 1.6;
-      color: #5a4000;
-    }
-    .note strong { display: block; margin-bottom: 4px; font-size: 14px; }
-    footer { text-align: center; padding: 32px; font-size: 11px; color: #aaa; }
+    .screen-card:hover { border-color: #7c4dff; background: #1e1e35; }
+    .screen-number { font-size: 0.75rem; color: #666; margin-bottom: 8px; }
+    .screen-name { font-size: 1rem; font-weight: 600; color: #c8b8ff; margin-bottom: 6px; }
+    .screen-desc { font-size: 0.82rem; color: #888; line-height: 1.4; }
+    .screen-cta { margin-top: 16px; font-size: 0.82rem; color: #7c4dff; }
+    .note { background: #1a2a1a; border-left: 3px solid #2a7d4e; padding: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #aaa; margin: 16px 0; }
+    .warning { background: #2a1a1a; border-left: 3px solid #7d2a2a; padding: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #aaa; margin: 16px 0; }
+    ol, ul { padding-left: 24px; color: #aaa; font-size: 0.9rem; line-height: 2; }
+    a.back { font-size: 0.82rem; color: #666; text-decoration: none; display: inline-block; margin-bottom: 32px; }
+    a.back:hover { color: #999; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-left: 6px; }
+    .badge-new { background: #1a3a1a; color: #4a9; }
+    .badge-existing { background: #1a1a3a; color: #66a; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Policy Tracker V3</h1>
-    <span class="badge">ACCT UK</span>
-    <span class="badge">Built 24 Jun 2026</span>
-  </header>
-  <main>
-    <h2 style="margin-top:0">Screen YAML Files</h2>
-    <p style="margin-bottom:20px;font-size:13px;color:#666;">Open a screen, click <strong>Copy YAML</strong>, then paste into PowerApps Studio.</p>
-    <div class="grid">
-      <a class="card" href="screens/StartScreen.html">
-        <div class="card-icon">🚀</div>
-        <div class="card-title">StartScreen</div>
-        <div class="card-desc">Deep-link router. Routes to Main or directly to ViewItem when an ID param is present.</div>
-      </a>
-      <a class="card" href="screens/Main.html">
-        <div class="card-icon">📋</div>
-        <div class="card-title">Main</div>
-        <div class="card-desc">Full redesign. Header, stat cards, date-grouped gallery with new card design, "Owned by Me" toggle, search overlay.</div>
-      </a>
-      <a class="card" href="screens/ViewItem.html">
-        <div class="card-icon">📝</div>
-        <div class="card-title">ViewItem</div>
-        <div class="card-desc">Detail/edit form. Top Item DataCard (amber), links open in new tab, scroll restoration on Close, fixed Duplicate patch.</div>
-      </a>
-      <a class="card" href="screens/Historic.html">
-        <div class="card-icon">📁</div>
-        <div class="card-title">Historic</div>
-        <div class="card-desc">Archive screen. Clean table layout with type-colour bar, published/unpublished badge, search, footer count.</div>
-      </a>
-      <a class="card" href="screens/Overview.html">
-        <div class="card-icon">🗓️</div>
-        <div class="card-title">Overview</div>
-        <div class="card-desc">4-week Kanban board. Thursday columns with type badges, ⭐ Top Item and ⚡ High Priority flags per card.</div>
-      </a>
-    </div>
 
-    <div class="note">
-      <strong>⚠️ Before importing — SharePoint prerequisite</strong>
-      A new <strong>Yes/No column named exactly "Top Item"</strong> must be added to the <em>Policy Proof Tracker</em> SharePoint list before ViewItem.yaml will validate. Without it, the <code>TopItem_DataCard1</code> DataCard will throw a binding error. Add the column in SharePoint list settings, then refresh the data source in PowerApps Studio.
+<a class="back" href="https://phaderon.github.io/PowerApps/">&#8592; Guide Library</a>
+<h1>Policy Tracker <span style="font-size:0.65em;font-weight:400;color:#666;vertical-align:middle;margin-left:8px;">V3</span></h1>
+<p style="font-size:0.75rem;color:#3a3a55;font-family:'Cascadia Code','Consolas',monospace;margin-bottom:4px;">Built 24 Jun 2026</p>
+<p class="subtitle">Canvas app — tracks ACCT UK policy documents through the release pipeline. Four tab views (Current / Future / Issues / Archive), date-grouped gallery, colour-coded document types, approval workflow, and deep-link support. Wraps the <code>Policy Proof Tracker</code> SharePoint list with a <code>PolicyLinks</code> child list for associated documents.</p>
+
+<h2>Before You Start</h2>
+<ol>
+  <li>Add the one new column to the SharePoint list (see below).</li>
+  <li>Open Power Apps Studio &rarr; New blank canvas app (tablet landscape, 1366&times;768).</li>
+  <li>Add both data connections listed below.</li>
+  <li>Set <strong>App &rarr; OnStart</strong> using the code block below.</li>
+  <li>Create 5 blank screens, then paste each YAML in order.</li>
+</ol>
+
+<h2>Data Connections</h2>
+<p>Add these in the Data panel before pasting any YAML:</p>
+<ul>
+  <li><strong>SharePoint</strong> &rarr; connect to your SharePoint site &rarr; select <code>Policy Proof Tracker</code></li>
+  <li><strong>SharePoint</strong> &rarr; same site &rarr; select <code>PolicyLinks</code></li>
+  <li><strong>Office365Users</strong> &rarr; used for the owner people-picker on ViewItem</li>
+</ul>
+
+<h2>SharePoint List Changes</h2>
+<p>The existing <code>Policy Proof Tracker</code> list is used as-is. One new column must be added:</p>
+
+<h3>List: <code>Policy Proof Tracker</code> <span class="badge badge-existing">existing</span></h3>
+<div class="note">This list already exists. Do not recreate it. Only add the one new column below.</div>
+<table>
+  <thead><tr><th>Column name</th><th>Type</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>Top Item</code></td><td>Yes/No (Boolean)</td><td><span class="badge badge-new">ADD THIS</span> Default: No. Used to flag entries that should appear first in the policy newsletter. The internal field name will be <code>Top_x0020_Item</code>.</td></tr>
+    <tr><td>All other columns</td><td>—</td><td>Leave as-is. The app uses internal column names directly from the schema.</td></tr>
+  </tbody>
+</table>
+
+<div class="warning">
+  <strong>Column name gotchas:</strong> Several columns have URL-encoded internal names. The app uses these exactly:
+  <ul style="margin-top:8px;">
+    <li><code>TrackerType</code> — displays as "Document Type"</li>
+    <li><code>PublishDate</code> — displays as "Planned Publish Date"</li>
+    <li><code>ActualPublishedDate</code> — displays as "Published Date"</li>
+    <li><code>ReadyForRelease</code> — displays as "Approved by Pillar Lead (Ready to Release)"</li>
+    <li><code>External_x0020_consultation_x002</code> — displays as "External consultation required"</li>
+    <li><code>Item_x0020_summary</code> — displays as "Item summary"</li>
+    <li><code>Title_x0020_for_x0020_Newsletter</code> — displays as "Title for Newsletter"</li>
+    <li><code>Approved_x0020_For_x0020_Release</code> — displays as "Approved For Release By" (radio button)</li>
+    <li><code>Top_x0020_Item</code> — displays as "Top Item" (the new column you are adding)</li>
+  </ul>
+  If any Patch calls fail with a field-not-found error, check the actual internal name in SharePoint list settings.
+</div>
+
+<h2>App.OnStart</h2>
+<p>Paste into <strong>App &rarr; OnStart</strong> in Power Apps Studio. Do not put this inside any screen.</p>
+<div class="code-block">
+  <button class="copy-btn" onclick="copyBlock(this, 'on-start')">Copy</button>
+  <pre id="on-start">// App.OnStart — Policy Tracker V3
+Set(varSelectedState, "Current");
+Set(varShowSearch, false);
+Set(varSelectPolicy, "Empty");
+Set(varHistoricLimit, 28);
+Set(varSelectedDate, Today());
+Set(varSelectedItem, Blank());
+Set(varSelectedRelease, Blank());
+Set(varSelectedLink, Blank());
+Set(varShowDuplicateModal, false);
+Set(varSaving, false);
+Set(varUnsavedChanges, false);
+Set(varParentSaved, false);
+Set(varLoadingLinks, false);
+Set(varFormSaved, false);
+Set(varDeletingItem, false);
+Set(varSaveMode, "");
+Set(varDuplicating, false);
+Set(varShowLinkModal, false);
+Set(varShowMyEntries, false);
+Set(varScrollDate, Blank());
+Set(varSourceScreen, "Main");
+Set(varDeepLinkHandled, false);
+Set(varLoading, false);
+Set(gblMorphTimestamp, Text(Now(), "yyyymmddhhmmss"));
+ClearCollect(
+    colChoiceColors,
+    ForAll(
+        Choices('Policy Proof Tracker'.'Document Type'),
+        {
+            ChoiceValue: Value,
+            ColorCode: Switch(
+                Value,
+                "📗 Manual",            RGBA(0, 130, 60, 1),
+                "📄 CFI",               RGBA(0, 100, 200, 1),
+                "📄 CFSO",              RGBA(130, 0, 180, 1),
+                "📕 SOI",               RGBA(190, 30, 30, 1),
+                "📖 Regulation",        RGBA(0, 150, 150, 1),
+                "📄 CBN",               RGBA(210, 100, 0, 1),
+                "📄 ACSO",              RGBA(0, 60, 130, 1),
+                "📑 Internal Document", RGBA(90, 90, 110, 1),
+                "📜 Newsletter Item",   RGBA(160, 120, 0, 1),
+                RGBA(150, 150, 150, 1)
+            )
+        }
+    )
+);
+Set(
+    AppTheme,
+    {
+        palette: {
+            themePrimary:   RGBA(0, 64, 47, 1),
+            themeSecondary: RGBA(45, 128, 40, 1),
+            themeTertiary:  RGBA(52, 152, 47, 1),
+            neutralLight:   RGBA(237, 237, 237, 1),
+            neutralDark:    RGBA(50, 49, 48, 1),
+            white:          RGBA(255, 255, 255, 1)
+        },
+        semanticColors: {
+            buttonBackground:        RGBA(0, 64, 47, 1),
+            buttonBackgroundHovered: RGBA(45, 128, 40, 1),
+            buttonBackgroundPressed: RGBA(52, 152, 47, 1),
+            buttonText:              RGBA(255, 255, 255, 1)
+        }
+    }
+)</pre>
+</div>
+
+<h2>Screens</h2>
+<p>Create a new blank screen for each one, then paste in this order. Each screen imports as a complete unit.</p>
+<div class="screen-grid">
+  <a class="screen-card" href="screens/StartScreen.html">
+    <div>
+      <div class="screen-number">Screen 1</div>
+      <div class="screen-name">StartScreen</div>
+      <div class="screen-desc">Deep-link router. Checks for an ID param and routes directly to ViewItem, otherwise goes to Main.</div>
     </div>
-  </main>
-  <footer>Policy Tracker V3 &mdash; ACCT UK &mdash; Built with Claude Code</footer>
+    <div class="screen-cta">Open and copy &rarr;</div>
+  </a>
+  <a class="screen-card" href="screens/Main.html">
+    <div>
+      <div class="screen-number">Screen 2</div>
+      <div class="screen-name">Main</div>
+      <div class="screen-desc">Full redesign. Header with "Owned by Me" toggle. Stat cards. Date-grouped gallery with type-colour bars, Top Item amber strip, owner avatar, pills, link count, search overlay.</div>
+    </div>
+    <div class="screen-cta">Open and copy &rarr;</div>
+  </a>
+  <a class="screen-card" href="screens/ViewItem.html">
+    <div>
+      <div class="screen-number">Screen 3</div>
+      <div class="screen-name">ViewItem</div>
+      <div class="screen-desc">Detail and edit form. Top Item DataCard with amber styling. Links open in new tab. Scroll position preserved on Close. Fixed Duplicate patch. Approved For Release By radio.</div>
+    </div>
+    <div class="screen-cta">Open and copy &rarr;</div>
+  </a>
+  <a class="screen-card" href="screens/Historic.html">
+    <div>
+      <div class="screen-number">Screen 4</div>
+      <div class="screen-name">Historic</div>
+      <div class="screen-desc">Archive screen. Table layout with type-colour left bar, published/unpublished status badge, search, and footer count split by status.</div>
+    </div>
+    <div class="screen-cta">Open and copy &rarr;</div>
+  </a>
+  <a class="screen-card" href="screens/Overview.html">
+    <div>
+      <div class="screen-number">Screen 5</div>
+      <div class="screen-name">Overview</div>
+      <div class="screen-desc">4-week Kanban board. Thursday date columns with dark green headers, colour-coded type badges, and ⭐ Top Item / ⚡ High Priority flags per card.</div>
+    </div>
+    <div class="screen-cta">Open and copy &rarr;</div>
+  </a>
+</div>
+
+<h2>Paste Order</h2>
+<ol>
+  <li>Create 5 blank screens in Power Apps (they can be named anything — the YAML renames them on paste).</li>
+  <li>Click the first blank screen, open the three-dot menu, choose <strong>Paste YAML</strong>.</li>
+  <li>Repeat for each screen in order: StartScreen, Main, ViewItem, Historic, Overview.</li>
+  <li>Set the startup screen to <code>StartScreen</code> in App &rarr; StartScreen.</li>
+</ol>
+
+<div class="note">
+  <strong>Top Item SP column:</strong> The <code>Top Item</code> Yes/No column must exist in the <code>Policy Proof Tracker</code> list before you paste ViewItem. Without it, the <code>TopItem_DataCard1</code> DataCard will throw a binding error on import. Add the column first, then refresh the SharePoint data source in the Data panel.
+</div>
+
+<div class="note">
+  <strong>Thursday dates:</strong> The Duplicate modal only shows Thursdays as valid release dates. Thursdays within 10 days of today are hidden unless the entry is marked High Priority. If your organisation changes release cadence, update the <code>colThursdays</code> ClearCollect in App.OnStart accordingly.
+</div>
+
+<h2>What Changed in V3</h2>
+<ul>
+  <li><strong>New:</strong> "Owned by Me" toggle on Main — filters Current, Future, and Issues by Owner field (not creator)</li>
+  <li><strong>New:</strong> Top Item flag — amber strip on gallery cards, amber DataCard in ViewItem newsletter section, ⭐ flag on Overview Kanban</li>
+  <li><strong>New:</strong> Links always open in a new tab — users no longer navigate away from the app when clicking a document link</li>
+  <li><strong>New:</strong> Scroll position is restored when returning from ViewItem to Main</li>
+  <li><strong>Fixed:</strong> Stat card counts were using wrong date ranges — now correct</li>
+  <li><strong>Fixed:</strong> <code>varHistoricLimit</code> was 30, now correctly 28 (4 weeks of Thursdays)</li>
+  <li><strong>Fixed:</strong> <code>gblMorphTimestamp</code> was not initialised in OnStart — now set on app launch</li>
+  <li><strong>Removed:</strong> <code>Approved For Release By</code> DataCard was incorrectly removed in an earlier draft — it is fully present in V3</li>
+  <li><strong>Redesigned:</strong> Gallery cards rebuilt with Labels (not TextInput), type-colour left bar, watermark, owner avatar, AutoLayout pills</li>
+</ul>
+
+<h2>Issues</h2>
+<p>Found a problem or need a change? <a href="https://github.com/PhadeDev/policy-tracker/issues" style="color:#7c4dff">Report it in the issues tracker</a>.</p>
+
+<script>
+async function copyBlock(btn, id) {
+  const text = document.getElementById(id).textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = '✓ Copied!';
+    btn.className = 'copy-btn ok';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.className = 'copy-btn'; }, 3000);
+  } catch (e) {
+    btn.textContent = 'Failed';
+  }
+}
+</script>
 </body>
 </html>
