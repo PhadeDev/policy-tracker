@@ -72,18 +72,20 @@ Note: "Internal Document" and "Newsletter Item" are long — use truncated displ
 
 Within any date group, items sort by this priority (ascending sort key):
 
+Order confirmed from SharePoint dropdown screenshot. Top Item always overrides.
+
 | Priority | Type | Sort Key |
 |----------|------|----------|
 | 0 | Top Item (checkbox ticked) | Always first, above all types |
 | 1 | Regulation | |
-| 2 | Manual | |
-| 3 | ACSO | |
-| 4 | CFSO | |
-| 5 | SOI | |
-| 6 | CFI | |
-| 7 | CBN | |
-| 8 | Internal Item | |
-| 9 | Newsletter | |
+| 2 | ACSO | |
+| 3 | CFSO | |
+| 4 | CFI | |
+| 5 | CBN | |
+| 6 | SOI | |
+| 7 | Internal Document | |
+| 8 | Manual | |
+| 9 | Newsletter Item | |
 
 **SortByColumns formula pattern:**
 ```
@@ -95,15 +97,15 @@ SortByColumns(
             0,
             Switch(
                 Mid(ThisRecord.'Document Type'.Value, Find(" ", ThisRecord.'Document Type'.Value) + 1),
-                "Regulation",       1,
-                "Manual",           2,
-                "ACSO",             3,
-                "CFSO",             4,
-                "SOI",              5,
-                "CFI",              6,
-                "CBN",              7,
-                "Internal Document", 8,
-                "Newsletter Item",  9,
+                "Regulation",        1,
+                "ACSO",              2,
+                "CFSO",              3,
+                "CFI",               4,
+                "CBN",               5,
+                "SOI",               6,
+                "Internal Document", 7,
+                "Manual",            8,
+                "Newsletter Item",   9,
                 99
             )
         )
@@ -111,8 +113,6 @@ SortByColumns(
     "SortKey", SortOrder.Ascending
 )
 ```
-
-Note: user referred to "Internal Item" — verify SharePoint choice value is "Internal Document" or "Internal Item" before using.
 
 ### Status Colours
 
@@ -411,8 +411,8 @@ Concat(
             "SortKey",
             If('Top Item', 0,
                 Switch(Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
-                    "Regulation", 1, "Manual", 2, "ACSO", 3, "CFSO", 4,
-                    "SOI", 5, "CFI", 6, "CBN", 7, "Internal Document", 8, "Newsletter Item", 9, 99
+                    "Regulation", 1, "ACSO", 2, "CFSO", 3, "CFI", 4,
+                    "CBN", 5, "SOI", 6, "Internal Document", 7, "Manual", 8, "Newsletter Item", 9, 99
                 )
             )
         ),
@@ -467,7 +467,7 @@ Past planned publish date AND not yet published (`Published = false`). Both cond
 ## What to Build — Session Checklist
 
 - [x] Newsletter access: colNewsletterUsers collection in OnStart — allan.hamilton775@mod.gov.uk + dan.smith391@mod.gov.uk. Add rows to extend.
-- [ ] Confirm "Internal Item" vs "Internal Document" — exact SharePoint choice value
+- [x] "Internal Document" confirmed from SharePoint dropdown screenshot. Priority order also corrected from screenshot.
 - [ ] App.OnStart: colChoiceColors, varMyEmail, varTypeFilter="All", varShowMyEntries=false, varNextThursday
 - [ ] StartScreen: unchanged (logo + navigate to Main)
 - [ ] Main: stat bar + controls row + grouped gallery with new card design + empty state + newsletter button (gated)
