@@ -611,8 +611,6 @@ Screens:
                                           BorderColor: =RGBA(0, 0, 0, 0)
                                           Fill: =RGBA(0, 64, 47, 1)
                                           Height: =Parent.Height
-                                          RadiusBottomLeft: =6
-                                          RadiusTopLeft: =6
                                           Width: =5
                                     - lblDateHeader:
                                         Control: Label@2.5.1
@@ -687,8 +685,6 @@ Screens:
                                                 BorderColor: =RGBA(0, 0, 0, 0)
                                                 Fill: =RGBA(255, 186, 8, 1)
                                                 Height: =6
-                                                RadiusTopLeft: =8
-                                                RadiusTopRight: =8
                                                 Visible: =ThisItem.'Top Item'
                                                 Width: =Parent.Width
                                                 Y: =0
@@ -698,8 +694,6 @@ Screens:
                                                 BorderColor: =RGBA(0, 0, 0, 0)
                                                 Fill: =LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode)
                                                 Height: =Parent.Height
-                                                RadiusBottomLeft: =8
-                                                RadiusTopLeft: =8
                                                 Width: =6
                                           - lblWatermark:
                                               Control: Label@2.5.1
