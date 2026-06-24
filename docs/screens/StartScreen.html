@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PowerApps – StartScreen</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f1a;
+      color: #e8e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 20px;
+    }
+    h1 { font-size: 1.4rem; font-weight: 400; color: #a0a0c0; }
+    .name { font-size: 1.1rem; font-weight: 600; color: #c8b8ff; }
+    button {
+      padding: 14px 36px;
+      font-size: 1.1rem;
+      background: #7c4dff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #6a3de8; }
+    button:active { background: #5830cc; }
+    #status {
+      font-size: 0.9rem;
+      color: #888;
+      min-height: 1.2em;
+      transition: color 0.2s;
+    }
+    #status.ok { color: #4caf7d; }
+    #status.err { color: #e85555; }
+    .info {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 8px;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .preview {
+      width: min(720px, calc(100vw - 48px));
+      background: #1a1a2e;
+      border: 1px solid #2a2a3a;
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #bfc7e8;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+    .build-stamp {
+      position: fixed;
+      bottom: 14px;
+      right: 18px;
+      font-size: 0.72rem;
+      color: #3a3a55;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>PowerApps Screen</h1>
+  <div class="name">StartScreen</div>
+  <button onclick="copyYAML()">Copy YAML to Clipboard</button>
+  <div id="status">Click to copy — PowerApps-ready (CRLF, UTF-8)</div>
+  <div class="info">
+    After copying, open PowerApps Studio &rarr; select a screen &rarr; Ctrl+V<br>
+    or use the paste button in the tree view.
+  </div>
+  <pre id="preview" class="preview"></pre>
+  <div class="build-stamp">V3  —  Built 24 Jun 2026  20:10 BST</div>
+  <script>
+    const yaml = "Screens:\r\n  StartScreen:\r\n    Properties:\r\n      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)\r\n      OnVisible: |-\r\n        =If(\r\n            !IsBlank(Param(\"ID\")),\r\n            Navigate(ViewItem, ScreenTransition.None),\r\n            Navigate(Main, ScreenTransition.None)\r\n        )\r\n    Children:\r\n      - lblLoading:\r\n          Control: Label@2.5.1\r\n          Properties:\r\n            Align: =Align.Center\r\n            BorderColor: =RGBA(0, 0, 0, 0)\r\n            Color: =RGBA(150, 150, 150, 1)\r\n            Font: =Font.'Open Sans'\r\n            Height: =40\r\n            Size: =14\r\n            Text: =\"Loading...\"\r\n            VerticalAlign: =VerticalAlign.Middle\r\n            Width: =Parent.Width\r\n            Y: =Parent.Height / 2 - 20\r\n";
+    const stamp = "V3  \u2014  Built 24 Jun 2026  20:10 BST";
+
+    function firstLines() {
+      return yaml.split(/\r?\n/).slice(0, 8).join('\n');
+    }
+
+    async function copyYAML() {
+      const status = document.getElementById('status');
+      if (!yaml.startsWith('Screens:\r\n  ') && !yaml.startsWith('Screens:\n  ')) {
+        status.textContent = 'Refusing to copy: YAML does not start with Screens:';
+        status.className = 'err';
+        return;
+      }
+      if (yaml.includes('\r\n    Control: Screen\r\n') || yaml.includes('\n    Control: Screen\n')) {
+        status.textContent = 'Refusing to copy: stale YAML still contains screen-level Control: Screen.';
+        status.className = 'err';
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(yaml);
+        status.textContent = '✓ Copied ' + stamp + '. First YAML line: ' + yaml.split(/\r?\n/)[0];
+        status.className = 'ok';
+        setTimeout(() => {
+          status.textContent = 'Click to copy again';
+          status.className = '';
+        }, 4000);
+      } catch (e) {
+        status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+        status.className = 'err';
+        const pre = document.createElement('pre');
+        pre.style = 'font-size:9px;max-height:200px;overflow:auto;background:#1a1a2e;padding:8px;border-radius:6px;text-align:left;';
+        pre.textContent = yaml;
+        document.body.appendChild(pre);
+      }
+    }
+
+    document.getElementById('preview').textContent = 'Clipboard payload preview (' + stamp + ')\n' + firstLines();
+  </script>
+</body>
+</html>

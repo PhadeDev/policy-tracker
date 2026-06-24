@@ -1,0 +1,68 @@
+// App.OnStart — Policy Tracker V3
+// Paste this into App.OnStart in PowerApps Studio (not a YAML screen)
+
+Set(varSelectedState, "Current");
+Set(varShowSearch, false);
+Set(varSelectPolicy, "Empty");
+Set(varHistoricLimit, 28);
+Set(varSelectedDate, Today());
+Set(varSelectedItem, Blank());
+Set(varSelectedRelease, Blank());
+Set(varSelectedLink, Blank());
+Set(varShowDuplicateModal, false);
+Set(varSaving, false);
+Set(varUnsavedChanges, false);
+Set(varParentSaved, false);
+Set(varLoadingLinks, false);
+Set(varFormSaved, false);
+Set(varDeletingItem, false);
+Set(varSaveMode, "");
+Set(varDuplicating, false);
+Set(varShowLinkModal, false);
+Set(varShowMyEntries, false);
+Set(varScrollDate, Blank());
+Set(varSourceScreen, "Main");
+Set(varDeepLinkHandled, false);
+Set(varLoading, false);
+Set(gblMorphTimestamp, Text(Now(), "yyyymmddhhmmss"));
+ClearCollect(
+    colChoiceColors,
+    ForAll(
+        Choices('Policy Proof Tracker'.'Document Type'),
+        {
+            ChoiceValue: Value,
+            ColorCode: Switch(
+                Value,
+                "📗 Manual",          RGBA(0, 130, 60, 1),
+                "📄 CFI",             RGBA(0, 100, 200, 1),
+                "📄 CFSO",            RGBA(130, 0, 180, 1),
+                "📕 SOI",             RGBA(190, 30, 30, 1),
+                "📖 Regulation",      RGBA(0, 150, 150, 1),
+                "📄 CBN",             RGBA(210, 100, 0, 1),
+                "📄 ACSO",            RGBA(0, 60, 130, 1),
+                "📑 Internal Document", RGBA(90, 90, 110, 1),
+                "📜 Newsletter Item", RGBA(160, 120, 0, 1),
+                RGBA(150, 150, 150, 1)
+            )
+        }
+    )
+);
+Set(
+    AppTheme,
+    {
+        palette: {
+            themePrimary: RGBA(0, 64, 47, 1),
+            themeSecondary: RGBA(45, 128, 40, 1),
+            themeTertiary: RGBA(52, 152, 47, 1),
+            neutralLight: RGBA(237, 237, 237, 1),
+            neutralDark: RGBA(50, 49, 48, 1),
+            white: RGBA(255, 255, 255, 1)
+        },
+        semanticColors: {
+            buttonBackground: RGBA(0, 64, 47, 1),
+            buttonBackgroundHovered: RGBA(45, 128, 40, 1),
+            buttonBackgroundPressed: RGBA(52, 152, 47, 1),
+            buttonText: RGBA(255, 255, 255, 1)
+        }
+    }
+)
