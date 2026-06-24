@@ -1892,7 +1892,8 @@ Screens:
                               DisplayMode: =DisplayMode.View
                               Font: =Font.'Open Sans'
                               Height: =292
-                              HtmlText: ="<div style=""border: 1px solid black; border-radius: 8px; padding: 15px; background-color: #fff8dc; width: 100%; box-sizing: border-box; text-align: left;""><p><strong>By ticking this box, you confirm that, as the pillar lead for this release, the item meets all required criteria for publication. These criteria include:</strong></p><ul style=""margin-top: 10px; padding-left: 20px;""><li><strong>Spelling and grammar:</strong> All text has been thoroughly checked and corrected.</li><li><strong>Links:</strong> All document links are valid and have been tested.</li><li><strong>Formatting:</strong> Bullets, page numbers, headers, and footers are correctly applied and consistent throughout.</li></ul></div>"
+                              HtmlText: |-
+                                ="<div style=""border: 1px solid black; border-radius: 8px; padding: 15px; background-color: #fff8dc; width: 100%; box-sizing: border-box; text-align: left;""><p><strong>By ticking this box, you confirm that, as the pillar lead for this release, the item meets all required criteria for publication. These criteria include:</strong></p><ul style=""margin-top: 10px; padding-left: 20px;""><li><strong>Spelling and grammar:</strong> All text has been thoroughly checked and corrected.</li><li><strong>Links:</strong> All document links are valid and have been tested.</li><li><strong>Formatting:</strong> Bullets, page numbers, headers, and footers are correctly applied and consistent throughout.</li></ul></div>"
                               Width: =716
                               X: =32
                   - Remarks_DataCard1_1:
