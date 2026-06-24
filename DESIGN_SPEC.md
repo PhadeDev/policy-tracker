@@ -169,9 +169,9 @@ Note: user referred to "Internal Item" — verify SharePoint choice value is "In
 └──────────────────────────────────────────────────────────┘
 ```
 
-- **Left type panel:** Rectangle, Width=100, full card height, Fill=type colour from colChoiceColors. Label centred in panel, Text=ThisItem.'Document Type'.Value (e.g. "CFSO"), Size=26, Bold, White, Courier New font. Below it: small classification label (Size=9, White 70% opacity).
+- **Left type panel:** Rectangle, Width=100, full card height, Fill=type colour from colChoiceColors. Label centred in panel, Text=Mid(ThisItem.'Document Type'.Value, Find(" ", ThisItem.'Document Type'.Value)+1) (strips emoji prefix — shows "CFSO", "Manual" etc.), Size=26, Bold, White, Courier New font. **No classification label** — remove "Official/Official-Sensitive" entirely.
 - **Right content area:** X=108, padding 12px top
-  - Row 1: Reference label (mono, 10px, muted) + "Mine" badge (visible if Owner.Email = varMyEmail) + priority flag (⚑ amber if High, red if Immediate)
+  - Row 1: Reference label (mono, 10px, muted) + "Mine" badge (visible if Owner.Email = varMyEmail) + priority flag (⚑ amber, visible only if High Priority = true — do not show "Immediate" wording, do not show flag at all for routine items)
   - Row 2: Title label (14px, Semibold, foreground, wraps to 2 lines max)
   - Divider: thin horizontal line at Y=~95
   - Row 3 (bottom): Owner initials circle (28px, type-colour bg) + Owner name + unit (11px, muted) | Date with calendar emoji | Status dot + label
@@ -217,26 +217,55 @@ Note: user referred to "Internal Item" — verify SharePoint choice value is "In
 
 ## Screen 4: ViewItem (Item Detail)
 
+### Form Approach
+- Try **Modern Form** first — if it produces clean, card-style field rendering that looks close to the V0 reference, use it
+- Fall back to Classic Form (TypedDataCards) only if Modern Form constrains the layout too much or breaks Patch behaviour
+- Either way: must patch correctly to SharePoint and show all dropdowns
+
 ### Header Band
 - Full width, height ~100px, Fill = type colour (from colChoiceColors lookup on Document Type)
-- Left section (X=20): Large type label (mono 32px bold white), vertical separator, Reference (mono 14px white), Type full name beneath (12px white 80% opacity)
+- Left section (X=20): Large type label (mono 32px bold white), vertical separator, type display name (12px white 80% opacity)
 - Title below that: 18px bold white, wrapping
+- **No classification label anywhere** (remove "Official" / "Official-Sensitive" — not needed)
 
 ### Two-Panel Layout
-- **Left panel (Width ~680):** All form fields
-  - Field labels: mono 10px uppercase bold muted — "PLANNED PUBLISH DATE", "DOCUMENT TYPE", "STATUS", "OWNER" etc.
-  - Inputs: height 40, border 1px, radius 6, bg panel colour
-  - Approval radio buttons: keep as-is (Classic/Radio), but label styled as field
-  - Action buttons at bottom: Save (primary green), Delete (red), Duplicate
-- **Right panel (Width ~350):** Attachments/links
-  - Panel header: "Attachments & Links" in mono uppercase
-  - Each link row: icon (document type icon) + link text + external arrow icon, clickable row that opens in new tab
-  - Add link button at bottom
-  - Delete attachment button per row (trash icon, visible on hover)
+- **Left panel (Width ~680):** All form fields. Field labels in mono 10px uppercase bold muted. Inputs height 40, border 1px, radius 6, panel bg.
+- **Right panel (Width ~350):** Attachments/links panel
+
+### Required Form Fields (all must be present)
+These come from the SharePoint list — V0 was missing several. Every field below must appear:
+
+| Field | Control Type | Notes |
+|-------|-------------|-------|
+| Title | Text input | |
+| Document Type | Dropdown | All 9 choice values |
+| Owner | People picker / dropdown | |
+| Planned Publish Date | Date picker | |
+| Status | Dropdown | On Track / At Risk / Blocked / Published |
+| Approved For Release By | Radio buttons (Classic/Radio) | Essential — do not remove |
+| Top Item | Toggle/Checkbox | |
+| High Priority | Toggle/Checkbox | |
+| Remarks | Multi-line text | |
+| Newsletter Text | Multi-line text | Only visible when type = "📜 Newsletter Item" |
+| Supersedes | Text input | |
+| Any other fields from original form | — | Check ViewItem.yaml for full list |
+
+**Newsletter Text field:** conditionally visible — `Visible: =ThisItem.'Document Type'.Value = "📜 Newsletter Item"` (or equivalent on the form card)
+
+### Priority Display Rules
+- **High Priority:** Show a flag/indicator on cards and in the header — keep this
+- **Immediate:** Do not show "Immediate" wording — remove or fold into High Priority display
+- Remove priority level entirely from card if it is routine/normal — only show when elevated
+
+### Attachments Panel (right side)
+- Header: "Attachments & Links" mono uppercase label
+- Each link row: link label text + external link icon, full row tappable, opens in new tab via `Launch(url, {}, LaunchTarget.New)`
+- Add link button at bottom (opens frmLink modal)
+- Delete icon per row (trash, triggers DeleteAttachmentModal)
 
 ### Warning Banner
-- Amber bg strip below header when item is within 10 days of publish date
-- "⚠ Publishing in X days — final checks required"
+- Amber strip below header when item is within 10 days of planned publish date
+- Text: "Publishing in X days — final checks required"
 
 ---
 
