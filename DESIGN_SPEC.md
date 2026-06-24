@@ -267,6 +267,21 @@ These come from the SharePoint list — V0 was missing several. Every field belo
 - Amber strip below header when item is within 10 days of planned publish date
 - Text: "Publishing in X days — final checks required"
 
+### Thursday Date Picker
+- Build `colThursdays` on screen load: next 52 Thursdays within 1 year
+- Formula: `Mod(5 - Weekday(Today()) + 7, 7)` days to next Thursday; then +7 per week
+- Only include Thursdays where `varDaysToNextThursday + (week-1)*7 >= 10` — i.e. exclude any Thursday within 10 days of today
+- **10-day block:** if selected date is within 10 days AND High Priority is NOT ticked, show error: "Release date is within 10 days. Tick High Priority to override, or pick a later date."
+- **High Priority override:** ticking High Priority bypasses the 10-day block — those near Thursdays become selectable
+- Validation: `Weekday(SelectedDate, StartOfWeek.Monday) <> 4` → `Notify("Only Thursdays are allowed!", NotificationType.Error)`
+
+### Duplicate Function
+- "Duplicate" button in header opens `DuplicateModal`
+- Modal shows a Thursday picker (`dpkDuplicateDate` from `colThursdays`) and a Confirm button
+- **Fields copied:** Title, Document Type, Item Summary, Owner, Audience, Expiry Date, External Consultation Required, External Consultation Details, Remarks, Title for Newsletter, High Priority, Reason for High Priority, Top Item
+- **Fields reset:** Planned Publish Date → chosen Thursday, Published → false, Published Date → Blank(), Approved by Pillar Lead → false, Approved For Release By → Blank(), EmailSent → false
+- On success: dismiss modal, `Notify("Duplicated to [Thursday label]. Find it on the main screen.")` — stays on current item, does not navigate away
+
 ---
 
 ## Key PowerApps Implementation Notes
