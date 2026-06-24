@@ -426,7 +426,8 @@ Screens:
                         Icon: ="Delete"
                         IconStyle: ='ButtonCanvas.IconStyle'.Filled
                         Layout: ='ButtonCanvas.Layout'.IconOnly
-                        OnSelect: =UpdateContext({locDisplayDeletePopUp: true})
+                        OnSelect: |-
+                          =UpdateContext({locDisplayDeletePopUp: true})
                         Text: ="Delete"
                         VerticalAlign: =VerticalAlign.Middle
                         Width: =Parent.Width
@@ -2257,7 +2258,8 @@ Screens:
                                           Icon: ="Delete"
                                           LayoutMaxHeight: =
                                           LayoutMaxWidth: =
-                                          OnSelect: =UpdateContext({locDisplayAttDeletePopUp: true})
+                                          OnSelect: |-
+                                            =UpdateContext({locDisplayAttDeletePopUp: true})
                                           Text: =
                                           Width: =32
                                     - EditLink_1:
@@ -2799,7 +2801,8 @@ Screens:
                               Layout: ='ButtonCanvas.Layout'.IconOnly
                               LayoutMaxHeight: =
                               LayoutMaxWidth: =
-                              OnSelect: =UpdateContext({locDisplayDeletePopUp: false})
+                              OnSelect: |-
+                                =UpdateContext({locDisplayDeletePopUp: false})
                               Width: =30
                   - txtModalText_2:
                       Control: Text@0.0.51
@@ -2834,7 +2837,8 @@ Screens:
                               Appearance: ='ButtonCanvas.Appearance'.Outline
                               LayoutMaxHeight: =
                               LayoutMaxWidth: =
-                              OnSelect: =UpdateContext({locDisplayDeletePopUp: false})
+                              OnSelect: |-
+                                =UpdateContext({locDisplayDeletePopUp: false})
                               Text: ="Cancel"
                         - btnModalAction_2:
                             Control: Button@0.0.45
@@ -2916,7 +2920,8 @@ Screens:
                               Layout: ='ButtonCanvas.Layout'.IconOnly
                               LayoutMaxHeight: =
                               LayoutMaxWidth: =
-                              OnSelect: =UpdateContext({locDisplayAttDeletePopUp: false})
+                              OnSelect: |-
+                                =UpdateContext({locDisplayAttDeletePopUp: false})
                               Width: =30
                   - txtModalText_3:
                       Control: Text@0.0.51
@@ -2951,7 +2956,8 @@ Screens:
                               Appearance: ='ButtonCanvas.Appearance'.Outline
                               LayoutMaxHeight: =
                               LayoutMaxWidth: =
-                              OnSelect: =UpdateContext({locDisplayAttDeletePopUp: false})
+                              OnSelect: |-
+                                =UpdateContext({locDisplayAttDeletePopUp: false})
                               Text: ="Cancel"
                         - btnModalAction_3:
                             Control: Button@0.0.45
