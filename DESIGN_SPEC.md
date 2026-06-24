@@ -342,14 +342,130 @@ Fill: =Switch(ThisItem.Status.Value,
 
 ---
 
+---
+
+## Screen 5: Newsletter Pack (New)
+
+### Access
+- Button appears in Main screen header — **visibility gated by user identity**
+- TBC: fixed email whitelist (`User().Email = "x@y.com" || User().Email = "a@b.com"`) OR open to all app users
+- **Awaiting confirmation from user on who should see this button**
+
+### Approval Filter (both conditions must be true)
+- `'Approved by Pillar Lead (Ready to Release)' = true`
+- `'Approved For Release By'` is not blank (XO/ACOS/DCOMD has signed off — this is the radio button field)
+
+### Upcoming Thursday Logic
+- `DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), Days)`
+- If today IS Thursday, show today's release
+- Auto-advances after Thursday passes — no manual input needed
+
+### Empty State
+- "No items approved for release this Thursday yet."
+
+### Left Panel — Plain Text View
+- Simple display list, no copy button (user copies line by line manually)
+- For each approved item in priority order, show:
+  - Title for Newsletter
+  - Audience
+  - Blank line between items
+- No summary/description
+
+### Right Panel — Email Format
+- **Copy All button** at top — copies entire panel content as plain text
+- Intro line: "Below is a summary of this week's releases from Cadets Branch:"
+- Then each item (priority order):
+  - `•` **Title for Newsletter** (bold)
+  - Indented `○` `Intended audience: [Audience]`
+- Rendered in HtmlViewer for visual fidelity; Copy button constructs plain-text equivalent:
+  ```
+  Below is a summary of this week's releases from Cadets Branch:
+
+  • [Title for Newsletter]
+      ○ Intended audience: [Audience]
+
+  • [Next Title]
+      ○ Intended audience: [Audience]
+  ```
+
+### Plain Text Construction Formula (for Copy button)
+```
+"Below is a summary of this week's releases from Cadets Branch:" & Char(13) & Char(10) & Char(13) & Char(10) &
+Concat(
+    SortByColumns(
+        AddColumns(
+            Filter('Policy Proof Tracker',
+                'Planned Publish Date' = varNextThursday &&
+                'Approved by Pillar Lead (Ready to Release)' = true &&
+                !IsBlank('Approved For Release By')
+            ),
+            "SortKey",
+            If('Top Item', 0,
+                Switch(Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
+                    "Regulation", 1, "Manual", 2, "ACSO", 3, "CFSO", 4,
+                    "SOI", 5, "CFI", 6, "CBN", 7, "Internal Document", 8, "Newsletter Item", 9, 99
+                )
+            )
+        ),
+        "SortKey", SortOrder.Ascending
+    ),
+    "• " & 'Title for Newsletter' & Char(13) & Char(10) &
+    "    ○ Intended audience: " & Audience & Char(13) & Char(10) & Char(13) & Char(10)
+)
+```
+
+---
+
+## Answers to Business Logic Questions (from spec session)
+
+### Q3 — Mandatory fields before save
+From ViewItem.yaml `Required: =true`:
+- Title (DataField: Title)
+- Owner (DataField: Owner)
+- Document Type (DataField: TrackerType)
+- Planned Publish Date (DataField: PublishDate)
+- Link Text (in link modal, DataField: LinkText)
+- Link URL (in link modal, DataField: LinkUrl)
+
+All other fields are optional (Required: =false).
+
+### Q3b — Field locking
+No explicit status-based field locking found in V2. Fields lock only when `varSaving = true` (DisabledMode during save operation).
+
+### Q4 — Link modal fields
+Two fields only (from PolicyLinks list):
+- **Link Text** (required) — display label for the link
+- **Link URL** (required) — the URL
+- PolicyTrackerSource auto-populated (parent item ID, not user-editable)
+No type classification (document/reference/form/external) — simpler than V0 suggested.
+
+### Q5 — Link permissions
+Everyone with app access can add, edit, and delete links. No owner restriction.
+
+### Q6 — Items hidden from Main feed
+No hidden/draft flag found — items appear based on date filtering only (current/future = Planned Publish Date >= Today()).
+
+### Q6b — Card visual differentiation (new rule)
+- **Top Item:** thin coloured top border or distinct visual treatment on card
+- **High Priority:** thin amber border around card
+- Both: combine both treatments
+
+### Q7 — Issues definition
+Past planned publish date AND not yet published (`Published = false`). Both conditions required.
+
+---
+
 ## What to Build — Session Checklist
 
-- [ ] App.OnStart: colChoiceColors, varMyEmail, varTypeFilter="All", varShowMyEntries=false
+- [ ] Confirm newsletter screen access: whitelist emails or open to all?
+- [ ] Confirm "Internal Item" vs "Internal Document" — exact SharePoint choice value
+- [ ] App.OnStart: colChoiceColors, varMyEmail, varTypeFilter="All", varShowMyEntries=false, varNextThursday
 - [ ] StartScreen: unchanged (logo + navigate to Main)
-- [ ] Main: stat bar + controls row + grouped gallery with new card design + empty state
+- [ ] Main: stat bar + controls row + grouped gallery with new card design + empty state + newsletter button (gated)
 - [ ] Overview: horizontal 4-column Thursday layout
 - [ ] Historic: sortable table layout
-- [ ] ViewItem: coloured header band + two-panel layout + attachments right panel
+- [ ] ViewItem: coloured header band + two-panel layout + attachments right panel + duplicate modal + Thursday date picker
+- [ ] Newsletter Pack: left plain-text panel + right HTML email panel with Copy All
 - [ ] Validate all YAML with PyYAML before wrapping
 - [ ] Bump version on every change
 - [ ] Push to GitHub Pages after each screen
