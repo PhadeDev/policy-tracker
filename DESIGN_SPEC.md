@@ -347,9 +347,18 @@ Fill: =Switch(ThisItem.Status.Value,
 ## Screen 5: Newsletter Pack (New)
 
 ### Access
-- Button appears in Main screen header — **visibility gated by user identity**
-- TBC: fixed email whitelist (`User().Email = "x@y.com" || User().Email = "a@b.com"`) OR open to all app users
-- **Awaiting confirmation from user on who should see this button**
+- Button appears in Main screen header, visible only to users in `colNewsletterUsers`
+- Visibility formula: `!IsEmpty(Filter(colNewsletterUsers, Email = Lower(User().Email)))`
+- **To add more users in future: edit the `colNewsletterUsers` collection in App.OnStart only — nowhere else needs changing**
+
+Set in App.OnStart:
+```
+ClearCollect(
+    colNewsletterUsers,
+    {Email: "allan.hamilton775@mod.gov.uk"},
+    {Email: "dan.smith391@mod.gov.uk"}
+)
+```
 
 ### Approval Filter (both conditions must be true)
 - `'Approved by Pillar Lead (Ready to Release)' = true`
@@ -457,7 +466,7 @@ Past planned publish date AND not yet published (`Published = false`). Both cond
 
 ## What to Build — Session Checklist
 
-- [ ] Confirm newsletter screen access: whitelist emails or open to all?
+- [x] Newsletter access: colNewsletterUsers collection in OnStart — allan.hamilton775@mod.gov.uk + dan.smith391@mod.gov.uk. Add rows to extend.
 - [ ] Confirm "Internal Item" vs "Internal Document" — exact SharePoint choice value
 - [ ] App.OnStart: colChoiceColors, varMyEmail, varTypeFilter="All", varShowMyEntries=false, varNextThursday
 - [ ] StartScreen: unchanged (logo + navigate to Main)
