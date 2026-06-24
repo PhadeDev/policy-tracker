@@ -66,6 +66,54 @@ All / Manual / CFI / CFSO / SOI / Regulation / CBN / ACSO / Internal / Newslette
 
 Note: "Internal Document" and "Newsletter Item" are long — use truncated display labels ("Internal", "Newsletter") on the filter buttons. Full value still used in the filter formula.
 
+---
+
+## Sort Priority Order
+
+Within any date group, items sort by this priority (ascending sort key):
+
+| Priority | Type | Sort Key |
+|----------|------|----------|
+| 0 | Top Item (checkbox ticked) | Always first, above all types |
+| 1 | Regulation | |
+| 2 | Manual | |
+| 3 | ACSO | |
+| 4 | CFSO | |
+| 5 | SOI | |
+| 6 | CFI | |
+| 7 | CBN | |
+| 8 | Internal Item | |
+| 9 | Newsletter | |
+
+**SortByColumns formula pattern:**
+```
+SortByColumns(
+    AddColumns(
+        galSource,
+        "SortKey",
+        If(ThisRecord.'Top Item',
+            0,
+            Switch(
+                Mid(ThisRecord.'Document Type'.Value, Find(" ", ThisRecord.'Document Type'.Value) + 1),
+                "Regulation",       1,
+                "Manual",           2,
+                "ACSO",             3,
+                "CFSO",             4,
+                "SOI",              5,
+                "CFI",              6,
+                "CBN",              7,
+                "Internal Document", 8,
+                "Newsletter Item",  9,
+                99
+            )
+        )
+    ),
+    "SortKey", SortOrder.Ascending
+)
+```
+
+Note: user referred to "Internal Item" — verify SharePoint choice value is "Internal Document" or "Internal Item" before using.
+
 ### Status Colours
 
 | Status | RGBA | Use |
