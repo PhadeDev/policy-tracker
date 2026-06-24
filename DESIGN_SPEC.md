@@ -21,12 +21,50 @@
 
 ### Document Type Colours
 
-| Type | Background RGBA | Text RGBA | Use |
-|------|----------------|-----------|-----|
-| CFSO | RGBA(56, 96, 178, 1) | RGBA(255, 255, 255, 1) | Steel blue |
-| CFI | RGBA(46, 125, 89, 1) | RGBA(255, 255, 255, 1) | Forest green |
-| Manual | RGBA(191, 132, 38, 1) | RGBA(255, 255, 255, 1) | Amber/gold |
-| JSP | RGBA(180, 62, 40, 1) | RGBA(255, 255, 255, 1) | Terracotta red |
+SharePoint choice values include emoji prefixes — always strip with `Mid(Value, Find(" ", Value) + 1)` for display.
+
+| SharePoint Choice Value | Display Label | Background RGBA | Text RGBA | Character |
+|------------------------|---------------|----------------|-----------|-----------|
+| 📗 Manual | Manual | RGBA(46, 125, 89, 1) | RGBA(255, 255, 255, 1) | Forest green |
+| 📄 CFI | CFI | RGBA(56, 96, 178, 1) | RGBA(255, 255, 255, 1) | Steel blue |
+| 📄 CFSO | CFSO | RGBA(108, 40, 168, 1) | RGBA(255, 255, 255, 1) | Rich purple |
+| 📕 SOI | SOI | RGBA(180, 50, 40, 1) | RGBA(255, 255, 255, 1) | Terracotta red |
+| 📖 Regulation | Regulation | RGBA(0, 130, 140, 1) | RGBA(255, 255, 255, 1) | Teal |
+| 📄 CBN | CBN | RGBA(191, 100, 30, 1) | RGBA(255, 255, 255, 1) | Amber orange |
+| 📄 ACSO | ACSO | RGBA(20, 60, 140, 1) | RGBA(255, 255, 255, 1) | Navy |
+| 📑 Internal Document | Internal | RGBA(90, 90, 115, 1) | RGBA(255, 255, 255, 1) | Slate grey |
+| 📜 Newsletter Item | Newsletter | RGBA(160, 120, 0, 1) | RGBA(255, 255, 255, 1) | Gold |
+
+**colChoiceColors OnStart formula** (full 9-type version):
+```
+ClearCollect(
+    colChoiceColors,
+    ForAll(
+        Choices('Policy Proof Tracker'.'Document Type'),
+        {
+            ChoiceValue: Value,
+            ColorCode: Switch(
+                Value,
+                "📗 Manual",            RGBA(46, 125, 89, 1),
+                "📄 CFI",               RGBA(56, 96, 178, 1),
+                "📄 CFSO",              RGBA(108, 40, 168, 1),
+                "📕 SOI",               RGBA(180, 50, 40, 1),
+                "📖 Regulation",        RGBA(0, 130, 140, 1),
+                "📄 CBN",               RGBA(191, 100, 30, 1),
+                "📄 ACSO",              RGBA(20, 60, 140, 1),
+                "📑 Internal Document", RGBA(90, 90, 115, 1),
+                "📜 Newsletter Item",   RGBA(160, 120, 0, 1),
+                RGBA(150, 150, 150, 1)
+            )
+        }
+    )
+)
+```
+
+**Type filter buttons** — the controls row needs these 10 options (All + 9 types):
+All / Manual / CFI / CFSO / SOI / Regulation / CBN / ACSO / Internal / Newsletter
+
+Note: "Internal Document" and "Newsletter Item" are long — use truncated display labels ("Internal", "Newsletter") on the filter buttons. Full value still used in the filter formula.
 
 ### Status Colours
 
