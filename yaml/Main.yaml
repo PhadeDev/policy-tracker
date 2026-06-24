@@ -229,7 +229,7 @@ Screens:
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
                       Children:
-                        - imgStatIcon1:
+                        - imgStatIconCurrent:
                             Control: Image@2.2.3
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -238,7 +238,7 @@ Screens:
                               Width: =36
                               X: =10
                               Y: =10
-                        - lblStatCount1:
+                        - lblStatCountCurrent:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
@@ -253,7 +253,7 @@ Screens:
                               Width: =75
                               X: =50
                               Y: =10
-                        - lblStatTitle1:
+                        - lblStatTitleCurrent:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -265,7 +265,7 @@ Screens:
                               Width: =Parent.Width - 10
                               X: =5
                               Y: =60
-                        - recStatActive1:
+                        - recStatBarCurrent:
                             Control: Rectangle@2.3.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -274,7 +274,7 @@ Screens:
                               Visible: =varSelectedState = "Current"
                               Width: =Parent.Width
                               Y: =84
-                        - btnStatOverlay1:
+                        - btnStatCurrent:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -310,7 +310,7 @@ Screens:
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
                       Children:
-                        - imgStatIcon2:
+                        - imgStatIconFuture:
                             Control: Image@2.2.3
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -319,7 +319,7 @@ Screens:
                               Width: =36
                               X: =10
                               Y: =10
-                        - lblStatCount2:
+                        - lblStatCountFuture:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
@@ -333,7 +333,7 @@ Screens:
                               Width: =75
                               X: =50
                               Y: =10
-                        - lblStatTitle2:
+                        - lblStatTitleFuture:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -345,7 +345,7 @@ Screens:
                               Width: =Parent.Width - 10
                               X: =5
                               Y: =60
-                        - recStatActive2:
+                        - recStatBarFuture:
                             Control: Rectangle@2.3.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -354,7 +354,7 @@ Screens:
                               Visible: =varSelectedState = "Future"
                               Width: =Parent.Width
                               Y: =84
-                        - btnStatOverlay2:
+                        - btnStatFuture:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -390,7 +390,7 @@ Screens:
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
                       Children:
-                        - imgStatIcon3:
+                        - imgStatIconIssues:
                             Control: Image@2.2.3
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -399,7 +399,7 @@ Screens:
                               Width: =36
                               X: =10
                               Y: =10
-                        - lblStatCount3:
+                        - lblStatCountIssues:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
@@ -413,7 +413,7 @@ Screens:
                               Width: =75
                               X: =50
                               Y: =10
-                        - lblStatTitle3:
+                        - lblStatTitleIssues:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -425,7 +425,7 @@ Screens:
                               Width: =Parent.Width - 10
                               X: =5
                               Y: =60
-                        - recStatActive3:
+                        - recStatBarIssues:
                             Control: Rectangle@2.3.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -434,7 +434,7 @@ Screens:
                               Visible: =varSelectedState = "UnapprovedHistoric"
                               Width: =Parent.Width
                               Y: =84
-                        - btnStatOverlay3:
+                        - btnStatIssues:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -470,7 +470,7 @@ Screens:
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
                       Children:
-                        - imgStatIcon4:
+                        - imgStatIconArchive:
                             Control: Image@2.2.3
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -479,7 +479,7 @@ Screens:
                               Width: =36
                               X: =10
                               Y: =10
-                        - lblStatCount4:
+                        - lblStatCountArchive:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
@@ -493,7 +493,7 @@ Screens:
                               Width: =75
                               X: =50
                               Y: =10
-                        - lblStatTitle4:
+                        - lblStatTitleArchive:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -505,7 +505,7 @@ Screens:
                               Width: =Parent.Width - 10
                               X: =5
                               Y: =60
-                        - btnStatOverlay4:
+                        - btnStatArchive:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
