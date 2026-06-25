@@ -5,10 +5,6 @@ Screens:
       OnVisible: |-
         =Set(varTypeFilter, "All");
         Set(varSearchText, "");
-        If(
-            !IsBlank(varScrollDate),
-            ScrollTo(galHeaders, LookUp(galHeaders.AllItems, PlannedDate = varScrollDate))
-        );
         Set(varScrollDate, Blank())
     Children:
       - conScreen:
@@ -986,29 +982,26 @@ Screens:
                                     BorderColor: =RGBA(0, 0, 0, 0)
                                     Height: =CountRows(ThisItem.GroupedItems) * 148
                                     Items: |-
-                                      =SortByColumns(
-                                          AddColumns(
-                                              ThisItem.GroupedItems,
-                                              "SortKey",
-                                              If(
-                                                  ThisRecord.'Top Item',
-                                                  0,
-                                                  Switch(
-                                                      Mid(ThisRecord.'Document Type'.Value, Find(" ", ThisRecord.'Document Type'.Value)+1),
-                                                      "Regulation", 1,
-                                                      "ACSO", 2,
-                                                      "CFSO", 3,
-                                                      "CFI", 4,
-                                                      "CBN", 5,
-                                                      "SOI", 6,
-                                                      "Internal Document", 7,
-                                                      "Manual", 8,
-                                                      "Newsletter Item", 9,
-                                                      99
-                                                  )
+                                      =Sort(
+                                          ThisItem.GroupedItems,
+                                          If(
+                                              'Top Item',
+                                              0,
+                                              Switch(
+                                                  Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
+                                                  "Regulation", 1,
+                                                  "ACSO", 2,
+                                                  "CFSO", 3,
+                                                  "CFI", 4,
+                                                  "CBN", 5,
+                                                  "SOI", 6,
+                                                  "Internal Document", 7,
+                                                  "Manual", 8,
+                                                  "Newsletter Item", 9,
+                                                  99
                                               )
                                           ),
-                                          "SortKey", SortOrder.Ascending
+                                          SortOrder.Ascending
                                       )
                                     TemplatePadding: =0
                                     TemplateSize: =148
@@ -1197,7 +1190,7 @@ Screens:
                                                 Color: =RGBA(0, 0, 0, 0)
                                                 DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                                 DisplayMode: =DisplayMode.View
-                                                Fill: =Switch(ThisItem.Status.Value, "On Track", RGBA(46, 140, 100, 1), "At Risk", RGBA(191, 150, 50, 1), "Blocked", RGBA(200, 72, 50, 1), "Published", RGBA(100, 110, 140, 1), RGBA(180, 184, 200, 1))
+                                                Fill: =If(ThisItem.Published, RGBA(100, 110, 140, 1), If(ThisItem.'Planned Publish Date' < Today(), RGBA(200, 72, 50, 1), If(DateDiff(Today(), ThisItem.'Planned Publish Date', "Days") <= 7, RGBA(191, 150, 50, 1), RGBA(46, 140, 100, 1))))
                                                 Height: =10
                                                 HoverBorderColor: =RGBA(0, 0, 0, 0)
                                                 HoverColor: =RGBA(0, 0, 0, 0)
@@ -1217,11 +1210,11 @@ Screens:
                                               Control: Label@2.5.1
                                               Properties:
                                                 BorderColor: =RGBA(0, 0, 0, 0)
-                                                Color: =Switch(ThisItem.Status.Value, "On Track", RGBA(46, 140, 100, 1), "At Risk", RGBA(191, 150, 50, 1), "Blocked", RGBA(200, 72, 50, 1), "Published", RGBA(100, 110, 140, 1), RGBA(180, 184, 200, 1))
+                                                Color: =If(ThisItem.Published, RGBA(100, 110, 140, 1), If(ThisItem.'Planned Publish Date' < Today(), RGBA(200, 72, 50, 1), If(DateDiff(Today(), ThisItem.'Planned Publish Date', "Days") <= 7, RGBA(191, 150, 50, 1), RGBA(46, 140, 100, 1))))
                                                 Font: =Font.'Open Sans'
                                                 Height: =26
                                                 Size: =10
-                                                Text: =If(IsBlank(ThisItem.Status.Value), "On Track", ThisItem.Status.Value)
+                                                Text: =If(ThisItem.Published, "Published", If(ThisItem.'Planned Publish Date' < Today(), "Overdue", If(DateDiff(Today(), ThisItem.'Planned Publish Date', "Days") <= 7, "Due Soon", "On Track")))
                                                 VerticalAlign: =VerticalAlign.Middle
                                                 Width: =110
                                                 X: =Parent.Width - 168
