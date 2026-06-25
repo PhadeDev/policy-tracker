@@ -48,9 +48,9 @@ Screens:
                   Font: =Font.'Courier New'
                   Height: =22
                   Size: =9
-                  Text: ="V2.5"
+                  Text: ="V2.6"
                   VerticalAlign: =VerticalAlign.Middle
-                  Width: =32
+                  Width: =48
                   X: =252
                   Y: =17
             - btnNewsletter:
@@ -188,12 +188,15 @@ Screens:
                         DateAdd(varNextThursday, (Value - 1) * 7, "Days"),
                         WeekItems,
                         With(
-                            {weekDate: DateAdd(varNextThursday, (Value - 1) * 7, "Days")},
+                            {colN: Value, colEnd: DateAdd(varNextThursday, (Value - 1) * 7, "Days")},
                             Sort(
                                 Filter(
                                     colUnpublishedPolicies,
-                                    'Planned Publish Date' >= weekDate,
-                                    'Planned Publish Date' < DateAdd(weekDate, 1, "Days")
+                                    If(
+                                        colN = 1,
+                                        'Planned Publish Date' <= colEnd,
+                                        'Planned Publish Date' > DateAdd(colEnd, -7, "Days") && 'Planned Publish Date' <= colEnd
+                                    )
                                 ),
                                 If(
                                     'Top Item',
