@@ -97,7 +97,7 @@ Screens:
                         HoverFill: =RGBA(160, 120, 0, 1)
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
-                        OnSelect: =Navigate(Newsletter)
+                        OnSelect: =Navigate(NewsletterPack, ScreenTransition.Fade)
                         PressedBorderColor: =RGBA(130, 95, 0, 1)
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =RGBA(120, 90, 0, 1)

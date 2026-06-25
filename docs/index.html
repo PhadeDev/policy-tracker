@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Policy Tracker v2.7 — PowerApps Build Guide</title>
+  <title>Policy Tracker v2.8 — PowerApps Build Guide</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -111,8 +111,8 @@
 <body>
 
 <a class="back" href="https://phaderon.github.io/PowerApps/">&larr; Guide Library</a>
-<h1>Policy Tracker <span class="version-tag">V2.7</span></h1>
-<p class="build-stamp">Built 25 Jun 2026 &mdash; v2.7: ViewItem — V2 rebuild; dark header + type band + title bar; two-panel layout (form 766px / links 600px); all 20 DataCards preserved verbatim; LayoutOverflowY scroll on conForm; DateDiff units use "Days" string throughout</p>
+<h1>Policy Tracker <span class="version-tag">V2.8</span></h1>
+<p class="build-stamp">Built 25 Jun 2026 &mdash; v2.8: Newsletter Pack screen added; Main header button now navigates to NewsletterPack; authorised users are gated through colNewsletterUsers</p>
 <p class="subtitle">Canvas app tracking ACCT UK policy documents through the release pipeline. V2 is a complete redesign: dominant type-colour card panels, segmented type filter, inline search, owner initials circles, status dots, Newsletter Pack screen, and a new cool-grey palette throughout. Wraps the <code>Policy Proof Tracker</code> SharePoint list with a <code>PolicyLinks</code> child list.</p>
 
 <!-- BUILD PROGRESS -->
@@ -146,8 +146,8 @@
     </div>
     <div class="progress-row">
       <div class="progress-label">Newsletter Pack</div>
-      <div class="progress-track"><div class="progress-fill fill-pending"></div></div>
-      <div class="progress-state state-pending">Pending</div>
+      <div class="progress-track"><div class="progress-fill fill-done"></div></div>
+      <div class="progress-state state-done">&#10003; V2.8 ready</div>
     </div>
     <div class="progress-row">
       <div class="progress-label">StartScreen</div>
@@ -340,15 +340,15 @@ Set(
     <div class="screen-cta green">Open and copy &rarr;</div>
   </a>
 
-  <div class="screen-card pending">
+  <a class="screen-card done" href="screens/NewsletterPack.html?v=2.8" target="_blank">
     <div>
-      <div class="status-pill pill-pending">Pending</div>
+      <div class="status-pill pill-done">&#10003; V2.8 ready</div>
       <div class="screen-number">Screen 6</div>
       <div class="screen-name">Newsletter Pack</div>
-      <div class="screen-desc">Dual-panel screen. Left: plain list of approved items for this Thursday. Right: formatted email copy with Copy All button. Gated by colNewsletterUsers.</div>
+      <div class="screen-desc">Dual-panel screen. Left: plain reference text. Right: email-ready preview with Copy All. Missing XO/ACOS/DCOMD approval is shown as a muted warning but is not included in copied text.</div>
     </div>
-    <div class="screen-cta muted">Coming soon</div>
-  </div>
+    <div class="screen-cta green">Open and copy &rarr;</div>
+  </a>
 
 </div>
 
@@ -356,7 +356,7 @@ Set(
 <ol>
   <li>Create <strong>6 blank screens</strong> in Power Apps Studio (names do not matter &mdash; YAML renames them on paste).</li>
   <li>Click the first blank screen. Open the three-dot menu on the screen name &rarr; <strong>Paste YAML</strong>.</li>
-  <li>Paste each screen in order: StartScreen, Main, Overview, Historic, ViewItem, Newsletter (when ready).</li>
+  <li>Paste each screen in order: StartScreen, Main, Overview, Historic, ViewItem, NewsletterPack.</li>
   <li>After pasting all screens, set <strong>App &rarr; StartScreen</strong> to <code>StartScreen</code>.</li>
   <li>Run <strong>App &rarr; OnStart</strong> once via the &ldquo;Run OnStart&rdquo; option to populate all collections.</li>
 </ol>
@@ -434,6 +434,9 @@ Set(
 </div>
 <div class="note">
   <strong>Newsletter Pack access:</strong> Edit the <code>colNewsletterUsers</code> collection in App.OnStart to add or remove users. The button in the Main header is automatically hidden for users not in the list. No other change needed.
+</div>
+<div class="warning">
+  <strong>Top Item column required:</strong> NewsletterPack, Main, Overview, and ViewItem now expect a Yes/No SharePoint column displayed as <code>Top Item</code>, internal name <code>Top_x0020_Item</code>, default No. Add this column before pasting the V2.8 YAML, or Power Apps will red-line formulas that reference <code>'Top Item'</code>.
 </div>
 
 <h2>Issues &amp; Feedback</h2>
