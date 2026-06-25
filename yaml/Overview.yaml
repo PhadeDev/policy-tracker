@@ -1,352 +1,447 @@
-Screens:
-  Overview:
+- Overview:
     Properties:
-      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      Fill: =RGBA(243, 244, 248, 1)
+      LoadingSpinner: =LoadingSpinner.None
+      OnVisible: =Set(varSourceScreen, "Overview")
     Children:
-      - conScreen:
+      - conHeader:
           Control: GroupContainer@1.5.0
-          Variant: AutoLayout
           Properties:
-            Fill: =RGBA(245, 246, 248, 1)
-            Height: =Parent.Height
-            LayoutAlignItems: =LayoutAlignItems.Stretch
-            LayoutDirection: =LayoutDirection.Vertical
-            LayoutGap: =0
-            PaddingBottom: =0
-            PaddingLeft: =0
-            PaddingRight: =0
-            PaddingTop: =0
+            Fill: =RGBA(28, 32, 48, 1)
+            Height: =56
+            LayoutMode: =LayoutMode.ManualLayout
             Width: =Parent.Width
+            X: =0
+            Y: =0
           Children:
-            - conHeader:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
+            - imgLogo:
+                Control: Image@2.2.0
                 Properties:
-                  DropShadow: =DropShadow.Semilight
-                  Fill: =RGBA(255, 255, 255, 1)
-                  FillPortions: =0
-                  Height: =68
-                  LayoutAlignItems: =LayoutAlignItems.Center
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =10
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  PaddingLeft: =14
-                  PaddingRight: =14
+                  Height: =36
+                  ImagePosition: =ImagePosition.Fit
+                  Width: =36
+                  X: =12
+                  Y: =10
+            - lblAppTitle:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(255, 255, 255, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =56
+                  Size: =14
+                  Text: ="Policy Tracker"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =200
+                  X: =56
+                  Y: =0
+            - badgeVersion:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(46, 125, 89, 1)
+                  BorderThickness: =1
+                  Color: =RGBA(46, 125, 89, 1)
+                  Font: =Font.'Courier New'
+                  Height: =22
+                  Size: =9
+                  Text: ="V2"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =32
+                  X: =252
+                  Y: =17
+            - btnNewsletter:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderThickness: =0
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(160, 120, 0, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(140, 104, 0, 1)
+                  OnSelect: =Navigate(NewsletterPack, ScreenTransition.Fade)
+                  PressedFill: =RGBA(120, 88, 0, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Newsletter"
+                  Visible: =!IsEmpty(Filter(colNewsletterUsers, Email = Lower(User().Email)))
+                  Width: =120
+                  X: =Parent.Width - 524
+                  Y: =10
+            - btnNewEntry:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderThickness: =0
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(46, 125, 89, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(36, 100, 70, 1)
+                  OnSelect: =Set(varSelectedItem, Blank()); Navigate(ViewItem, ScreenTransition.Fade)
+                  PressedFill: =RGBA(28, 80, 55, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="New Entry"
+                  Width: =110
+                  X: =Parent.Width - 396
+                  Y: =10
+            - btnMainNav:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(112, 116, 134, 0.4)
+                  BorderThickness: =1
+                  Color: =RGBA(180, 184, 200, 1)
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(255, 255, 255, 0.06)
+                  OnSelect: =Navigate(Main, ScreenTransition.Fade)
+                  PressedFill: =RGBA(255, 255, 255, 0.1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Main"
+                  Width: =90
+                  X: =Parent.Width - 278
+                  Y: =10
+            - btnOverviewNav:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderThickness: =0
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(46, 125, 89, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(36, 100, 70, 1)
+                  OnSelect: =false
+                  PressedFill: =RGBA(36, 100, 70, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Overview"
+                  Width: =100
+                  X: =Parent.Width - 170
+                  Y: =10
+            - btnArchiveNav:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(112, 116, 134, 0.4)
+                  BorderThickness: =1
+                  Color: =RGBA(180, 184, 200, 1)
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(255, 255, 255, 0.06)
+                  OnSelect: =Navigate(Historic, ScreenTransition.Fade)
+                  PressedFill: =RGBA(255, 255, 255, 0.1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Archive"
+                  Width: =90
+                  X: =Parent.Width - 62
+                  Y: =10
+      - conBody:
+          Control: GroupContainer@1.5.0
+          Properties:
+            Fill: =RGBA(243, 244, 248, 1)
+            Height: =Parent.Height - conHeader.Height
+            LayoutMode: =LayoutMode.ManualLayout
+            Width: =Parent.Width
+            X: =0
+            Y: =conHeader.Height
+          Children:
+            - galWeeks:
+                Control: Gallery@2.15.0
+                Properties:
+                  Height: =Parent.Height - 24
+                  Items: |-
+                    =AddColumns(
+                        Sequence(4),
+                        "WeekDate",
+                        DateAdd(varNextThursday, (Value - 1) * 7, "Days")
+                    )
+                  Layout: =Layout.Horizontal
+                  LoadingSpinner: =LoadingSpinner.None
+                  ShowScrollbar: =false
+                  TemplatePadding: =8
+                  TemplateSize: =322
+                  Width: =Parent.Width - 24
+                  WrapCount: =1
+                  X: =12
+                  Y: =12
                 Children:
-                  - imgLogo:
-                      Control: Image@2.2.3
-                      Properties:
-                        BorderColor: =RGBA(0, 0, 0, 0)
-                        Fill: =RGBA(0, 64, 47, 1)
-                        FillPortions: =0
-                        Height: =40
-                        Image: |-
-                          ="data:image/svg+xml;utf8, "&EncodeUrl("<svg id='Layer_1' data-name='Layer 1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 154.49 116.84' width='40px' height='40px'><defs><style>.cls-1{fill:#ffffff;}</style></defs><g id='Text_and_Chevron' data-name='Text and Chevron'><path class='cls-1' d='M31.61,116.84c.02-.16.02-.3.02-.43H0c0-13.34,14.15-39.41,25.37-57.98C14.16,39.77,0,13.6,0,.5h31.63c0-.15,0-.32-.02-.5.85,6.6,14.24,31.68,25.74,50.07l5.26,8.41-5.28,8.4c-12.98,20.63-24.99,43.98-25.72,49.97'/><path class='cls-1' d='M77.6,116.84c.02-.16.02-.3.02-.43h-31.63c0-13.34,14.15-39.41,25.37-57.98C60.14,39.77,45.99,13.6,45.99.5h31.63c0-.15,0-.32-.02-.5.85,6.6,14.24,31.68,25.74,50.07l5.26,8.41-5.28,8.4c-12.98,20.63-24.99,43.98-25.72,49.97'/><path class='cls-1' d='M123.5,116.84c.02-.16.02-.3.02-.43h-31.63c0-13.34,14.15-39.41,25.37-57.98C106.04,39.77,91.89,13.6,91.89.5h31.63c0-.15,0-.32-.02-.5.85,6.6,14.24,31.68,25.74,50.07l5.26,8.41-5.28,8.4c-12.98,20.63-24.99,43.98-25.72,49.97'/></g></svg>")
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        RadiusBottomLeft: =6
-                        RadiusBottomRight: =6
-                        RadiusTopLeft: =6
-                        RadiusTopRight: =6
-                        Width: =46
-                  - lblAppTitle:
-                      Control: Label@2.5.1
-                      Properties:
-                        BorderColor: =RGBA(0, 0, 0, 0)
-                        FillPortions: =0
-                        Font: =Font.'Lato Black'
-                        Height: =44
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Size: =20
-                        Text: ="Policy Tracker"
-                        VerticalAlign: =VerticalAlign.Middle
-                        Width: =170
-                  - badgeVersion:
-                      Control: Badge@0.0.24
-                      Properties:
-                        Appearance: ='BadgeCanvas.Appearance'.Tint
-                        Content: ="V3"
-                        FillPortions: =0
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Shape: ='BadgeCanvas.Shape'.Rounded
-                        ThemeColor: ='BadgeCanvas.ThemeColor'.Success
-                        Width: =40
-                  - lblPageTitle:
-                      Control: Label@2.5.1
-                      Properties:
-                        BorderColor: =RGBA(0, 0, 0, 0)
-                        Color: =RGBA(100, 100, 100, 1)
-                        Font: =Font.'Open Sans'
-                        FillPortions: =0
-                        Height: =44
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Size: =13
-                        Text: ="4-week release overview — click any item to open it"
-                        VerticalAlign: =VerticalAlign.Middle
-                        Width: =340
-                  - conSpacer:
+                  - conColumnCard:
                       Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
                       Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                  - btnReturn:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        BorderColor: =RGBA(0, 64, 47, 1)
-                        BorderThickness: =1
-                        Color: =RGBA(0, 64, 47, 1)
-                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        BorderColor: =If(ThisItem.Value = 1, RGBA(46, 125, 89, 1), RGBA(28, 32, 48, 0.12))
+                        BorderThickness: =If(ThisItem.Value = 1, 2, 1)
+                        DropShadow: =DropShadow.Light
                         Fill: =RGBA(255, 255, 255, 1)
-                        FillPortions: =0
-                        Font: =Font.'Open Sans'
-                        Height: =36
-                        HoverBorderColor: =RGBA(0, 64, 47, 1)
-                        HoverColor: =RGBA(255, 255, 255, 1)
-                        HoverFill: =RGBA(0, 64, 47, 1)
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        OnSelect: =Navigate(Main, ScreenTransition.Fade)
-                        PressedBorderColor: =RGBA(0, 64, 47, 1)
-                        PressedColor: =RGBA(0, 64, 47, 1)
-                        PressedFill: =RGBA(45, 128, 40, 1)
-                        RadiusBottomLeft: =6
-                        RadiusBottomRight: =6
-                        RadiusTopLeft: =6
-                        RadiusTopRight: =6
-                        Text: ="← Back to Main"
-                        Width: =134
-            - conKanban:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  PaddingBottom: =12
-                  PaddingLeft: =12
-                  PaddingRight: =12
-                  PaddingTop: =12
-                Children:
-                  - galThursdays:
-                      Control: Gallery@2.15.0
-                      Variant: BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0
-                      Properties:
-                        BorderColor: =RGBA(0, 0, 0, 0)
-                        Fill: =RGBA(245, 246, 248, 1)
-                        Items: |-
-                          =SortByColumns(
-                              GroupBy(
-                                  Filter(
-                                      'Policy Proof Tracker',
-                                      DateValue(PublishDate) >= Today() &&
-                                      DateValue(PublishDate) <= Today() + 28
-                                  ),
-                                  "PublishDate",
-                                  "ItemsForDate"
-                              ),
-                              "PublishDate",
-                              SortOrder.Ascending
-                          )
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        TemplatePadding: =0
-                        TemplateSize: =310
+                        Height: =Parent.Height
+                        LayoutMode: =LayoutMode.ManualLayout
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Width: =Parent.TemplateWidth
+                        X: =0
+                        Y: =0
                       Children:
-                        - conColumn:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
+                        - recHeaderBand:
+                            Control: Rectangle@2.3.0
                             Properties:
-                              BorderColor: =RGBA(220, 222, 224, 1)
-                              BorderThickness: =1
-                              DropShadow: =DropShadow.Regular
-                              Fill: =RGBA(255, 255, 255, 1)
-                              Height: =Parent.TemplateHeight
-                              RadiusBottomLeft: =8
-                              RadiusBottomRight: =8
-                              RadiusTopLeft: =8
-                              RadiusTopRight: =8
-                              Width: =300
+                              Fill: =If(ThisItem.Value = 1, RGBA(46, 125, 89, 1), RGBA(72, 78, 105, 1))
+                              Height: =72
+                              Width: =Parent.Width
+                              X: =0
+                              Y: =0
+                        - lblWeekLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(255, 255, 255, 0.65)
+                              Font: =Font.'Courier New'
+                              FontWeight: =FontWeight.Bold
+                              Height: =18
+                              Size: =9
+                              Text: =If(ThisItem.Value = 1, "THIS WEEK", "WEEK " & Text(ThisItem.Value))
+                              Width: =Parent.Width - 52
+                              X: =12
+                              Y: =10
+                        - lblWeekDate:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Courier New'
+                              FontWeight: =FontWeight.Bold
+                              Height: =32
+                              Size: =15
+                              Text: =Text(ThisItem.WeekDate, "ddd d mmm")
+                              Width: =Parent.Width - 52
+                              X: =12
+                              Y: =30
+                        - conCountBadge:
+                            Control: GroupContainer@1.5.0
+                            Properties:
+                              Fill: =RGBA(255, 186, 8, 1)
+                              Height: =26
+                              LayoutMode: =LayoutMode.ManualLayout
+                              RadiusBottomLeft: =13
+                              RadiusBottomRight: =13
+                              RadiusTopLeft: =13
+                              RadiusTopRight: =13
+                              Width: =26
+                              X: =Parent.Width - 40
+                              Y: =23
                             Children:
-                              - conColumnHeader:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: ManualLayout
+                              - lblCount:
+                                  Control: Label@2.5.1
                                   Properties:
-                                    BorderColor: =RGBA(0, 0, 0, 0)
-                                    Fill: =RGBA(0, 64, 47, 1)
-                                    Height: =56
-                                    RadiusTopLeft: =8
-                                    RadiusTopRight: =8
-                                    Width: =Parent.Width
+                                    Align: =Align.Center
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    Font: =Font.'Courier New'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =26
+                                    Size: =10
+                                    Text: =CountRows(galWeekItems.AllItems)
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =26
+                                    X: =0
+                                    Y: =0
+                        - galWeekItems:
+                            Control: Gallery@2.15.0
+                            Properties:
+                              Height: =Parent.Height - 72
+                              Items: |-
+                                =Sort(
+                                    Filter(
+                                        'Policy Proof Tracker',
+                                        'Planned Publish Date' = ThisItem.WeekDate,
+                                        Published = false
+                                    ),
+                                    If(
+                                        'Top Item',
+                                        0,
+                                        Switch(
+                                            Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
+                                            "Regulation", 1,
+                                            "ACSO", 2,
+                                            "CFSO", 3,
+                                            "CFI", 4,
+                                            "CBN", 5,
+                                            "SOI", 6,
+                                            "Internal Document", 7,
+                                            "Manual", 8,
+                                            "Newsletter Item", 9,
+                                            99
+                                        )
+                                    ),
+                                    SortOrder.Ascending
+                                )
+                              Layout: =Layout.Vertical
+                              LoadingSpinner: =LoadingSpinner.None
+                              ShowScrollbar: =true
+                              TemplatePadding: =6
+                              TemplateSize: =100
+                              Width: =Parent.Width
+                              X: =0
+                              Y: =72
+                            Children:
+                              - btnCardBg:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderColor: =RGBA(28, 32, 48, 0.1)
+                                    BorderThickness: =1
+                                    Color: =RGBA(0, 0, 0, 0)
+                                    DisplayMode: =DisplayMode.View
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Height: =Parent.TemplateHeight
+                                    HoverBorderColor: =RGBA(28, 32, 48, 0.1)
+                                    HoverColor: =RGBA(0, 0, 0, 0)
+                                    HoverFill: =RGBA(255, 255, 255, 1)
+                                    PressedBorderColor: =RGBA(28, 32, 48, 0.1)
+                                    PressedColor: =RGBA(0, 0, 0, 0)
+                                    PressedFill: =RGBA(255, 255, 255, 1)
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Text: =""
+                                    Width: =Parent.TemplateWidth
+                                    X: =0
+                                    Y: =0
+                              - recTypeBarCompact:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    Fill: =LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode)
+                                    Height: =Parent.TemplateHeight
+                                    Width: =6
+                                    X: =0
+                                    Y: =0
+                              - lblTypePillCompact:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode)
+                                    Font: =Font.'Courier New'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =16
+                                    Size: =9
+                                    Text: |-
+                                      =Switch(
+                                          Mid(ThisItem.'Document Type'.Value, Find(" ", ThisItem.'Document Type'.Value)+1),
+                                          "Internal Document", "Internal",
+                                          "Newsletter Item", "Newsletter",
+                                          Mid(ThisItem.'Document Type'.Value, Find(" ", ThisItem.'Document Type'.Value)+1)
+                                      )
+                                    Width: =Parent.TemplateWidth - 22
+                                    X: =14
+                                    Y: =8
+                              - lblCardTitle:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(28, 32, 48, 1)
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =36
+                                    Overflow: =Overflow.Hidden
+                                    Size: =12
+                                    Text: =ThisItem.Title
+                                    Width: =Parent.TemplateWidth - 22
+                                    X: =14
+                                    Y: =28
+                              - conOwnerCircle:
+                                  Control: GroupContainer@1.5.0
+                                  Properties:
+                                    Fill: =LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode)
+                                    Height: =20
+                                    LayoutMode: =LayoutMode.ManualLayout
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                    Width: =20
+                                    X: =14
+                                    Y: =72
                                   Children:
-                                    - lblColumnDate:
+                                    - lblOwnerInitialsCompact:
                                         Control: Label@2.5.1
                                         Properties:
-                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          Align: =Align.Center
                                           Color: =RGBA(255, 255, 255, 1)
-                                          Font: =Font.'Lato Black'
-                                          Height: =36
-                                          PaddingLeft: =14
-                                          Size: =16
-                                          Text: =Text(ThisItem.PublishDate, "dd mmm yyyy")
+                                          Font: =Font.'Courier New'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =20
+                                          Size: =7
+                                          Text: =Upper(Left(ThisItem.Owner.DisplayName, 1) & Mid(ThisItem.Owner.DisplayName, Find(" ", ThisItem.Owner.DisplayName & " ")+1, 1))
                                           VerticalAlign: =VerticalAlign.Middle
-                                          Width: =220
-                                          Y: =10
-                                    - badgeCount:
-                                        Control: Badge@0.0.24
-                                        Properties:
-                                          Appearance: ='BadgeCanvas.Appearance'.Filled
-                                          Content: =Text(CountRows(ThisItem.ItemsForDate))
-                                          Height: =22
-                                          Shape: ='BadgeCanvas.Shape'.Circular
-                                          ThemeColor: ='BadgeCanvas.ThemeColor'.Warning
-                                          Width: =32
-                                          X: =258
-                                          Y: =17
-                              - galColumnItems:
-                                  Control: Gallery@2.15.0
-                                  Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                                          Width: =20
+                                          X: =0
+                                          Y: =0
+                              - conStatusDotCompact:
+                                  Control: Classic/Button@2.2.0
                                   Properties:
                                     BorderColor: =RGBA(0, 0, 0, 0)
-                                    Height: =Parent.Height - 56
-                                    Items: |-
-                                      =Sort(
-                                          ThisItem.ItemsForDate,
-                                          TrackerType.Value,
-                                          SortOrder.Ascending
+                                    BorderThickness: =0
+                                    Color: =RGBA(0, 0, 0, 0)
+                                    DisplayMode: =DisplayMode.View
+                                    Fill: |-
+                                      =If(
+                                          ThisItem.Published,
+                                          RGBA(100, 110, 140, 1),
+                                          If(
+                                              ThisItem.'Planned Publish Date' < Today(),
+                                              RGBA(200, 72, 50, 1),
+                                              If(
+                                                  DateDiff(Today(), ThisItem.'Planned Publish Date', "Days") <= 7,
+                                                  RGBA(191, 150, 50, 1),
+                                                  RGBA(46, 140, 100, 1)
+                                              )
+                                          )
                                       )
-                                    TemplatePadding: =0
-                                    TemplateSize: =62
-                                    Width: =Parent.Width
-                                    Y: =56
-                                  Children:
-                                    - conItemRow:
-                                        Control: GroupContainer@1.5.0
-                                        Variant: ManualLayout
-                                        Properties:
-                                          BorderColor: =RGBA(235, 236, 237, 1)
-                                          BorderThickness: =1
-                                          DropShadow: =DropShadow.None
-                                          Fill: =If(ThisItem.'High Priority', RGBA(255, 248, 240, 1), RGBA(255, 255, 255, 1))
-                                          Height: =62
-                                          Width: =Parent.TemplateWidth
-                                        Children:
-                                          - recItemTypeBar:
-                                              Control: Rectangle@2.3.0
-                                              Properties:
-                                                BorderColor: =RGBA(0, 0, 0, 0)
-                                                Fill: =LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode)
-                                                Height: =62
-                                                Width: =4
-                                          - lblItemTitle:
-                                              Control: Label@2.5.1
-                                              Properties:
-                                                BorderColor: =RGBA(0, 0, 0, 0)
-                                                Color: =RGBA(30, 30, 30, 1)
-                                                Font: =Font.'Open Sans'
-                                                FontWeight: =FontWeight.Semibold
-                                                Height: =32
-                                                PaddingLeft: =10
-                                                Size: =12
-                                                Text: =If(Len(ThisItem.Title) > 32, Left(ThisItem.Title, 29) & "...", ThisItem.Title)
-                                                Tooltip: =ThisItem.Title
-                                                VerticalAlign: =VerticalAlign.Bottom
-                                                Width: =240
-                                                X: =4
-                                          - badgeItemType:
-                                              Control: Badge@0.0.24
-                                              Properties:
-                                                Appearance: ='BadgeCanvas.Appearance'.Tint
-                                                Content: =ThisItem.'Document Type'.Value
-                                                Font: =Font.Lato
-                                                FontSize: =14
-                                                Height: =20
-                                                Shape: ='BadgeCanvas.Shape'.Rounded
-                                                ThemeColor: |-
-                                                  =Switch(
-                                                      ThisItem.'Document Type'.Value,
-                                                      "📗 Manual",             'BadgeCanvas.ThemeColor'.Success,
-                                                      "📄 CFI",                'BadgeCanvas.ThemeColor'.Informative,
-                                                      "📄 CFSO",               'BadgeCanvas.ThemeColor'.Important,
-                                                      "📕 SOI",                'BadgeCanvas.ThemeColor'.Danger,
-                                                      "📖 Regulation",         'BadgeCanvas.ThemeColor'.Brand,
-                                                      "📄 CBN",                'BadgeCanvas.ThemeColor'.Severe,
-                                                      "📄 ACSO",               'BadgeCanvas.ThemeColor'.Warning,
-                                                      "📑 Internal Document",  'BadgeCanvas.ThemeColor'.Severe,
-                                                      "📜 Newsletter Item",    'BadgeCanvas.ThemeColor'.Informative,
-                                                      'BadgeCanvas.ThemeColor'.Warning
-                                                  )
-                                                Visible: =!IsBlank(ThisItem.'Document Type'.Value)
-                                                Width: =235
-                                                X: =4
-                                                Y: =36
-                                          - lblHighPriority:
-                                              Control: Label@2.5.1
-                                              Properties:
-                                                BorderColor: =RGBA(0, 0, 0, 0)
-                                                Color: =RGBA(200, 80, 0, 1)
-                                                Font: =Font.'Open Sans'
-                                                FontWeight: =FontWeight.Bold
-                                                Height: =20
-                                                Size: =11
-                                                Text: ="⚡"
-                                                VerticalAlign: =VerticalAlign.Middle
-                                                Visible: =ThisItem.'High Priority'
-                                                Width: =22
-                                                X: =270
-                                                Y: =20
-                                          - lblTopItemFlag:
-                                              Control: Label@2.5.1
-                                              Properties:
-                                                BorderColor: =RGBA(0, 0, 0, 0)
-                                                Color: =RGBA(180, 120, 0, 1)
-                                                Font: =Font.'Open Sans'
-                                                FontWeight: =FontWeight.Bold
-                                                Height: =20
-                                                Size: =11
-                                                Text: ="⭐"
-                                                VerticalAlign: =VerticalAlign.Middle
-                                                Visible: =ThisItem.'Top Item'
-                                                Width: =22
-                                                X: =270
-                                                Y: =38
-                                          - btnItemSelect:
-                                              Control: Classic/Button@2.2.0
-                                              Properties:
-                                                BorderColor: =RGBA(0, 0, 0, 0)
-                                                BorderThickness: =0
-                                                Color: =RGBA(0, 0, 0, 0)
-                                                DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                                Fill: =RGBA(0, 0, 0, 0)
-                                                Font: =Font.'Open Sans'
-                                                Height: =62
-                                                HoverBorderColor: =RGBA(0, 0, 0, 0)
-                                                HoverColor: =RGBA(0, 0, 0, 0)
-                                                HoverFill: =RGBA(0, 64, 47, 0.06)
-                                                OnSelect: |-
-                                                  =Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
-                                                  Set(varSelectedItem, varSelectedRelease);
-                                                  Set(varSourceScreen, "Overview");
-                                                  Set(varSelectPolicy, "Filled");
-                                                  Set(varParentSaved, true);
-                                                  Set(varSelectedPerson, varSelectedRelease.Owner);
-                                                  Set(varScrollDate, Blank());
-                                                  Set(varLoadingLinks, true);
-                                                  ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
-                                                  Set(varLoadingLinks, false);
-                                                  Navigate(ViewItem, ScreenTransition.Fade)
-                                                PressedBorderColor: =RGBA(0, 0, 0, 0)
-                                                PressedColor: =RGBA(0, 0, 0, 0)
-                                                PressedFill: =RGBA(0, 64, 47, 0.12)
-                                                RadiusBottomLeft: =0
-                                                RadiusBottomRight: =0
-                                                RadiusTopLeft: =0
-                                                RadiusTopRight: =0
-                                                Text: =""
-                                                Width: =300
+                                    Height: =8
+                                    HoverBorderColor: =RGBA(0, 0, 0, 0)
+                                    HoverColor: =RGBA(0, 0, 0, 0)
+                                    HoverFill: =Self.Fill
+                                    PressedBorderColor: =RGBA(0, 0, 0, 0)
+                                    PressedColor: =RGBA(0, 0, 0, 0)
+                                    PressedFill: =Self.Fill
+                                    RadiusBottomLeft: =4
+                                    RadiusBottomRight: =4
+                                    RadiusTopLeft: =4
+                                    RadiusTopRight: =4
+                                    Text: =""
+                                    Width: =8
+                                    X: =Parent.TemplateWidth - 20
+                                    Y: =76
+                              - recSelectorCompact:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Height: =Parent.TemplateHeight
+                                    HoverFill: =RGBA(0, 0, 0, 0.03)
+                                    OnSelect: =Set(varSelectedItem, ThisItem); Navigate(ViewItem, ScreenTransition.Fade)
+                                    Width: =Parent.TemplateWidth
+                                    X: =0
+                                    Y: =0
