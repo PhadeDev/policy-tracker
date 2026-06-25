@@ -488,10 +488,11 @@ Screens:
                   Y: =0
       - conForm:
           Control: GroupContainer@1.5.0
-          Variant: ManualLayout
+          Variant: AutoLayout
           Properties:
             Fill: =RGBA(255, 255, 255, 1)
             Height: =Parent.Height - 112
+            LayoutDirection: =LayoutDirection.Vertical
             LayoutOverflowY: =LayoutOverflow.Scroll
             Width: =766
             X: =0
@@ -507,6 +508,7 @@ Screens:
                   Height: =3000
                   Item: =LookUp('Policy Proof Tracker', ID = varSelectedRelease.ID)
                   NumberOfColumns: =2
+                  AlignInContainer: =AlignInContainer.Stretch
                   OnFailure: |-
                     =Notify(
                         "Save failed: " & Coalesce(Form1.Error, "Unknown error. Please check your connection."),
