@@ -19,7 +19,13 @@ Screens:
                             Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
                             Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
                             Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
-                            ReadyForRelease = true &&
+                            (
+                                ReadyForRelease = true ||
+                                'Approved For Release By'.Value = "XO" ||
+                                'Approved For Release By'.Value = "ACOS" ||
+                                'Approved For Release By'.Value = "DCOMD" ||
+                                'Approved For Release By'.Value = "D Commander"
+                            ) &&
                             Published = false
                         ),
                         SortKey,
@@ -57,7 +63,9 @@ Screens:
                         PackTitle,
                         Coalesce('Title for Newsletter', Title),
                         PackAudience,
-                        Coalesce(Audience, "")
+                        Coalesce(Audience, ""),
+                        PackSummary,
+                        Coalesce('Item summary', "")
                     ),
                     SortKey,
                     SortOrder.Ascending
@@ -135,7 +143,13 @@ Screens:
                                           Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
                                           Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
                                           Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
-                                          ReadyForRelease = true &&
+                                          (
+                                              ReadyForRelease = true ||
+                                              'Approved For Release By'.Value = "XO" ||
+                                              'Approved For Release By'.Value = "ACOS" ||
+                                              'Approved For Release By'.Value = "DCOMD" ||
+                                              'Approved For Release By'.Value = "D Commander"
+                                          ) &&
                                           Published = false
                                       ),
                                       SortKey,
@@ -173,7 +187,9 @@ Screens:
                                       PackTitle,
                                       Coalesce('Title for Newsletter', Title),
                                       PackAudience,
-                                      Coalesce(Audience, "")
+                                      Coalesce(Audience, ""),
+                                      PackSummary,
+                                      Coalesce('Item summary', "")
                                   ),
                                   SortKey,
                                   SortOrder.Ascending
@@ -269,7 +285,7 @@ Screens:
                         BorderColor: =RGBA(200, 204, 214, 1)
                         BorderThickness: =1
                         Color: =RGBA(28, 32, 48, 1)
-                        Default: =Concat(colNewsletterPack, PackTitle & Char(10) & PackAudience & Char(10) & Char(10))
+                        Default: =Concat(colNewsletterPack, PackTitle & Char(10) & PackAudience & If(IsBlank(PackSummary), "", Char(10) & PackSummary) & Char(10) & Char(10))
                         DisplayMode: =DisplayMode.View
                         Fill: =RGBA(248, 249, 252, 1)
                         Font: =Font.'Open Sans'
@@ -373,7 +389,7 @@ Screens:
                         LoadingSpinner: =LoadingSpinner.None
                         ShowScrollbar: =true
                         TemplatePadding: =10
-                        TemplateSize: =106
+                        TemplateSize: =130
                         Width: =Parent.Width - 40
                         X: =20
                         Y: =62
@@ -406,10 +422,10 @@ Screens:
                               Color: =If(ThisItem.IsFinalApproved, RGBA(28, 32, 48, 1), RGBA(95, 98, 108, 1))
                               Font: =Font.'Open Sans'
                               FontWeight: =FontWeight.Semibold
-                              Height: =30
+                              Height: =44
                               Size: =13
                               Text: =ThisItem.PackTitle
-                              VerticalAlign: =VerticalAlign.Middle
+                              VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.TemplateWidth - 34
                               X: =14
                               Y: =10
@@ -419,14 +435,14 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               Color: =If(ThisItem.IsFinalApproved, RGBA(70, 74, 88, 1), RGBA(120, 124, 134, 1))
                               Font: =Font.'Open Sans'
-                              Height: =26
+                              Height: =32
                               PaddingLeft: =24
                               Size: =12
                               Text: =ThisItem.PackAudience
-                              VerticalAlign: =VerticalAlign.Middle
+                              VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.TemplateWidth - 34
                               X: =14
-                              Y: =40
+                              Y: =58
                         - lblPendingApproval:
                             Control: Label@2.5.1
                             Properties:
@@ -440,7 +456,7 @@ Screens:
                               Visible: =!ThisItem.IsFinalApproved
                               Width: =Parent.TemplateWidth - 34
                               X: =38
-                              Y: =72
+                              Y: =96
                   - txtEmailPackHidden:
                       Control: Classic/TextInput@2.3.2
                       Properties:
