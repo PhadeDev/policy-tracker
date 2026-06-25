@@ -182,7 +182,7 @@ Screens:
                   Items: |-
                     =AddColumns(
                         Sequence(4),
-                        "WeekDate",
+                        WeekDate,
                         DateAdd(varNextThursday, (Value - 1) * 7, "Days")
                     )
                   LoadingSpinner: =LoadingSpinner.None
