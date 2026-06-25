@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Policy Tracker v2.9 — PowerApps Build Guide</title>
+  <title>Policy Tracker v3.0 — PowerApps Build Guide</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -111,8 +111,8 @@
 <body>
 
 <a class="back" href="https://phaderon.github.io/PowerApps/">&larr; Guide Library</a>
-<h1>Policy Tracker <span class="version-tag">V2.9</span></h1>
-<p class="build-stamp">Built 25 Jun 2026 &mdash; v2.9: Newsletter Pack no longer depends on the future Top Item column; pillar-ready filter uses ReadyForRelease; approval warning accepts DCOMD and D Commander</p>
+<h1>Policy Tracker <span class="version-tag">V3.0</span></h1>
+<p class="build-stamp">Built 25 Jun 2026 &mdash; v3.0: document type order updated to MoD Policy, ACSO, Regulation, CFSO, CFI, CBN, SOI, Internal Document, Manual, Newsletter Item</p>
 <p class="subtitle">Canvas app tracking ACCT UK policy documents through the release pipeline. V2 is a complete redesign: dominant type-colour card panels, segmented type filter, inline search, owner initials circles, status dots, Newsletter Pack screen, and a new cool-grey palette throughout. Wraps the <code>Policy Proof Tracker</code> SharePoint list with a <code>PolicyLinks</code> child list.</p>
 
 <!-- BUILD PROGRESS -->
@@ -147,7 +147,7 @@
     <div class="progress-row">
       <div class="progress-label">Newsletter Pack</div>
       <div class="progress-track"><div class="progress-fill fill-done"></div></div>
-      <div class="progress-state state-done">&#10003; V2.9 ready</div>
+      <div class="progress-state state-done">&#10003; V3.0 ready</div>
     </div>
     <div class="progress-row">
       <div class="progress-label">StartScreen</div>
@@ -249,15 +249,26 @@ ClearCollect(
             ChoiceValue: Value,
             ColorCode: Switch(
                 Value,
-                "📖 Regulation",        RGBA(0, 130, 140, 1),
+                "📄 MoD Policy",        RGBA(28, 32, 48, 1),
+                "MoD Policy",           RGBA(28, 32, 48, 1),
                 "📄 ACSO",              RGBA(20, 60, 140, 1),
+                "ACSO",                 RGBA(20, 60, 140, 1),
+                "📖 Regulation",        RGBA(0, 130, 140, 1),
+                "Regulation",           RGBA(0, 130, 140, 1),
                 "📄 CFSO",              RGBA(108, 40, 168, 1),
+                "CFSO",                 RGBA(108, 40, 168, 1),
                 "📄 CFI",               RGBA(56, 96, 178, 1),
+                "CFI",                  RGBA(56, 96, 178, 1),
                 "📄 CBN",               RGBA(191, 100, 30, 1),
+                "CBN",                  RGBA(191, 100, 30, 1),
                 "📕 SOI",               RGBA(180, 50, 40, 1),
+                "SOI",                  RGBA(180, 50, 40, 1),
                 "📑 Internal Document", RGBA(90, 90, 115, 1),
+                "Internal Document",    RGBA(90, 90, 115, 1),
                 "📗 Manual",            RGBA(46, 125, 89, 1),
+                "Manual",               RGBA(46, 125, 89, 1),
                 "📜 Newsletter Item",   RGBA(160, 120, 0, 1),
+                "Newsletter Item",      RGBA(160, 120, 0, 1),
                 RGBA(150, 150, 150, 1)
             )
         }
@@ -300,7 +311,7 @@ Set(
     <div class="screen-cta purple">Open and copy &rarr;</div>
   </a>
 
-  <a class="screen-card done" href="screens/Main.html" target="_blank">
+  <a class="screen-card done" href="screens/Main.html?v=3.0" target="_blank">
     <div>
       <div class="status-pill pill-done">&#10003; V2 ready</div>
       <div class="screen-number">Screen 2</div>
@@ -310,7 +321,7 @@ Set(
     <div class="screen-cta green">Open and copy &rarr;</div>
   </a>
 
-  <a class="screen-card done" href="screens/Overview.html" target="_blank">
+  <a class="screen-card done" href="screens/Overview.html?v=3.0" target="_blank">
     <div>
       <div class="status-pill pill-done">&#10003; V2 ready</div>
       <div class="screen-number">Screen 3</div>
@@ -340,9 +351,9 @@ Set(
     <div class="screen-cta green">Open and copy &rarr;</div>
   </a>
 
-  <a class="screen-card done" href="screens/NewsletterPack.html?v=2.9" target="_blank">
+  <a class="screen-card done" href="screens/NewsletterPack.html?v=3.0" target="_blank">
     <div>
-      <div class="status-pill pill-done">&#10003; V2.9 ready</div>
+      <div class="status-pill pill-done">&#10003; V3.0 ready</div>
       <div class="screen-number">Screen 6</div>
       <div class="screen-name">Newsletter Pack</div>
       <div class="screen-desc">Dual-panel screen. Left: plain reference text. Right: email-ready preview with Copy All. Missing XO/ACOS/DCOMD approval is shown as a muted warning but is not included in copied text.</div>
@@ -380,8 +391,9 @@ Set(
 <table>
   <thead><tr><th>Type</th><th>Colour</th><th>RGBA</th></tr></thead>
   <tbody>
-    <tr><td>Regulation</td><td>Teal</td><td><code>RGBA(0, 130, 140, 1)</code></td></tr>
+    <tr><td>MoD Policy</td><td>Dark slate</td><td><code>RGBA(28, 32, 48, 1)</code></td></tr>
     <tr><td>ACSO</td><td>Navy</td><td><code>RGBA(20, 60, 140, 1)</code></td></tr>
+    <tr><td>Regulation</td><td>Teal</td><td><code>RGBA(0, 130, 140, 1)</code></td></tr>
     <tr><td>CFSO</td><td>Rich purple</td><td><code>RGBA(108, 40, 168, 1)</code></td></tr>
     <tr><td>CFI</td><td>Steel blue</td><td><code>RGBA(56, 96, 178, 1)</code></td></tr>
     <tr><td>CBN</td><td>Amber orange</td><td><code>RGBA(191, 100, 30, 1)</code></td></tr>
@@ -397,15 +409,16 @@ Set(
   <thead><tr><th>Priority</th><th>Type</th><th>Notes</th></tr></thead>
   <tbody>
     <tr><td>0</td><td>Top Item</td><td>Always first, regardless of type</td></tr>
-    <tr><td>1</td><td>Regulation</td><td></td></tr>
+    <tr><td>1</td><td>MoD Policy</td><td></td></tr>
     <tr><td>2</td><td>ACSO</td><td></td></tr>
-    <tr><td>3</td><td>CFSO</td><td></td></tr>
-    <tr><td>4</td><td>CFI</td><td></td></tr>
-    <tr><td>5</td><td>CBN</td><td></td></tr>
-    <tr><td>6</td><td>SOI</td><td></td></tr>
-    <tr><td>7</td><td>Internal Document</td><td></td></tr>
-    <tr><td>8</td><td>Manual</td><td></td></tr>
-    <tr><td>9</td><td>Newsletter Item</td><td></td></tr>
+    <tr><td>3</td><td>Regulation</td><td></td></tr>
+    <tr><td>4</td><td>CFSO</td><td></td></tr>
+    <tr><td>5</td><td>CFI</td><td></td></tr>
+    <tr><td>6</td><td>CBN</td><td></td></tr>
+    <tr><td>7</td><td>SOI</td><td></td></tr>
+    <tr><td>8</td><td>Internal Document</td><td></td></tr>
+    <tr><td>9</td><td>Manual</td><td></td></tr>
+    <tr><td>10</td><td>Newsletter Item</td><td></td></tr>
   </tbody>
 </table>
 

@@ -854,7 +854,7 @@ Screens:
                                               Filter('Policy Proof Tracker',
                                                   'Planned Publish Date' > DateAdd(Today(), 28, "Days") &&
                                                   (!varShowMyEntries || Owner.Email = User().Email) &&
-                                                  (varTypeFilter = "All" || Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1) = varTypeFilter) &&
+                                                  (varTypeFilter = "All" || 'Document Type'.Value = varTypeFilter || Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1) = varTypeFilter) &&
                                                   (varSearchText = "" || Lower(varSearchText) in Lower(Title) || Lower(varSearchText) in Lower(Owner.DisplayName))
                                               ),
                                               PlannedDate, 'Planned Publish Date',
@@ -874,7 +874,7 @@ Screens:
                                               Filter('Policy Proof Tracker',
                                                   'Planned Publish Date' < Today() && Published = false &&
                                                   (!varShowMyEntries || Owner.Email = User().Email) &&
-                                                  (varTypeFilter = "All" || Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1) = varTypeFilter) &&
+                                                  (varTypeFilter = "All" || 'Document Type'.Value = varTypeFilter || Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1) = varTypeFilter) &&
                                                   (varSearchText = "" || Lower(varSearchText) in Lower(Title) || Lower(varSearchText) in Lower(Owner.DisplayName))
                                               ),
                                               PlannedDate, 'Planned Publish Date',
@@ -893,7 +893,7 @@ Screens:
                                               Filter('Policy Proof Tracker',
                                                   'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
                                                   (!varShowMyEntries || Owner.Email = User().Email) &&
-                                                  (varTypeFilter = "All" || Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1) = varTypeFilter) &&
+                                                  (varTypeFilter = "All" || 'Document Type'.Value = varTypeFilter || Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1) = varTypeFilter) &&
                                                   (varSearchText = "" || Lower(varSearchText) in Lower(Title) || Lower(varSearchText) in Lower(Owner.DisplayName))
                                               ),
                                               PlannedDate, 'Planned Publish Date',
@@ -984,23 +984,34 @@ Screens:
                                     Items: |-
                                       =Sort(
                                           ThisItem.GroupedItems,
-                                          If(
-                                              'Top Item',
-                                              0,
-                                              Switch(
-                                                  Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
-                                                  "Regulation", 1,
-                                                  "ACSO", 2,
-                                                  "CFSO", 3,
-                                                  "CFI", 4,
-                                                  "CBN", 5,
-                                                  "SOI", 6,
-                                                  "Internal Document", 7,
-                                                  "Manual", 8,
-                                                  "Newsletter Item", 9,
-                                                  99
-                                              )
-                                          ),
+                                              If(
+                                                  'Top Item',
+                                                  0,
+                                                  Switch(
+                                                      'Document Type'.Value,
+                                                      "📄 MoD Policy", 1,
+                                                      "MoD Policy", 1,
+                                                      "📄 ACSO", 2,
+                                                      "ACSO", 2,
+                                                      "📖 Regulation", 3,
+                                                      "Regulation", 3,
+                                                      "📄 CFSO", 4,
+                                                      "CFSO", 4,
+                                                      "📄 CFI", 5,
+                                                      "CFI", 5,
+                                                      "📄 CBN", 6,
+                                                      "CBN", 6,
+                                                      "📕 SOI", 7,
+                                                      "SOI", 7,
+                                                      "📑 Internal Document", 8,
+                                                      "Internal Document", 8,
+                                                      "📗 Manual", 9,
+                                                      "Manual", 9,
+                                                      "📜 Newsletter Item", 10,
+                                                      "Newsletter Item", 10,
+                                                      99
+                                                  )
+                                              ),
                                           SortOrder.Ascending
                                       )
                                     TemplatePadding: =0
