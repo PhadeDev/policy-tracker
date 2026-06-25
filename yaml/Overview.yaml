@@ -280,7 +280,7 @@ Screens:
                                 =Sort(
                                     Filter(
                                         'Policy Proof Tracker',
-                                        'Planned Publish Date' = ThisItem.WeekDate,
+                                        'Planned Publish Date' = galWeeks.ThisItem.WeekDate,
                                         Published = false
                                     ),
                                     If(
