@@ -7,6 +7,7 @@ Screens:
     Children:
       - conHeader:
           Control: GroupContainer@1.5.0
+          Variant: ManualLayout
           Properties:
             Fill: =RGBA(28, 32, 48, 1)
             Height: =56
@@ -16,7 +17,7 @@ Screens:
             Y: =0
           Children:
             - imgLogo:
-                Control: Image@2.2.0
+                Control: Image@2.2.3
                 Properties:
                   Height: =36
                   ImagePosition: =ImagePosition.Fit
@@ -166,6 +167,7 @@ Screens:
                   Y: =10
       - conBody:
           Control: GroupContainer@1.5.0
+          Variant: ManualLayout
           Properties:
             Fill: =RGBA(243, 244, 248, 1)
             Height: =Parent.Height - conHeader.Height
@@ -196,6 +198,7 @@ Screens:
                 Children:
                   - conColumnCard:
                       Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
                       Properties:
                         BorderColor: =If(ThisItem.Value = 1, RGBA(46, 125, 89, 1), RGBA(28, 32, 48, 0.12))
                         BorderThickness: =If(ThisItem.Value = 1, 2, 1)
@@ -245,6 +248,7 @@ Screens:
                               Y: =30
                         - conCountBadge:
                             Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
                             Properties:
                               Fill: =RGBA(255, 186, 8, 1)
                               Height: =26
@@ -374,6 +378,7 @@ Screens:
                                     Y: =28
                               - conOwnerCircle:
                                   Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
                                   Properties:
                                     Fill: =LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode)
                                     Height: =20
