@@ -185,7 +185,6 @@ Screens:
                         "WeekDate",
                         DateAdd(varNextThursday, (Value - 1) * 7, "Days")
                     )
-                  Layout: =Layout.Horizontal
                   LoadingSpinner: =LoadingSpinner.None
                   ShowScrollbar: =false
                   TemplatePadding: =8
@@ -303,7 +302,6 @@ Screens:
                                     ),
                                     SortOrder.Ascending
                                 )
-                              Layout: =Layout.Vertical
                               LoadingSpinner: =LoadingSpinner.None
                               ShowScrollbar: =true
                               TemplatePadding: =6
