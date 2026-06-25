@@ -11,7 +11,6 @@ Screens:
           Properties:
             Fill: =RGBA(28, 32, 48, 1)
             Height: =56
-            LayoutMode: =LayoutMode.ManualLayout
             Width: =Parent.Width
             X: =0
             Y: =0
@@ -171,13 +170,13 @@ Screens:
           Properties:
             Fill: =RGBA(243, 244, 248, 1)
             Height: =Parent.Height - conHeader.Height
-            LayoutMode: =LayoutMode.ManualLayout
             Width: =Parent.Width
             X: =0
             Y: =conHeader.Height
           Children:
             - galWeeks:
                 Control: Gallery@2.15.0
+                Variant: Horizontal
                 Properties:
                   Height: =Parent.Height - 24
                   Items: |-
@@ -205,7 +204,6 @@ Screens:
                         DropShadow: =DropShadow.Light
                         Fill: =RGBA(255, 255, 255, 1)
                         Height: =Parent.Height
-                        LayoutMode: =LayoutMode.ManualLayout
                         RadiusBottomLeft: =8
                         RadiusBottomRight: =8
                         RadiusTopLeft: =8
@@ -252,7 +250,6 @@ Screens:
                             Properties:
                               Fill: =RGBA(255, 186, 8, 1)
                               Height: =26
-                              LayoutMode: =LayoutMode.ManualLayout
                               RadiusBottomLeft: =13
                               RadiusBottomRight: =13
                               RadiusTopLeft: =13
@@ -277,6 +274,7 @@ Screens:
                                     Y: =0
                         - galWeekItems:
                             Control: Gallery@2.15.0
+                            Variant: Vertical
                             Properties:
                               Height: =Parent.Height - 72
                               Items: |-
@@ -382,7 +380,6 @@ Screens:
                                   Properties:
                                     Fill: =LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode)
                                     Height: =20
-                                    LayoutMode: =LayoutMode.ManualLayout
                                     RadiusBottomLeft: =10
                                     RadiusBottomRight: =10
                                     RadiusTopLeft: =10
