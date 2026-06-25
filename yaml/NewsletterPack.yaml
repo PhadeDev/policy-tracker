@@ -285,7 +285,7 @@ Screens:
                         BorderColor: =RGBA(200, 204, 214, 1)
                         BorderThickness: =1
                         Color: =RGBA(28, 32, 48, 1)
-                        Default: =Concat(colNewsletterPack, PackTitle & Char(10) & PackAudience & If(IsBlank(PackSummary), "", Char(10) & PackSummary) & Char(10) & Char(10))
+                        Default: =Concat(colNewsletterPack, PackTitle & Char(10) & PackAudience & If(IsBlank(PackSummary), "", Char(10) & PackSummary) & Char(10) & Char(10) & "------------------------------------------------------------" & Char(10) & Char(10))
                         DisplayMode: =DisplayMode.View
                         Fill: =RGBA(248, 249, 252, 1)
                         Font: =Font.'Open Sans'
@@ -363,7 +363,7 @@ Screens:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(36, 100, 70, 1)
                         OnSelect: |-
-                          =Copy(Concat(colNewsletterPack, PackTitle & Char(10) & "    " & PackAudience & Char(10) & Char(10)));
+                          =Copy(Concat(colNewsletterPack, Char(8226) & " " & PackTitle & Char(10) & "    " & Char(9702) & " Intended audience: " & PackAudience & Char(10) & Char(10)));
                           Notify("Newsletter pack copied.", NotificationType.Success)
                         PressedBorderColor: =RGBA(28, 80, 55, 1)
                         PressedColor: =RGBA(255, 255, 255, 1)
@@ -389,7 +389,7 @@ Screens:
                         LoadingSpinner: =LoadingSpinner.None
                         ShowScrollbar: =true
                         TemplatePadding: =10
-                        TemplateSize: =130
+                        TemplateSize: =156
                         Width: =Parent.Width - 40
                         X: =20
                         Y: =62
@@ -422,11 +422,11 @@ Screens:
                               Color: =If(ThisItem.IsFinalApproved, RGBA(28, 32, 48, 1), RGBA(95, 98, 108, 1))
                               Font: =Font.'Open Sans'
                               FontWeight: =FontWeight.Semibold
-                              Height: =44
+                              Height: =58
                               Size: =13
-                              Text: =ThisItem.PackTitle
+                              Text: =Char(8226) & " " & ThisItem.PackTitle
                               VerticalAlign: =VerticalAlign.Top
-                              Width: =Parent.TemplateWidth - 34
+                              Width: =Parent.TemplateWidth - 44
                               X: =14
                               Y: =10
                         - lblPreviewAudience:
@@ -435,14 +435,15 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               Color: =If(ThisItem.IsFinalApproved, RGBA(70, 74, 88, 1), RGBA(120, 124, 134, 1))
                               Font: =Font.'Open Sans'
-                              Height: =32
-                              PaddingLeft: =24
+                              Height: =50
+                              PaddingLeft: =0
                               Size: =12
-                              Text: =ThisItem.PackAudience
+                              Text: |-
+                                =Char(9702) & " Intended audience: " & ThisItem.PackAudience
                               VerticalAlign: =VerticalAlign.Top
-                              Width: =Parent.TemplateWidth - 34
-                              X: =14
-                              Y: =58
+                              Width: =Parent.TemplateWidth - 74
+                              X: =38
+                              Y: =72
                         - lblPendingApproval:
                             Control: Label@2.5.1
                             Properties:
@@ -456,11 +457,12 @@ Screens:
                               Visible: =!ThisItem.IsFinalApproved
                               Width: =Parent.TemplateWidth - 34
                               X: =38
-                              Y: =96
+                              Y: =126
                   - txtEmailPackHidden:
                       Control: Classic/TextInput@2.3.2
                       Properties:
-                        Default: =Concat(colNewsletterPack, PackTitle & Char(10) & "    " & PackAudience & Char(10) & Char(10))
+                        Default: |-
+                          =Concat(colNewsletterPack, Char(8226) & " " & PackTitle & Char(10) & "    " & Char(9702) & " Intended audience: " & PackAudience & Char(10) & Char(10))
                         DisplayMode: =DisplayMode.View
                         Height: =1
                         Mode: =TextMode.MultiLine
