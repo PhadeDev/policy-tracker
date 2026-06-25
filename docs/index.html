@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Policy Tracker v2.4 — PowerApps Build Guide</title>
+  <title>Policy Tracker v2.5 — PowerApps Build Guide</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -111,8 +111,8 @@
 <body>
 
 <a class="back" href="https://phaderon.github.io/PowerApps/">&larr; Guide Library</a>
-<h1>Policy Tracker <span class="version-tag">V2.4</span></h1>
-<p class="build-stamp">Built 25 Jun 2026 &mdash; v2.4: Overview column fix — pre-compute WeekItems in galWeeks.Items via AddColumns; galWeekItems.Items = ThisItem.WeekItems (nested gallery Items cannot use outer ThisItem directly)</p>
+<h1>Policy Tracker <span class="version-tag">V2.5</span></h1>
+<p class="build-stamp">Built 25 Jun 2026 &mdash; v2.5: Overview scope fix — wrap WeekItems Filter in With({weekDate:...}) so Value from Sequence is captured before the nested Filter predicate evaluates; date range comparison instead of exact equality</p>
 <p class="subtitle">Canvas app tracking ACCT UK policy documents through the release pipeline. V2 is a complete redesign: dominant type-colour card panels, segmented type filter, inline search, owner initials circles, status dots, Newsletter Pack screen, and a new cool-grey palette throughout. Wraps the <code>Policy Proof Tracker</code> SharePoint list with a <code>PolicyLinks</code> child list.</p>
 
 <!-- BUILD PROGRESS -->

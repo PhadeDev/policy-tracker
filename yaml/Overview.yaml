@@ -48,7 +48,7 @@ Screens:
                   Font: =Font.'Courier New'
                   Height: =22
                   Size: =9
-                  Text: ="V2"
+                  Text: ="V2.5"
                   VerticalAlign: =VerticalAlign.Middle
                   Width: =32
                   X: =252
@@ -187,29 +187,33 @@ Screens:
                         WeekDate,
                         DateAdd(varNextThursday, (Value - 1) * 7, "Days"),
                         WeekItems,
-                        Sort(
-                            Filter(
-                                colUnpublishedPolicies,
-                                'Planned Publish Date' = DateAdd(varNextThursday, (Value - 1) * 7, "Days")
-                            ),
-                            If(
-                                'Top Item',
-                                0,
-                                Switch(
-                                    Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
-                                    "Regulation", 1,
-                                    "ACSO", 2,
-                                    "CFSO", 3,
-                                    "CFI", 4,
-                                    "CBN", 5,
-                                    "SOI", 6,
-                                    "Internal Document", 7,
-                                    "Manual", 8,
-                                    "Newsletter Item", 9,
-                                    99
-                                )
-                            ),
-                            SortOrder.Ascending
+                        With(
+                            {weekDate: DateAdd(varNextThursday, (Value - 1) * 7, "Days")},
+                            Sort(
+                                Filter(
+                                    colUnpublishedPolicies,
+                                    'Planned Publish Date' >= weekDate,
+                                    'Planned Publish Date' < DateAdd(weekDate, 1, "Days")
+                                ),
+                                If(
+                                    'Top Item',
+                                    0,
+                                    Switch(
+                                        Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
+                                        "Regulation", 1,
+                                        "ACSO", 2,
+                                        "CFSO", 3,
+                                        "CFI", 4,
+                                        "CBN", 5,
+                                        "SOI", 6,
+                                        "Internal Document", 7,
+                                        "Manual", 8,
+                                        "Newsletter Item", 9,
+                                        99
+                                    )
+                                ),
+                                SortOrder.Ascending
+                            )
                         )
                     )
                   LoadingSpinner: =LoadingSpinner.None
