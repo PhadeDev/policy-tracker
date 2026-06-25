@@ -360,7 +360,8 @@ Screens:
                   FontWeight: =FontWeight.Bold
                   Height: =36
                   HoverFill: =RGBA(160, 40, 40, 1)
-                  OnSelect: =UpdateContext({locDisplayDeletePopUp: true})
+                  OnSelect: |-
+                    =UpdateContext({locDisplayDeletePopUp: true})
                   PressedFill: =RGBA(130, 30, 30, 1)
                   RadiusBottomLeft: =6
                   RadiusBottomRight: =6
