@@ -1,7 +1,7 @@
 Screens:
   ViewItem:
     Properties:
-      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      LoadingSpinnerColor: =RGBA(46, 125, 89, 1)
       OnVisible: |-
         =Set(
             varOwnerDefault,
@@ -36,457 +36,475 @@ Screens:
             Set(varLoading, false)
         )
     Children:
-      - TopButtons_1:
-          Control: GroupContainer@1.5.0
-          Variant: AutoLayout
-          Properties:
-            DropShadow: =DropShadow.None
-            Fill: =RGBA(237, 237, 237, 1)
-            Height: =50
-            LayoutAlignItems: =LayoutAlignItems.Center
-            LayoutDirection: =LayoutDirection.Horizontal
-            LayoutGap: =10
-            LayoutJustifyContent: =LayoutJustifyContent.End
-            PaddingBottom: =5
-            PaddingLeft: =10
-            PaddingRight: =10
-            PaddingTop: =5
-            Width: =Parent.Width
-          Children:
-            - DuplicateBtn:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  BorderColor: =RGBA(122, 138, 143, 1)
-                  BorderThickness: =0.1
-                  FillPortions: =0
-                  Height: =Parent.Height -10
-                  LayoutMinHeight: =Parent.Height - 10
-                  LayoutMinWidth: =16
-                  Visible: =varSelectPolicy = "Filled"
-                  Width: =160
-                Children:
-                  - 'btnDuplicate:':
-                      Control: ModernButton@1.0.0
-                      Properties:
-                        Align: =VerticalAlign.Middle
-                        BasePaletteColor: =RGBA(0, 100, 180, 1)
-                        Height: =Parent.Height
-                        Icon: ="Copy"
-                        IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                        Layout: ='ButtonCanvas.Layout'.IconAfter
-                        OnSelect: |-
-                          =ClearCollect(
-                              colUpcomingEntries,
-                              Filter(
-                                  'Policy Proof Tracker',
-                                  'Planned Publish Date' >= Today() &&
-                                  'Planned Publish Date' <= DateAdd(Today(), 365, "Days")
-                              )
-                          );
-                          Set(
-                              varDaysToNextThursday,
-                              If(Mod(5 - Weekday(Today()) + 7, 7) = 0, 7, Mod(5 - Weekday(Today()) + 7, 7))
-                          );
-                          Clear(colThursdays);
-                          ForAll(
-                              Sequence(52),
-                              If(
-                                  varSelectedRelease.'High Priority' ||
-                                  varDaysToNextThursday + (Value - 1) * 7 >= 10,
-                                  With(
-                                      {thurDate: DateAdd(Today(), varDaysToNextThursday + (Value - 1) * 7, "Days")},
-                                      With(
-                                          {
-                                              cnt: CountRows(
-                                                  Filter(
-                                                      colUpcomingEntries,
-                                                      Year('Planned Publish Date') = Year(thurDate) &&
-                                                      Month('Planned Publish Date') = Month(thurDate) &&
-                                                      Day('Planned Publish Date') = Day(thurDate)
-                                                  )
-                                              )
-                                          },
-                                          Collect(
-                                              colThursdays,
-                                              {
-                                                  ThursdayDate: thurDate,
-                                                  ThursdayLabel: Text(thurDate, "dddd d mmmm yyyy") &
-                                                      If(
-                                                          cnt = 0, " — clear",
-                                                          cnt = 1, " — 1 entry already scheduled",
-                                                          " — " & Text(cnt, "0") & " entries already scheduled"
-                                                      )
-                                              }
-                                          )
-                                      )
-                                  )
-                              )
-                          );
-                          Set(varShowDuplicateModal, true)
-                        Text: ="Duplicate"
-                        Width: =Parent.Width
-            - conFormSubheader:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  LayoutMinHeight: =16
-                  LayoutMinWidth: =16
-                  Width: =450
-                Children:
-                  - lblPolicyDetailsTitle:
-                      Control: Label@2.5.1
-                      Properties:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Font: =Font.'Open Sans'
-                        FontWeight: =FontWeight.Bold
-                        Height: =Parent.Height
-                        Text: ="Policy Details:"
-                        X: =12
-                  - SVG_11:
-                      Control: Image@2.2.3
-                      Properties:
-                        BorderColor: =RGBA(0, 0, 0, 1)
-                        Height: =Parent.Height
-                        Image: ="data:image/svg+xml;utf8, "&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' fill='#000000' aria-hidden='true' width='40px' height='40px' viewBox='0 0 20 20'><path d='M7 11a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm1 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm2-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm1 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm2-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm4-5.5A2.5 2.5 0 0 0 14.5 3h-9A2.5 2.5 0 0 0 3 5.5v9A2.5 2.5 0 0 0 5.5 17h9a2.5 2.5 0 0 0 2.5-2.5v-9ZM4 7h12v7.5c0 .83-.67 1.5-1.5 1.5h-9A1.5 1.5 0 0 1 4 14.5V7Zm1.5-3h9c.83 0 1.5.67 1.5 1.5V6H4v-.5C4 4.67 4.67 4 5.5 4Z' fill='#000000'/></svg>")
-                        Visible: =If(varSelectPolicy="Filled",true, false)
-                        Width: =Parent.Height
-                        X: =149
-                  - lblReleaseDateStatus:
-                      Control: Label@2.5.1
-                      Properties:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Font: =Font.'Open Sans'
-                        FontWeight: =FontWeight.Bold
-                        Height: =39
-                        Text: |-
-                          =If(
-                              !varSelectedRelease.Published,
-                              With(
-                                  { d: DateValue(varSelectedRelease.'Planned Publish Date') },
-                                  If(
-                                      d = Today(),
-                                      "Planned publish date is today",
-                                      If(
-                                          d > Today(),
-                                          DateDiff(Today(), d, TimeUnit.Days) & " days until planned publish date",
-                                          "Planned publish date has passed"
-                                      )
-                                  )
-                              ),
-                              With(
-                                  { d: DateValue(varSelectedRelease.'Planned Publish Date') },
-                                  If(
-                                      DateDiff(d, Today(), TimeUnit.Days) = 0,
-                                      "This was published today",
-                                      "This has been published for " & DateDiff(d, Today(), TimeUnit.Days) & " days"
-                                  )
-                              )
-                          )
-                        Visible: =If(varSelectPolicy="Filled",true, false)
-                        Width: =320
-                        X: =192
-                  - AnimatedSuccess_1:
-                      Control: Image@2.2.3
-                      Properties:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Height: =40
-                        Image: |
-                          ="data:image/svg+xml," & EncodeUrl("
-                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='40px' height='40px'>
-                            <style>
-                              .circle" & gblMorphTimestamp & " { fill: #52c41a; stroke: #389e0d; stroke-width: 2; transform-origin: center; animation-name: successBounce; animation-duration: 2000ms; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
-                              .checkmark" & gblMorphTimestamp & " { fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 12; stroke-dashoffset: 12; animation-name: checkDraw; animation-duration: 2000ms; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
-                              @keyframes successBounce { 0%, 70%, 100% { transform: scale(1); } 10% { transform: scale(0.8); } 35% { transform: scale(1.1); } 50% { transform: scale(1); } }
-                              @keyframes checkDraw { 0%, 30% { stroke-dashoffset: 12; } 70%, 100% { stroke-dashoffset: 0; } }
-                            </style>
-                            <circle class='circle" & gblMorphTimestamp & "' cx='12' cy='12' r='6.5' />
-                            <path class='checkmark" & gblMorphTimestamp & "' d='M9 12L11 14L15 9.5' />
-                          </svg>
-                          ")
-                        OnSelect: |-
-                          =Set(gblMorphToggle, !gblMorphToggle);
-                          Set(gblMorphTimestamp, Text(Now(), "yyyymmddhhmmss"))
-                        Visible: =varSelectedRelease.Published
-                        X: =526
-            - Close:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  BorderColor: =RGBA(122, 138, 143, 1)
-                  BorderThickness: =0.1
-                  FillPortions: =0
-                  Height: =Parent.Height -10
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  LayoutMinHeight: =Parent.Height -10
-                  Width: =250
-                Children:
-                  - btnCancel_3:
-                      Control: Button@0.0.45
-                      Properties:
-                        Align: =Align.Justify
-                        Appearance: ='ButtonCanvas.Appearance'.Primary
-                        BasePaletteColor: =RGBA(189, 178, 176, 1)
-                        Font: =Font.'Open Sans'
-                        Height: =38
-                        Icon: ="ArrowExit"
-                        IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                        Layout: ='ButtonCanvas.Layout'.IconAfter
-                        OnSelect: |-
-                          =Set(varSelectPolicy, "Empty");
-                          Set(varSelectedRelease, Blank());
-                          Set(varUnsavedChanges, false);
-                          Set(varShowLinkModal, false);
-                          ResetForm(Form1);
-                          If(
-                              varSourceScreen = "Historic",
-                              Navigate(Historic, ScreenTransition.Fade),
-                              Navigate(Main, ScreenTransition.Fade)
-                          )
-                        Text: ="Close (Does not save)"
-                        VerticalAlign: =VerticalAlign.Middle
-                        Width: =Parent.Width
-            - SaveAndClose:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  BorderColor: =RGBA(122, 138, 143, 1)
-                  BorderThickness: =0.1
-                  Fill: =RGBA(166, 215, 153, 1)
-                  FillPortions: =0
-                  Height: =Parent.Height -10
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  LayoutMinHeight: =Parent.Height -10
-                  Width: =175
-                Children:
-                  - btnSaveClose:
-                      Control: Button@0.0.45
-                      Properties:
-                        Align: =Align.Justify
-                        Appearance: ='ButtonCanvas.Appearance'.Primary
-                        BasePaletteColor: =AppTheme.palette.themePrimary
-                        DisplayMode: =If(varSaving, DisplayMode.Disabled, DisplayMode.Edit)
-                        Font: =Font.'Open Sans'
-                        Height: =Parent.Height
-                        Icon: ="Save"
-                        IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                        Layout: ='ButtonCanvas.Layout'.IconAfter
-                        OnSelect: |-
-                          =If( !varSaving,
-                              Set(varSaving, true);
-                              Set(varSaveMode, "Close");
-                              If(
-                                  !IsBlank(Form1.Updates.'Planned Publish Date') &&
-                                  DateDiff(Today(), Form1.Updates.'Planned Publish Date', TimeUnit.Days) >= 0 &&
-                                  DateDiff(Today(), Form1.Updates.'Planned Publish Date', TimeUnit.Days) < 10 &&
-                                  !Form1.Updates.'High Priority' &&
-                                  (
-                                      Form1.Mode = FormMode.New ||
-                                      Form1.Updates.'Planned Publish Date' <> varSelectedRelease.'Planned Publish Date'
-                                  ),
-                                  Set(varSaving, false);
-                                  Notify(
-                                      "Release date is within 10 days. Tick High Priority to override, or pick a later date.",
-                                      NotificationType.Warning
-                                  ),
-                                  SubmitForm(Form1)
-                              )
-                          )
-                        Text: ="Save & Close"
-                        VerticalAlign: =VerticalAlign.Middle
-                        Width: =Parent.Width
-                  - AnimatedLoadingSpinner_1:
-                      Control: Image@2.2.3
-                      Properties:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Height: =40
-                        Image: |
-                          ="data:image/svg+xml," & EncodeUrl("
-                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='40px' height='40px'>
-                            <style>
-                              .spinner" & gblMorphTimestamp & " { stroke: black; stroke-width: 2; stroke-linecap: round; fill: none; transform-origin: center; animation-name: spinLoad; animation-duration: 1000ms; animation-iteration-count: infinite; animation-timing-function: linear; }
-                              @keyframes spinLoad { 0% { transform: rotate(0deg); stroke-dasharray: 1, 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 89, 200; stroke-dashoffset: -35px; } 100% { transform: rotate(360deg); stroke-dasharray: 89, 200; stroke-dashoffset: -124px; } }
-                            </style>
-                            <circle class='spinner" & gblMorphTimestamp & "' cx='12' cy='12' r='9' />
-                          </svg>
-                          ")
-                        OnSelect: |-
-                          =Set(gblMorphToggle, !gblMorphToggle);
-                          Set(gblMorphTimestamp, Text(Now(), "yyyymmddhhmmss"))
-                        Visible: =varSaving
-                        Width: =Parent.Width
-            - Save:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  BorderColor: =RGBA(122, 138, 143, 1)
-                  BorderThickness: =0.1
-                  Fill: =RGBA(152, 208, 70, 1)
-                  FillPortions: =0
-                  Height: =Parent.Height -10
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  LayoutMinHeight: =Parent.Height -10
-                  Width: =100
-                Children:
-                  - SaveForm:
-                      Control: Button@0.0.45
-                      Properties:
-                        Align: =Align.Justify
-                        Appearance: ='ButtonCanvas.Appearance'.Primary
-                        BasePaletteColor: =AppTheme.palette.themePrimary
-                        DisplayMode: =If(varSaving, DisplayMode.Disabled, DisplayMode.Edit)
-                        Font: =Font.'Open Sans'
-                        Height: =Parent.Height
-                        Icon: ="Save"
-                        IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                        Layout: ='ButtonCanvas.Layout'.IconAfter
-                        OnSelect: |-
-                          =If( !varSaving,
-                              Set(varSaving, true);
-                              Set(varSaveMode, "Stay");
-                              If(
-                                  !IsBlank(Form1.Updates.'Planned Publish Date') &&
-                                  DateDiff(Today(), Form1.Updates.'Planned Publish Date', TimeUnit.Days) >= 0 &&
-                                  DateDiff(Today(), Form1.Updates.'Planned Publish Date', TimeUnit.Days) < 10 &&
-                                  !Form1.Updates.'High Priority' &&
-                                  (
-                                      Form1.Mode = FormMode.New ||
-                                      Form1.Updates.'Planned Publish Date' <> varSelectedRelease.'Planned Publish Date'
-                                  ),
-                                  Set(varSaving, false);
-                                  Notify(
-                                      "Release date is within 10 days. Tick High Priority to override, or pick a later date.",
-                                      NotificationType.Warning
-                                  ),
-                                  SubmitForm(Form1)
-                              )
-                          )
-                        Text: ="Save"
-                        VerticalAlign: =VerticalAlign.Middle
-                        Width: =Parent.Width
-                  - AnimatedLoadingSpinner:
-                      Control: Image@2.2.3
-                      Properties:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Height: =40
-                        Image: |
-                          ="data:image/svg+xml," & EncodeUrl("
-                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='40px' height='40px'>
-                            <style>
-                              .spinner" & gblMorphTimestamp & " { stroke: black; stroke-width: 2; stroke-linecap: round; fill: none; transform-origin: center; animation-name: spinLoad; animation-duration: 1000ms; animation-iteration-count: infinite; animation-timing-function: linear; }
-                              @keyframes spinLoad { 0% { transform: rotate(0deg); stroke-dasharray: 1, 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 89, 200; stroke-dashoffset: -35px; } 100% { transform: rotate(360deg); stroke-dasharray: 89, 200; stroke-dashoffset: -124px; } }
-                            </style>
-                            <circle class='spinner" & gblMorphTimestamp & "' cx='12' cy='12' r='9' />
-                          </svg>
-                          ")
-                        OnSelect: |-
-                          =Set(gblMorphToggle, !gblMorphToggle);
-                          Set(gblMorphTimestamp, Text(Now(), "yyyymmddhhmmss"))
-                        Visible: =varSaving
-                        Width: =Parent.Width
-            - Spacer:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  FillPortions: =0
-                  LayoutMinHeight: =16
-                  LayoutMinWidth: =16
-                  Width: =50
-            - DeleteItem:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  BorderColor: =RGBA(122, 138, 143, 1)
-                  BorderThickness: =1
-                  Fill: =RGBA(215, 58, 60, 1)
-                  FillPortions: =0
-                  Height: =Parent.Height -10
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  LayoutMinHeight: =Parent.Height -10
-                  Width: =45
-                Children:
-                  - btnCancel_4:
-                      Control: Button@0.0.45
-                      Properties:
-                        Align: =Align.Justify
-                        Appearance: ='ButtonCanvas.Appearance'.Primary
-                        BasePaletteColor: =RGBA(249, 83, 109, 1)
-                        Height: =40
-                        Icon: ="Delete"
-                        IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                        Layout: ='ButtonCanvas.Layout'.IconOnly
-                        OnSelect: |-
-                          =UpdateContext({locDisplayDeletePopUp: true})
-                        Text: ="Delete"
-                        VerticalAlign: =VerticalAlign.Middle
-                        Width: =Parent.Width
-      - ReleaseDate_1:
+      - conHeader:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
-            DropShadow: =DropShadow.Regular
-            Fill: =RGBA(237, 237, 237, 1)
-            Height: =12
-            Visible: =false
+            Fill: =RGBA(28, 32, 48, 1)
+            Height: =56
             Width: =Parent.Width
-            Y: =0 + TopButtons_1.Height
+            X: =0
+            Y: =0
           Children:
-            - Unsaved:
+            - imgLogo:
+                Control: Image@2.2.3
+                Properties:
+                  Height: =36
+                  Image: |-
+                    ="data:image/svg+xml;utf8, "&EncodeUrl("<svg id='Layer_1' data-name='Layer 1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 154.49 116.84' width='36px' height='36px'><defs><style>.cls-1{fill:#00402f;}</style></defs><g id='Text_and_Chevron' data-name='Text and Chevron'><path class='cls-1' d='M31.61,116.84c.02-.16.02-.3.02-.43H0c0-13.34,14.15-39.41,25.37-57.98C14.16,39.77,0,13.6,0,.5h31.63c0-.15,0-.32-.02-.5.85,6.6,14.24,31.68,25.74,50.07l5.26,8.41-5.28,8.4c-12.98,20.63-24.99,43.98-25.72,49.97'/><path class='cls-1' d='M77.6,116.84c.02-.16.02-.3.02-.43h-31.63c0-13.34,14.15-39.41,25.37-57.98C60.14,39.77,45.99,13.6,45.99.5h31.63c0-.15,0-.32-.02-.5.85,6.6,14.24,31.68,25.74,50.07l5.26,8.41-5.28,8.4c-12.98,20.63-24.99,43.98-25.72,49.97'/><path class='cls-1' d='M123.5,116.84c.02-.16.02-.3.02-.43h-31.63c0-13.34,14.15-39.41,25.37-57.98C106.04,39.77,91.89,13.6,91.89.5h31.63c0-.15,0-.32-.02-.5.85,6.6,14.24,31.68,25.74,50.07l5.26,8.41-5.28,8.4c-12.98,20.63-24.99,43.98-25.72,49.97'/></g></svg>")
+                  ImagePosition: =ImagePosition.Fit
+                  Width: =36
+                  X: =12
+                  Y: =10
+            - lblAppTitle:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(255, 255, 255, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =56
+                  Size: =14
+                  Text: ="Policy Tracker"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =140
+                  X: =56
+                  Y: =0
+            - badgeVersion:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(46, 125, 89, 1)
+                  BorderThickness: =1
+                  Color: =RGBA(46, 125, 89, 1)
+                  Font: =Font.'Courier New'
+                  Height: =22
+                  Size: =9
+                  Text: ="V2.1"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =44
+                  X: =204
+                  Y: =17
+            - btnNewsletterNav:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderThickness: =0
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(160, 120, 0, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(140, 104, 0, 1)
+                  OnSelect: =Navigate(NewsletterPack, ScreenTransition.Fade)
+                  PressedFill: =RGBA(120, 88, 0, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Newsletter"
+                  Visible: =!IsEmpty(Filter(colNewsletterUsers, Email = Lower(User().Email)))
+                  Width: =110
+                  X: =Parent.Width - 836
+                  Y: =10
+            - btnOverviewNav:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(112, 116, 134, 0.4)
+                  BorderThickness: =1
+                  Color: =RGBA(180, 184, 200, 1)
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(255, 255, 255, 0.06)
+                  OnSelect: =Navigate(Overview, ScreenTransition.Fade)
+                  PressedFill: =RGBA(255, 255, 255, 0.1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Overview"
+                  Width: =90
+                  X: =Parent.Width - 718
+                  Y: =10
+            - btnMainNav:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(112, 116, 134, 0.4)
+                  BorderThickness: =1
+                  Color: =RGBA(180, 184, 200, 1)
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(255, 255, 255, 0.06)
+                  OnSelect: =Navigate(Main, ScreenTransition.Fade)
+                  PressedFill: =RGBA(255, 255, 255, 0.1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Main"
+                  Width: =80
+                  X: =Parent.Width - 620
+                  Y: =10
+            - btnDuplicate:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(36, 100, 70, 1)
+                  BorderThickness: =1
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(46, 125, 89, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(36, 100, 70, 1)
+                  OnSelect: |-
+                    =ClearCollect(
+                        colUpcomingEntries,
+                        Filter(
+                            'Policy Proof Tracker',
+                            'Planned Publish Date' >= Today() &&
+                            'Planned Publish Date' <= DateAdd(Today(), 365, "Days")
+                        )
+                    );
+                    Set(
+                        varDaysToNextThursday,
+                        If(Mod(5 - Weekday(Today()) + 7, 7) = 0, 7, Mod(5 - Weekday(Today()) + 7, 7))
+                    );
+                    Clear(colThursdays);
+                    ForAll(
+                        Sequence(52),
+                        If(
+                            varSelectedRelease.'High Priority' ||
+                            varDaysToNextThursday + (Value - 1) * 7 >= 10,
+                            With(
+                                {thurDate: DateAdd(Today(), varDaysToNextThursday + (Value - 1) * 7, "Days")},
+                                With(
+                                    {
+                                        cnt: CountRows(
+                                            Filter(
+                                                colUpcomingEntries,
+                                                Year('Planned Publish Date') = Year(thurDate) &&
+                                                Month('Planned Publish Date') = Month(thurDate) &&
+                                                Day('Planned Publish Date') = Day(thurDate)
+                                            )
+                                        )
+                                    },
+                                    Collect(
+                                        colThursdays,
+                                        {
+                                            ThursdayDate: thurDate,
+                                            ThursdayLabel: Text(thurDate, "dddd d mmmm yyyy") &
+                                                If(
+                                                    cnt = 0, " — clear",
+                                                    cnt = 1, " — 1 entry already scheduled",
+                                                    " — " & Text(cnt, "0") & " entries already scheduled"
+                                                )
+                                        }
+                                    )
+                                )
+                            )
+                        )
+                    );
+                    Set(varShowDuplicateModal, true)
+                  PressedFill: =RGBA(28, 80, 55, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Duplicate"
+                  Visible: =varSelectPolicy = "Filled"
+                  Width: =105
+                  X: =Parent.Width - 518
+                  Y: =10
+            - btnSave:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(36, 100, 70, 1)
+                  BorderThickness: =1
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(100, 120, 100, 1)
+                  DisabledColor: =RGBA(180, 200, 180, 1)
+                  DisabledFill: =RGBA(38, 80, 55, 1)
+                  Fill: =RGBA(46, 125, 89, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(36, 100, 70, 1)
+                  OnSelect: |-
+                    =If(!varSaving,
+                        Set(varSaving, true);
+                        Set(varSaveMode, "Stay");
+                        If(
+                            !IsBlank(Form1.Updates.'Planned Publish Date') &&
+                            DateDiff(Today(), Form1.Updates.'Planned Publish Date', "Days") >= 0 &&
+                            DateDiff(Today(), Form1.Updates.'Planned Publish Date', "Days") < 10 &&
+                            !Form1.Updates.'High Priority' &&
+                            (
+                                Form1.Mode = FormMode.New ||
+                                Form1.Updates.'Planned Publish Date' <> varSelectedRelease.'Planned Publish Date'
+                            ),
+                            Set(varSaving, false);
+                            Notify(
+                                "Release date is within 10 days. Tick High Priority to override, or pick a later date.",
+                                NotificationType.Warning
+                            ),
+                            SubmitForm(Form1)
+                        )
+                    )
+                  DisplayMode: =If(varSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                  PressedFill: =RGBA(28, 80, 55, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: =If(varSaving && varSaveMode = "Stay", "Saving...", "Save")
+                  Width: =80
+                  X: =Parent.Width - 405
+                  Y: =10
+            - btnSaveClose:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(36, 100, 70, 1)
+                  BorderThickness: =1
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(100, 120, 100, 1)
+                  DisabledColor: =RGBA(180, 200, 180, 1)
+                  DisabledFill: =RGBA(38, 80, 55, 1)
+                  Fill: =RGBA(46, 125, 89, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(36, 100, 70, 1)
+                  OnSelect: |-
+                    =If(!varSaving,
+                        Set(varSaving, true);
+                        Set(varSaveMode, "Close");
+                        If(
+                            !IsBlank(Form1.Updates.'Planned Publish Date') &&
+                            DateDiff(Today(), Form1.Updates.'Planned Publish Date', "Days") >= 0 &&
+                            DateDiff(Today(), Form1.Updates.'Planned Publish Date', "Days") < 10 &&
+                            !Form1.Updates.'High Priority' &&
+                            (
+                                Form1.Mode = FormMode.New ||
+                                Form1.Updates.'Planned Publish Date' <> varSelectedRelease.'Planned Publish Date'
+                            ),
+                            Set(varSaving, false);
+                            Notify(
+                                "Release date is within 10 days. Tick High Priority to override, or pick a later date.",
+                                NotificationType.Warning
+                            ),
+                            SubmitForm(Form1)
+                        )
+                    )
+                  DisplayMode: =If(varSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                  PressedFill: =RGBA(28, 80, 55, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: =If(varSaving && varSaveMode = "Close", "Saving...", "Save & Close")
+                  Width: =130
+                  X: =Parent.Width - 313
+                  Y: =10
+            - btnClose:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(112, 116, 134, 0.4)
+                  BorderThickness: =1
+                  Color: =RGBA(180, 184, 200, 1)
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(255, 255, 255, 0.06)
+                  OnSelect: |-
+                    =Set(varSelectPolicy, "Empty");
+                    Set(varSelectedRelease, Blank());
+                    Set(varUnsavedChanges, false);
+                    Set(varShowLinkModal, false);
+                    ResetForm(Form1);
+                    If(
+                        varSourceScreen = "Historic",
+                        Navigate(Historic, ScreenTransition.Fade),
+                        Navigate(Main, ScreenTransition.Fade)
+                    )
+                  PressedFill: =RGBA(255, 255, 255, 0.1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Close"
+                  Width: =80
+                  X: =Parent.Width - 175
+                  Y: =10
+            - btnDelete:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(180, 50, 50, 1)
+                  BorderThickness: =1
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(200, 60, 60, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  HoverFill: =RGBA(160, 40, 40, 1)
+                  OnSelect: =UpdateContext({locDisplayDeletePopUp: true})
+                  PressedFill: =RGBA(130, 30, 30, 1)
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Size: =10
+                  Text: ="Del"
+                  Tooltip: ="Delete this entry permanently"
+                  Visible: =varSelectPolicy = "Filled"
+                  Width: =50
+                  X: =Parent.Width - 62
+                  Y: =10
+      - recTypeBand:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =Coalesce(LookUp(colChoiceColors, ChoiceValue = varSelectedRelease.'Document Type'.Value, ColorCode), RGBA(100, 110, 140, 1))
+            Height: =5
+            Width: =Parent.Width
+            X: =0
+            Y: =56
+      - conTitleBar:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.Semilight
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =51
+            Width: =Parent.Width
+            X: =0
+            Y: =61
+          Children:
+            - recTitleAccent:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
-                  Fill: =RGBA(255, 191, 0, 1)
-                  Height: =39
-                  Visible: =false
-                  Width: =385
-                  X: =617
+                  Fill: =Coalesce(LookUp(colChoiceColors, ChoiceValue = varSelectedRelease.'Document Type'.Value, ColorCode), RGBA(100, 110, 140, 1))
+                  Height: =51
+                  Width: =5
+                  X: =0
+                  Y: =0
+            - lblDocType:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Color: =Coalesce(LookUp(colChoiceColors, ChoiceValue = varSelectedRelease.'Document Type'.Value, ColorCode), RGBA(100, 110, 140, 1))
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =18
+                  Size: =9
+                  Text: =If(IsBlank(varSelectedRelease), "New Entry", Coalesce(varSelectedRelease.'Document Type'.Value, "New Entry"))
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =500
+                  X: =14
                   Y: =5
-                Children:
-                  - lblUnsavedWarning:
-                      Control: Text@0.0.51
-                      Properties:
-                        Font: =Font.'Lato Black'
-                        Height: =36
-                        Size: =26
-                        Text: ="You have unsaved changes"
-                        Width: =319
-                        X: =53
-                        Y: =4
-      - FormContainer_1:
+            - lblTitle:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Color: =RGBA(28, 32, 48, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =26
+                  Size: =13
+                  Text: =If(IsBlank(varSelectedRelease.Title), "New entry — fill in the form below", varSelectedRelease.Title)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =820
+                  X: =14
+                  Y: =23
+            - lblDateStatus:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Color: |-
+                    =If(
+                        IsBlank(varSelectedRelease),
+                        RGBA(150, 150, 150, 1),
+                        If(
+                            varSelectedRelease.Published,
+                            RGBA(100, 110, 140, 1),
+                            If(
+                                IsBlank(varSelectedRelease.'Planned Publish Date'),
+                                RGBA(150, 150, 150, 1),
+                                If(
+                                    DateDiff(Today(), DateValue(varSelectedRelease.'Planned Publish Date'), "Days") < 0,
+                                    RGBA(200, 72, 50, 1),
+                                    If(
+                                        DateDiff(Today(), DateValue(varSelectedRelease.'Planned Publish Date'), "Days") <= 7,
+                                        RGBA(191, 150, 50, 1),
+                                        RGBA(46, 140, 100, 1)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                  Font: =Font.'Courier New'
+                  Height: =51
+                  Size: =10
+                  Text: |-
+                    =If(
+                        IsBlank(varSelectedRelease),
+                        "",
+                        If(
+                            varSelectedRelease.Published,
+                            "Published " & Text(varSelectedRelease.'Planned Publish Date', "d mmm yyyy"),
+                            If(
+                                IsBlank(varSelectedRelease.'Planned Publish Date'),
+                                "No date set",
+                                With(
+                                    {d: DateValue(varSelectedRelease.'Planned Publish Date')},
+                                    If(
+                                        d = Today(), "Due today",
+                                        d < Today(), "Overdue — " & Text(d, "d mmm yyyy"),
+                                        DateDiff(Today(), d, "Days") & " days — " & Text(d, "d mmm yyyy")
+                                    )
+                                )
+                            )
+                        )
+                    )
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =400
+                  X: =Parent.Width - 416
+                  Y: =0
+      - conForm:
           Control: GroupContainer@1.5.0
-          Variant: AutoLayout
+          Variant: ManualLayout
           Properties:
-            Height: =718
-            LayoutAlignItems: =LayoutAlignItems.Stretch
-            LayoutDirection: =LayoutDirection.Horizontal
-            LayoutGap: =5
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - 112
             LayoutOverflowY: =LayoutOverflow.Scroll
-            Width: =Parent.Width
-            Y: =50
+            Width: =766
+            X: =0
+            Y: =112
           Children:
             - Form1:
                 Control: Form@2.4.4
                 Variant: Classic
                 Layout: Vertical
                 Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
                   BorderColor: =RGBA(0, 18, 107, 1)
                   DataSource: ='Policy Proof Tracker'
-                  Height: =Parent.Height
+                  Height: =3000
                   Item: =LookUp('Policy Proof Tracker', ID = varSelectedRelease.ID)
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
                   NumberOfColumns: =2
                   OnFailure: |-
                     =Notify(
@@ -499,6 +517,7 @@ Screens:
                     Set(varSelectedRelease, Form1.LastSubmit);
                     Set(varParentSaved, true);
                     Set(varFormSaved, true);
+                    ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
                     Notify("Saved successfully!", NotificationType.Success);
                     ResetForm(Form1);
                     Set(varSelectPolicy, "Empty");
@@ -512,7 +531,7 @@ Screens:
                         )
                     );
                   SnapToColumns: =false
-                  Width: =500
+                  Width: =760
                 Children:
                   - Title_DataCard1_1:
                       Control: TypedDataCard@1.0.7
@@ -1078,15 +1097,6 @@ Screens:
                                     FieldName: ="Owner"
                                     FieldType: ="E"
                                     Order: =6
-                              - Files & Attachments1:
-                                  Control: ComboBoxDataField@1.5.0
-                                  Variant: textualColumn
-                                  IsLocked: true
-                                  Properties:
-                                    FieldDisplayName: ="Files & Attachments"
-                                    FieldName: ="FilesAttachments"
-                                    FieldType: ="s"
-                                    Order: =7
                               - Title for Newsletter1:
                                   Control: ComboBoxDataField@1.5.0
                                   Variant: textualColumn
@@ -1483,7 +1493,7 @@ Screens:
                                     Font: =Font.'Lato Black'
                                     Height: =34
                                     Size: =12
-                                    Text: ="⭐ TOP ITEM — This entry will be listed first in the policy newsletter"
+                                    Text: ="Top Item - This entry will be listed first in the policy newsletter"
                                     VerticalAlign: =VerticalAlign.Middle
                                     Width: =Parent.Width
                         - ckbTopItem:
@@ -1496,7 +1506,7 @@ Screens:
                               Default: =Parent.Default
                               Font: =Font.'Open Sans'
                               HoverColor: =RGBA(0, 0, 0, 1)
-                              Text: =Parent.DisplayName & " — flag this entry to appear first in the newsletter"
+                              Text: =Parent.DisplayName & " - flag this entry to appear first in the newsletter"
                               Width: =680
                               X: =22
                               Y: =If(ckbTopItem.Value, 14, 8)
@@ -2162,7 +2172,7 @@ Screens:
                               DisplayMode: =Parent.DisplayMode
                               EndYear: =Year(Today())+100
                               Font: =Font.'Open Sans'
-                              IconBackground: =RGBA(56, 96, 178, 1)
+                              IconBackground: =RGBA(46, 125, 89, 1)
                               IconFill: =RGBA(255, 255, 255, 1)
                               IsEditable: =true
                               OnChange: =Set(varUnsavedChanges, true)
@@ -2206,543 +2216,622 @@ Screens:
                               Width: =30
                               Wrap: =false
                               Y: =DataCardKey18_1.Y
-            - Attachments:
+      - conLinks:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.Regular
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - 112
+            Width: =600
+            X: =766
+            Y: =112
+          Children:
+            - lblLinksTitle:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Color: =RGBA(28, 32, 48, 1)
+                  Font: =Font.'Courier New'
+                  FontWeight: =FontWeight.Bold
+                  Height: =36
+                  Size: =12
+                  Text: ="Document Links"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =Parent.Width - 20
+                  X: =10
+                  Y: =0
+            - AttachmentsGal:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.Regular
                   Fill: =RGBA(255, 255, 255, 1)
-                  FillPortions: =0
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  Width: =600
+                  Height: =680
+                  Width: =Parent.Width
+                  Y: =37
                 Children:
-                  - AttachmentsGal:
+                  - LinksGallery:
+                      Control: Gallery@2.15.0
+                      Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
+                      Properties:
+                        BorderColor: =RGBA(166, 166, 166, 1)
+                        Height: =562
+                        Items: =colLinks
+                        TemplateSize: =55
+                        Visible: =!varLoadingLinks && !IsBlank(varSelectedRelease) && CountRows(colLinks) > 0
+                        Width: =Parent.Width - 10
+                        Y: =8
+                      Children:
+                        - conLinkRow:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              Height: =55
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =5
+                              PaddingLeft: =10
+                              Width: =584
+                              X: =6
+                            Children:
+                              - DeleteLink_1:
+                                  Control: Button@0.0.45
+                                  Properties:
+                                    BasePaletteColor: =RGBA(249, 83, 109, 1)
+                                    Height: =50
+                                    Icon: ="Delete"
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: |-
+                                      =UpdateContext({locDisplayAttDeletePopUp: true})
+                                    Text: ==""
+                                    Width: =32
+                              - EditLink_1:
+                                  Control: Button@0.0.45
+                                  Properties:
+                                    BasePaletteColor: =RGBA(5, 102, 178, 1)
+                                    Height: =50
+                                    Icon: ="Edit"
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: |-
+                                      =Set(varSelectedLink, ThisItem);
+                                      Set(varShowLinkModal, true)
+                                    Text: ==""
+                                    Width: =32
+                              - LinkURL_1:
+                                  Control: Button@0.0.45
+                                  Properties:
+                                    Align: =Align.Left
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BasePaletteColor: =RGBA(0, 64, 47, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =50
+                                    Icon: ="Link"
+                                    Layout: ='ButtonCanvas.Layout'.IconBefore
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =Launch(ThisItem.LinkUrl, {}, LaunchTarget.New)
+                                    Text: =Coalesce(ThisItem.LinkText, ThisItem.LinkUrl)
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =490
+                  - btnAddLinkFAB:
+                      Control: Button@0.0.45
+                      Properties:
+                        Align: =Align.Center
+                        Appearance: ='ButtonCanvas.Appearance'.Primary
+                        BasePaletteColor: =AppTheme.palette.themePrimary
+                        BorderColor: =RGBA(122, 138, 143, 1)
+                        BorderRadius: =100
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =1
+                        Font: =Font.Lato
+                        FontSize: =42
+                        Height: =75
+                        Icon: ="Add"
+                        IconStyle: ='ButtonCanvas.IconStyle'.Filled
+                        Layout: ='ButtonCanvas.Layout'.IconOnly
+                        OnSelect: |-
+                          =Set(varSelectedLink, Defaults(PolicyLinks));
+                          Set(varShowLinkModal, true)
+                        Text: ="Add Document Link"
+                        Visible: =!IsBlank(varSelectedItem) && CountRows(LinksGallery.AllItems) > 0
+                        Width: =75
+                        X: =500
+                        Y: =588
+            - lblSaveBeforeLinks:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Font: =Font.'Lato Black'
+                  Height: =89
+                  Size: =28
+                  Text: ="You must save this form before you can add links to documents."
+                  VerticalAlign: =VerticalAlign.Middle
+                  Visible: =!varParentSaved
+                  Width: =600
+                  Y: =236
+            - Activator:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =223
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =20
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  Visible: =!IsBlank(varSelectedRelease) && CountRows(colLinks) = 0
+                  Width: =Parent.Width
+                  Y: =37
+                Children:
+                  - lblNoLinksTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Lato Black'
+                        Height: =33
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Size: =16
+                        Text: ="Associated document links"
+                        Width: =340
+                  - btnAddFirstLink:
+                      Control: Button@0.0.45
+                      Properties:
+                        Align: =Align.Center
+                        Appearance: ='ButtonCanvas.Appearance'.Primary
+                        BasePaletteColor: =AppTheme.palette.themePrimary
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =1
+                        Font: =Font.Lato
+                        FontSize: =18
+                        Height: =39
+                        Icon: ="Add"
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: |-
+                          =Set(varSelectedLink, Defaults(PolicyLinks));
+                          Set(varShowLinkModal, true)
+                        Text: ="Add Document Link"
+                        Width: =474
+            - ctnLinkModal_1:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  Fill: =RGBA(0,0,0,0.5)
+                  Height: =583
+                  Visible: =varShowLinkModal = true
+                  Width: =Parent.Width
+                  Y: =20
+                Children:
+                  - cardLinkModal_1:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
                         Fill: =RGBA(255, 255, 255, 1)
-                        Height: =680
-                        Width: =Parent.Width
-                        Y: =37
+                        Height: =303
+                        PaddingBottom: =20
+                        PaddingLeft: =20
+                        PaddingRight: =20
+                        PaddingTop: =20
+                        X: =50
+                        Y: =150
                       Children:
-                        - LinksGallery:
-                            Control: Gallery@2.15.0
-                            Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
+                        - frmLink_1:
+                            Control: Form@2.4.4
+                            Variant: Classic
+                            Layout: Vertical
                             Properties:
-                              BorderColor: =RGBA(166, 166, 166, 1)
-                              Height: =562
-                              Items: =colLinks
-                              TemplateSize: =55
-                              Visible: =!varLoadingLinks && !IsBlank(varSelectedRelease) && CountRows(colLinks) > 0
-                              Width: =Parent.Width -10
-                              Y: =8
-                            Children:
-                              - conLinkRow:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    Height: =55
-                                    LayoutAlignItems: =LayoutAlignItems.Center
-                                    LayoutDirection: =LayoutDirection.Horizontal
-                                    LayoutGap: =5
-                                    PaddingLeft: =10
-                                    Width: =584
-                                    X: =6
-                                  Children:
-                                    - DeleteLink_1:
-                                        Control: Button@0.0.45
-                                        Properties:
-                                          BasePaletteColor: =RGBA(249, 83, 109, 1)
-                                          Height: =50
-                                          Icon: ="Delete"
-                                          LayoutMaxHeight: =
-                                          LayoutMaxWidth: =
-                                          OnSelect: |-
-                                            =UpdateContext({locDisplayAttDeletePopUp: true})
-                                          Text: =
-                                          Width: =32
-                                    - EditLink_1:
-                                        Control: Button@0.0.45
-                                        Properties:
-                                          BasePaletteColor: =RGBA(5, 102, 178, 1)
-                                          Height: =50
-                                          Icon: ="Edit"
-                                          LayoutMaxHeight: =
-                                          LayoutMaxWidth: =
-                                          OnSelect: |-
-                                            =Set(varSelectedLink, ThisItem);
-                                            Set(varShowLinkModal, true)
-                                          Text: =
-                                          Width: =32
-                                    - LinkURL_1:
-                                        Control: Button@0.0.45
-                                        Properties:
-                                          Align: =Align.Left
-                                          AlignInContainer: =AlignInContainer.Center
-                                          BasePaletteColor: =RGBA(0, 64, 47, 1)
-                                          Font: =Font.'Open Sans'
-                                          Height: =50
-                                          Icon: ="Link"
-                                          Layout: ='ButtonCanvas.Layout'.IconBefore
-                                          LayoutMaxHeight: =
-                                          LayoutMaxWidth: =
-                                          OnSelect: =Launch(ThisItem.LinkUrl, {}, LaunchTarget.New)
-                                          Text: =Coalesce(ThisItem.LinkText, ThisItem.LinkUrl)
-                                          VerticalAlign: =VerticalAlign.Middle
-                                          Width: =490
-                        - btnAddLinkFAB:
-                            Control: Button@0.0.45
-                            Properties:
-                              Align: =Align.Center
-                              Appearance: ='ButtonCanvas.Appearance'.Primary
-                              BasePaletteColor: =AppTheme.palette.themePrimary
-                              BorderColor: =RGBA(122, 138, 143, 1)
-                              BorderRadius: =100
-                              BorderStyle: =BorderStyle.Solid
-                              BorderThickness: =1
-                              Font: =Font.Lato
-                              FontSize: =42
-                              Height: =75
-                              Icon: ="Add"
-                              IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                              Layout: ='ButtonCanvas.Layout'.IconOnly
-                              OnSelect: |-
-                                =Set(varSelectedLink, Defaults(PolicyLinks));
-                                Set(varShowLinkModal, true)
-                              Text: ="Add Document Link"
-                              Visible: =!IsBlank(varSelectedItem) && CountRows(LinksGallery.AllItems) > 0
-                              Width: =75
-                              X: =500
-                              Y: =588
-                  - lblSaveBeforeLinks:
-                      Control: Text@0.0.51
-                      Properties:
-                        Align: ='TextCanvas.Align'.Center
-                        Font: =Font.'Lato Black'
-                        Height: =89
-                        Size: =28
-                        Text: ="You must save this form before you can add links to documents."
-                        VerticalAlign: =VerticalAlign.Middle
-                        Visible: =!varParentSaved
-                        Width: =600
-                        Y: =236
-                  - Activator:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Height: =223
-                        LayoutAlignItems: =LayoutAlignItems.Center
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =20
-                        LayoutJustifyContent: =LayoutJustifyContent.Center
-                        Visible: =!IsBlank(varSelectedRelease) && CountRows(colLinks) = 0
-                        Width: =Parent.Width
-                        Y: =37
-                      Children:
-                        - lblNoLinksTitle:
-                            Control: Label@2.5.1
-                            Properties:
-                              Align: =Align.Center
                               BorderColor: =RGBA(0, 18, 107, 1)
-                              Font: =Font.'Lato Black'
-                              Height: =33
-                              LayoutMaxHeight: =
-                              LayoutMaxWidth: =
-                              Size: =16
-                              Text: ="Associated document links"
-                              Width: =340
-                        - btnAddFirstLink:
-                            Control: Button@0.0.45
-                            Properties:
-                              Align: =Align.Center
-                              Appearance: ='ButtonCanvas.Appearance'.Primary
-                              BasePaletteColor: =AppTheme.palette.themePrimary
-                              BorderStyle: =BorderStyle.Solid
-                              BorderThickness: =1
-                              Font: =Font.Lato
-                              FontSize: =18
-                              Height: =39
-                              Icon: ="Add"
-                              LayoutMaxHeight: =
-                              LayoutMaxWidth: =
-                              OnSelect: |-
-                                =Set(varSelectedLink, Defaults(PolicyLinks));
-                                Set(varShowLinkModal, true)
-                              Text: ="Add Document Link"
-                              Width: =474
-                  - ctnLinkModal_1:
-                      Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
-                      Properties:
-                        Fill: =RGBA(0,0,0,0.5)
-                        Height: =583
-                        Visible: =varShowLinkModal = true
-                        Width: =Parent.Width
-                        Y: =20
-                      Children:
-                        - cardLinkModal_1:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
-                            Properties:
-                              Fill: =RGBA(255, 255, 255, 1)
-                              Height: =303
-                              PaddingBottom: =20
-                              PaddingLeft: =20
-                              PaddingRight: =20
-                              PaddingTop: =20
-                              X: =50
-                              Y: =150
+                              DataSource: =PolicyLinks
+                              Height: =298
+                              Item: =varSelectedLink
+                              NumberOfColumns: =1
+                              OnSuccess: |-
+                                =Refresh(PolicyLinks);
+                                Set(varLoadingLinks, true);
+                                ClearCollect(
+                                    colLinks,
+                                    Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID)
+                                );
+                                Set(varLoadingLinks, false);
+                                Set(varSelectedItem, varSelectedRelease);
+                                Set(varShowLinkModal, false);
+                                Set(varSelectedLink, Blank());
+                                Notify("Link saved successfully!", NotificationType.Success);
+                              Width: =Parent.Width
                             Children:
-                              - frmLink_1:
-                                  Control: Form@2.4.4
-                                  Variant: Classic
-                                  Layout: Vertical
+                              - LinkText_DataCard2_1:
+                                  Control: TypedDataCard@1.0.7
+                                  Variant: ClassicTextualEdit
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    DataField: ="LinkText"
+                                    Default: =ThisItem.LinkText
+                                    DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,LinkText)
+                                    MaxLength: =DataSourceInfo([@PolicyLinks], DataSourceInfo.MaxLength, LinkText)
+                                    Required: =true
+                                    Update: =DataCardValue28_1.Text
+                                    Width: =Parent.Width
+                                    X: =0
+                                    Y: =0
+                                  Children:
+                                    - DataCardKey28_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: FieldName
+                                        Properties:
+                                          AutoHeight: =true
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =34
+                                          Text: ="Link Display Name"
+                                          Width: =Parent.Width - 60
+                                          Wrap: =false
+                                          X: =30
+                                          Y: =10
+                                    - DataCardValue28_1:
+                                        Control: Classic/TextInput@2.3.2
+                                        MetadataKey: FieldValue
+                                        Properties:
+                                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                          BorderThickness: =1
+                                          Default: |-
+                                            =If(
+                                                IsBlank(Parent.Default),
+                                                DisplayNamePrefill,
+                                                Parent.Default
+                                            )
+                                          DelayOutput: =true
+                                          DisplayMode: =Parent.DisplayMode
+                                          Font: =Font.'Open Sans'
+                                          HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                          HoverFill: =RGBA(0,128,64,0.08)
+                                          MaxLength: =Parent.MaxLength
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =4
+                                          RadiusBottomRight: =4
+                                          RadiusTopLeft: =4
+                                          RadiusTopRight: =4
+                                          Tooltip: =Parent.DisplayName
+                                          Width: =Parent.Width - 60
+                                          X: =30
+                                          Y: =DataCardKey28_1.Y + DataCardKey28_1.Height + 5
+                                    - ErrorMessage28_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: ErrorMessage
+                                        Properties:
+                                          AutoHeight: =true
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(168, 0, 0, 1)
+                                          Font: =Font.'Lato Black'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =10
+                                          Live: =Live.Assertive
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: |-
+                                            =If(
+                                                frmLink_1.Valid = false && !IsBlank(frmLink_1.Error),
+                                                "Link Display Name is required.",
+                                                ""
+                                            )
+                                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                          Width: =Parent.Width - 60
+                                          X: =30
+                                          Y: =DataCardValue28_1.Y + DataCardValue28_1.Height
+                                    - StarVisible28_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: FieldRequired
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(0, 18, 107, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =DataCardKey28_1.Height
+                                          Text: ="*"
+                                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                          Width: =30
+                                          Wrap: =false
+                                          Y: =DataCardKey28_1.Y
+                              - LinkUrl_DataCard2_1:
+                                  Control: TypedDataCard@1.0.7
+                                  Variant: ClassicUrlEdit
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    DataField: ="LinkUrl"
+                                    Default: =ThisItem.LinkUrl
+                                    DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,LinkUrl)
+                                    Required: =true
+                                    Update: |-
+                                      =If(
+                                          IsBlank(DataCardValue29_1.Text),
+                                          Blank(),
+                                          Left(DataCardValue29_1.Text,
+                                              If(
+                                                  Find("&action", DataCardValue29_1.Text) > 0,
+                                                  Find("&action", DataCardValue29_1.Text) - 1,
+                                                  Len(DataCardValue29_1.Text)
+                                              )
+                                          )
+                                      )
+                                    Width: =Parent.Width
+                                    X: =0
+                                    Y: =1
+                                  Children:
+                                    - DataCardKey29_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: FieldName
+                                        Properties:
+                                          AutoHeight: =true
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =34
+                                          Text: =Parent.DisplayName
+                                          Width: =Parent.Width - 60
+                                          Wrap: =false
+                                          X: =30
+                                          Y: =10
+                                    - DataCardValue29_1:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                          BorderThickness: =1
+                                          Default: =Parent.Default
+                                          DelayOutput: =true
+                                          DisplayMode: =Parent.DisplayMode
+                                          Font: =Font.'Open Sans'
+                                          HoverBorderColor: =RGBA(0, 18, 107, 1)
+                                          HoverFill: =RGBA(0,128,64,0.08)
+                                          OnChange: |-
+                                            =If(
+                                                StartsWith(DataCardValue29_1.Text, "https://modgovuk.sharepoint.com") ||
+                                                StartsWith(DataCardValue29_1.Text, "https://modgovuk-my.sharepoint.com"),
+                                                Set(varFileName, Last(Split(First(Split(DataCardValue29_1.Text, "?")).Value, "/")).Value);
+                                                UpdateContext({ DisplayNamePrefill: varFileName }),
+                                                UpdateContext({ DisplayNamePrefill: Blank() })
+                                            )
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =4
+                                          RadiusBottomRight: =4
+                                          RadiusTopLeft: =4
+                                          RadiusTopRight: =4
+                                          Tooltip: =Parent.DisplayName
+                                          Width: =Parent.Width - 60
+                                          X: =30
+                                          Y: =DataCardKey29_1.Y + DataCardKey29_1.Height + 5
+                                    - ErrorMessage29_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: ErrorMessage
+                                        Properties:
+                                          AutoHeight: =true
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(168, 0, 0, 1)
+                                          Font: =Font.'Lato Black'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =10
+                                          Live: =Live.Assertive
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: |-
+                                            =If(
+                                                frmLink_1.Valid = false && !IsBlank(frmLink_1.Error),
+                                                "URL is required.",
+                                                ""
+                                            )
+                                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                          Width: =Parent.Width - 60
+                                          X: =30
+                                          Y: =DataCardValue29_1.Y + DataCardValue29_1.Height
+                              - ParentPolicy_DataCard3_1:
+                                  Control: TypedDataCard@1.0.7
+                                  Variant: ClassicComboBoxEdit
                                   Properties:
                                     BorderColor: =RGBA(0, 18, 107, 1)
-                                    DataSource: =PolicyLinks
-                                    Height: =298
-                                    Item: =varSelectedLink
-                                    NumberOfColumns: =1
-                                    OnSuccess: |-
-                                      =Refresh(PolicyLinks);
-                                      Set(varLoadingLinks, true);
-                                      ClearCollect(
-                                          colLinks,
-                                          Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID)
-                                      );
-                                      Set(varLoadingLinks, false);
-                                      Set(varSelectedItem, varSelectedRelease);
-                                      Set(varShowLinkModal, false);
-                                      Set(varSelectedLink, Blank());
-                                      Notify("Link saved successfully!", NotificationType.Success);
+                                    DataField: ="PolicyTrackerSource"
+                                    Default: =ThisItem.PolicyTrackerSource
+                                    DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,PolicyTrackerSource)
+                                    Required: =false
+                                    Update: |-
+                                      ={
+                                         '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
+                                         Id: varSelectedRelease.ID,
+                                         Value: varSelectedRelease.Title
+                                      }
+                                    Visible: =false
                                     Width: =Parent.Width
+                                    X: =0
+                                    Y: =350
                                   Children:
-                                    - LinkText_DataCard2_1:
-                                        Control: TypedDataCard@1.0.7
-                                        Variant: ClassicTextualEdit
+                                    - DataCardKey32_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: FieldName
                                         Properties:
+                                          AutoHeight: =true
                                           BorderColor: =RGBA(0, 0, 0, 1)
-                                          DataField: ="LinkText"
-                                          Default: =ThisItem.LinkText
-                                          DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,LinkText)
-                                          MaxLength: =DataSourceInfo([@PolicyLinks], DataSourceInfo.MaxLength, LinkText)
-                                          Required: =true
-                                          Update: =DataCardValue28_1.Text
-                                          Width: =Parent.Width
-                                          X: =0
-                                          Y: =0
-                                        Children:
-                                          - DataCardKey28_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: FieldName
-                                              Properties:
-                                                AutoHeight: =true
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Font: =Font.'Open Sans'
-                                                Height: =34
-                                                Text: ="Link Display Name"
-                                                Width: =Parent.Width - 60
-                                                Wrap: =false
-                                                X: =30
-                                                Y: =10
-                                          - DataCardValue28_1:
-                                              Control: Classic/TextInput@2.3.2
-                                              MetadataKey: FieldValue
-                                              Properties:
-                                                BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
-                                                BorderThickness: =1
-                                                Default: |-
-                                                  =If(
-                                                      IsBlank(Parent.Default),
-                                                      DisplayNamePrefill,
-                                                      Parent.Default
-                                                  )
-                                                DelayOutput: =true
-                                                DisplayMode: =Parent.DisplayMode
-                                                Font: =Font.'Open Sans'
-                                                HoverBorderColor: =RGBA(0, 18, 107, 1)
-                                                HoverFill: =RGBA(0,128,64,0.08)
-                                                MaxLength: =Parent.MaxLength
-                                                PaddingLeft: =5
-                                                RadiusBottomLeft: =4
-                                                RadiusBottomRight: =4
-                                                RadiusTopLeft: =4
-                                                RadiusTopRight: =4
-                                                Tooltip: =Parent.DisplayName
-                                                Width: =Parent.Width - 60
-                                                X: =30
-                                                Y: =DataCardKey28_1.Y + DataCardKey28_1.Height + 5
-                                          - ErrorMessage28_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: ErrorMessage
-                                              Properties:
-                                                AutoHeight: =true
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Color: =RGBA(168, 0, 0, 1)
-                                                Font: =Font.'Lato Black'
-                                                FontWeight: =FontWeight.Semibold
-                                                Height: =10
-                                                Live: =Live.Assertive
-                                                PaddingBottom: =0
-                                                PaddingLeft: =0
-                                                PaddingRight: =0
-                                                PaddingTop: =0
-                                                Size: =14
-                                                Text: |-
-                                                  =If(
-                                                      frmLink_1.Valid = false && !IsBlank(frmLink_1.Error),
-                                                      "Link Display Name is required.",
-                                                      ""
-                                                  )
-                                                Visible: =Parent.DisplayMode=DisplayMode.Edit
-                                                Width: =Parent.Width - 60
-                                                X: =30
-                                                Y: =DataCardValue28_1.Y + DataCardValue28_1.Height
-                                          - StarVisible28_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: FieldRequired
-                                              Properties:
-                                                Align: =Align.Center
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Color: =RGBA(0, 18, 107, 1)
-                                                Font: =Font.'Open Sans'
-                                                Height: =DataCardKey28_1.Height
-                                                Text: ="*"
-                                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
-                                                Width: =30
-                                                Wrap: =false
-                                                Y: =DataCardKey28_1.Y
-                                    - LinkUrl_DataCard2_1:
-                                        Control: TypedDataCard@1.0.7
-                                        Variant: ClassicUrlEdit
+                                          Color: =RGBA(0, 18, 107, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =34
+                                          Text: =Parent.DisplayName
+                                          Width: =Parent.Width - 60
+                                          Wrap: =false
+                                          X: =30
+                                          Y: =10
+                                    - DataCardValue32_1:
+                                        Control: Classic/ComboBox@2.4.0
+                                        MetadataKey: FieldValue
                                         Properties:
-                                          BorderColor: =RGBA(0, 0, 0, 1)
-                                          DataField: ="LinkUrl"
-                                          Default: =ThisItem.LinkUrl
-                                          DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,LinkUrl)
-                                          Required: =true
-                                          Update: |-
+                                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                          ChevronBackground: =RGBA(56, 96, 178, 1)
+                                          ChevronFill: =RGBA(255, 255, 255, 1)
+                                          ChevronHoverBackground: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                          DefaultSelectedItems: |-
                                             =If(
-                                                IsBlank(DataCardValue29_1.Text),
-                                                Blank(),
-                                                Left(DataCardValue29_1.Text,
-                                                    If(
-                                                        Find("&action", DataCardValue29_1.Text) > 0,
-                                                        Find("&action", DataCardValue29_1.Text) - 1,
-                                                        Len(DataCardValue29_1.Text)
-                                                    )
-                                                )
+                                                IsBlank(varSelectedLink.ID),
+                                                Filter(Choices([@PolicyLinks].PolicyTrackerSource), Id = varSelectedItem.ID),
+                                                [Parent.Default]
                                             )
-                                          Width: =Parent.Width
-                                          X: =0
-                                          Y: =1
-                                        Children:
-                                          - DataCardKey29_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: FieldName
-                                              Properties:
-                                                AutoHeight: =true
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Font: =Font.'Open Sans'
-                                                Height: =34
-                                                Text: =Parent.DisplayName
-                                                Width: =Parent.Width - 60
-                                                Wrap: =false
-                                                X: =30
-                                                Y: =10
-                                          - DataCardValue29_1:
-                                              Control: Classic/TextInput@2.3.2
-                                              Properties:
-                                                BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
-                                                BorderThickness: =1
-                                                Default: =Parent.Default
-                                                DelayOutput: =true
-                                                DisplayMode: =Parent.DisplayMode
-                                                Font: =Font.'Open Sans'
-                                                HoverBorderColor: =RGBA(0, 18, 107, 1)
-                                                HoverFill: =RGBA(0,128,64,0.08)
-                                                OnChange: |-
-                                                  =If(
-                                                      StartsWith(DataCardValue29_1.Text, "https://modgovuk.sharepoint.com") ||
-                                                      StartsWith(DataCardValue29_1.Text, "https://modgovuk-my.sharepoint.com"),
-                                                      Set(varFileName, Last(Split(First(Split(DataCardValue29_1.Text, "?")).Value, "/")).Value);
-                                                      UpdateContext({ DisplayNamePrefill: varFileName }),
-                                                      UpdateContext({ DisplayNamePrefill: Blank() })
-                                                  )
-                                                PaddingLeft: =5
-                                                RadiusBottomLeft: =4
-                                                RadiusBottomRight: =4
-                                                RadiusTopLeft: =4
-                                                RadiusTopRight: =4
-                                                Tooltip: =Parent.DisplayName
-                                                Width: =Parent.Width - 60
-                                                X: =30
-                                                Y: =DataCardKey29_1.Y + DataCardKey29_1.Height + 5
-                                          - ErrorMessage29_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: ErrorMessage
-                                              Properties:
-                                                AutoHeight: =true
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Color: =RGBA(168, 0, 0, 1)
-                                                Font: =Font.'Lato Black'
-                                                FontWeight: =FontWeight.Semibold
-                                                Height: =10
-                                                Live: =Live.Assertive
-                                                PaddingBottom: =0
-                                                PaddingLeft: =0
-                                                PaddingRight: =0
-                                                PaddingTop: =0
-                                                Size: =14
-                                                Text: |-
-                                                  =If(
-                                                      frmLink_1.Valid = false && !IsBlank(frmLink_1.Error),
-                                                      "URL is required.",
-                                                      ""
-                                                  )
-                                                Visible: =Parent.DisplayMode=DisplayMode.Edit
-                                                Width: =Parent.Width - 60
-                                                X: =30
-                                                Y: =DataCardValue29_1.Y + DataCardValue29_1.Height
-                                    - ParentPolicy_DataCard3_1:
-                                        Control: TypedDataCard@1.0.7
-                                        Variant: ClassicComboBoxEdit
+                                          DisplayFields: =["Value"]
+                                          DisplayMode: =Parent.DisplayMode
+                                          Font: =Font.'Open Sans'
+                                          HoverFill: =RGBA(186, 202, 226, 1)
+                                          Items: =Choices([@PolicyLinks].PolicyTrackerSource)
+                                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(0, 18, 107, 1)
+                                          SearchFields: =["Value"]
+                                          SelectMultiple: =false
+                                          SelectionColor: =RGBA(255, 255, 255, 1)
+                                          SelectionFill: =RGBA(56, 96, 178, 1)
+                                          Tooltip: =Parent.DisplayName
+                                          Width: =Parent.Width - 60
+                                          X: =30
+                                          Y: =DataCardKey32_1.Y + DataCardKey32_1.Height + 5
+                                    - ErrorMessage32_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: ErrorMessage
                                         Properties:
-                                          BorderColor: =RGBA(0, 18, 107, 1)
-                                          DataField: ="PolicyTrackerSource"
-                                          Default: =ThisItem.PolicyTrackerSource
-                                          DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,PolicyTrackerSource)
-                                          Required: =false
-                                          Update: |-
-                                            ={
-                                               '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
-                                               Id: varSelectedRelease.ID,
-                                               Value: varSelectedRelease.Title
-                                            }
-                                          Visible: =false
-                                          Width: =Parent.Width
-                                          X: =0
-                                          Y: =350
-                                        Children:
-                                          - DataCardKey32_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: FieldName
-                                              Properties:
-                                                AutoHeight: =true
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Color: =RGBA(0, 18, 107, 1)
-                                                Font: =Font.'Open Sans'
-                                                Height: =34
-                                                Text: =Parent.DisplayName
-                                                Width: =Parent.Width - 60
-                                                Wrap: =false
-                                                X: =30
-                                                Y: =10
-                                          - DataCardValue32_1:
-                                              Control: Classic/ComboBox@2.4.0
-                                              MetadataKey: FieldValue
-                                              Properties:
-                                                BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
-                                                ChevronBackground: =RGBA(56, 96, 178, 1)
-                                                ChevronFill: =RGBA(255, 255, 255, 1)
-                                                ChevronHoverBackground: =ColorFade(RGBA(56, 96, 178, 1), -20%)
-                                                ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                                DefaultSelectedItems: |-
-                                                  =If(
-                                                      IsBlank(varSelectedLink.ID),
-                                                      Filter(Choices([@PolicyLinks].PolicyTrackerSource), Id = varSelectedItem.ID),
-                                                      [Parent.Default]
-                                                  )
-                                                DisplayFields: =["Value"]
-                                                DisplayMode: =Parent.DisplayMode
-                                                Font: =Font.'Open Sans'
-                                                HoverFill: =RGBA(186, 202, 226, 1)
-                                                Items: =Choices([@PolicyLinks].PolicyTrackerSource)
-                                                PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
-                                                PressedColor: =RGBA(255, 255, 255, 1)
-                                                PressedFill: =RGBA(0, 18, 107, 1)
-                                                SearchFields: =["Value"]
-                                                SelectMultiple: =false
-                                                SelectionColor: =RGBA(255, 255, 255, 1)
-                                                SelectionFill: =RGBA(56, 96, 178, 1)
-                                                Tooltip: =Parent.DisplayName
-                                                Width: =Parent.Width - 60
-                                                X: =30
-                                                Y: =DataCardKey32_1.Y + DataCardKey32_1.Height + 5
-                                          - ErrorMessage32_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: ErrorMessage
-                                              Properties:
-                                                AutoHeight: =true
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Color: =RGBA(168, 0, 0, 1)
-                                                Font: =Font.'Open Sans'
-                                                FontWeight: =FontWeight.Semibold
-                                                Height: =10
-                                                Live: =Live.Assertive
-                                                PaddingBottom: =0
-                                                PaddingLeft: =0
-                                                PaddingRight: =0
-                                                PaddingTop: =0
-                                                Size: =14
-                                                Text: =Parent.Error
-                                                Visible: =Parent.DisplayMode=DisplayMode.Edit
-                                                Width: =Parent.Width - 60
-                                                X: =30
-                                                Y: =DataCardValue32_1.Y + DataCardValue32_1.Height
-                                          - StarVisible32_1:
-                                              Control: Label@2.5.1
-                                              MetadataKey: FieldRequired
-                                              Properties:
-                                                Align: =Align.Center
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Color: =RGBA(0, 18, 107, 1)
-                                                Font: =Font.'Open Sans'
-                                                Height: =DataCardKey32_1.Height
-                                                Text: ="*"
-                                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
-                                                Width: =30
-                                                Wrap: =false
-                                                Y: =DataCardKey32_1.Y
-                              - btnSaveLink_1:
-                                  Control: Button@0.0.45
-                                  Properties:
-                                    BasePaletteColor: =AppTheme.palette.themePrimary
-                                    DisplayMode: =If(varSubmitting, DisplayMode.Disabled, DisplayMode.Edit)
-                                    Font: =Font.'Open Sans'
-                                    Height: =40
-                                    Icon: ="Save"
-                                    IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                                    Layout: ='ButtonCanvas.Layout'.IconAfter
-                                    OnSelect: |-
-                                      =If(
-                                          !varSubmitting,
-                                          Set(varSubmitting, true);
-                                          SubmitForm(frmLink_1);
-                                          Set(varSubmitting, false)
-                                      )
-                                    Text: ="Save"
-                                    X: =151
-                                    Y: =240
-                              - btnCnlLink_1:
-                                  Control: Button@0.0.45
-                                  Properties:
-                                    BasePaletteColor: =Color.DimGrey
-                                    Font: =Font.'Open Sans'
-                                    Height: =40
-                                    Icon: ="DismissCircle"
-                                    IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                                    Layout: ='ButtonCanvas.Layout'.IconAfter
-                                    OnSelect: |-
-                                      =ResetForm(frmLink_1);
-                                      Set(varShowLinkModal, false);
-                                      Set(varSelectedLink, Blank())
-                                    Text: ="Cancel"
-                                    X: =270
-                                    Y: =240
+                                          AutoHeight: =true
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(168, 0, 0, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =10
+                                          Live: =Live.Assertive
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: =Parent.Error
+                                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                          Width: =Parent.Width - 60
+                                          X: =30
+                                          Y: =DataCardValue32_1.Y + DataCardValue32_1.Height
+                                    - StarVisible32_1:
+                                        Control: Label@2.5.1
+                                        MetadataKey: FieldRequired
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(0, 18, 107, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =DataCardKey32_1.Height
+                                          Text: ="*"
+                                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                          Width: =30
+                                          Wrap: =false
+                                          Y: =DataCardKey32_1.Y
+                        - btnSaveLink_1:
+                            Control: Button@0.0.45
+                            Properties:
+                              BasePaletteColor: =AppTheme.palette.themePrimary
+                              DisplayMode: =If(varSubmitting, DisplayMode.Disabled, DisplayMode.Edit)
+                              Font: =Font.'Open Sans'
+                              Height: =40
+                              Icon: ="Save"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Filled
+                              Layout: ='ButtonCanvas.Layout'.IconAfter
+                              OnSelect: |-
+                                =If(
+                                    !varSubmitting,
+                                    Set(varSubmitting, true);
+                                    SubmitForm(frmLink_1);
+                                    Set(varSubmitting, false)
+                                )
+                              Text: ="Save"
+                              X: =151
+                              Y: =240
+                        - btnCnlLink_1:
+                            Control: Button@0.0.45
+                            Properties:
+                              BasePaletteColor: =Color.DimGrey
+                              Font: =Font.'Open Sans'
+                              Height: =40
+                              Icon: ="DismissCircle"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Filled
+                              Layout: ='ButtonCanvas.Layout'.IconAfter
+                              OnSelect: |-
+                                =ResetForm(frmLink_1);
+                                Set(varShowLinkModal, false);
+                                Set(varSelectedLink, Blank())
+                              Text: ="Cancel"
+                              X: =270
+                              Y: =240
+      - WarningBanner10Day:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(255, 200, 0, 1)
+            Height: =50
+            Visible: |-
+              =varSelectPolicy = "Filled" &&
+              !IsBlank(Form1.Updates.'Planned Publish Date') &&
+              DateDiff(Today(), Form1.Updates.'Planned Publish Date', "Days") >= 0 &&
+              DateDiff(Today(), Form1.Updates.'Planned Publish Date', "Days") < 10 &&
+              !Form1.Updates.'High Priority' &&
+              (
+                  Form1.Mode = FormMode.New ||
+                  Form1.Updates.'Planned Publish Date' <> varSelectedRelease.'Planned Publish Date'
+              )
+            Width: =Parent.Width
+            Y: =56
+          Children:
+            - btnBannerDiscard:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =Color.Transparent
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(80, 40, 0, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =36
+                  HoverBorderColor: =Color.Transparent
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(120, 60, 0, 1)
+                  OnSelect: |-
+                    =Set(varSelectPolicy, "Empty");
+                    Set(varSelectedRelease, Blank());
+                    Set(varUnsavedChanges, false);
+                    Set(varShowLinkModal, false);
+                    ResetForm(Form1);
+                    If(
+                        varSourceScreen = "Historic",
+                        Navigate(Historic, ScreenTransition.Fade),
+                        Navigate(Main, ScreenTransition.Fade)
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: ="Discard & Close"
+                  Width: =175
+                  X: =Parent.Width - 190
+                  Y: =7
+            - lblWarningText:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(80, 40, 0, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =34
+                  Size: =12
+                  Text: ="Less than 10 days to planned release date. Saving is blocked. Pick a later date or tick High Priority to override."
+                  Width: =Parent.Width - 220
+                  X: =15
+                  Y: =10
       - DeleteItemModal:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
@@ -2856,6 +2945,7 @@ Screens:
                                     UpdateContext({locDisplayDeletePopUp: false});
                                     Notify("Delete failed. The item may still exist. Please check and try again.", NotificationType.Error),
                                     UpdateContext({locDisplayDeletePopUp: false});
+                                    ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
                                     Notify("Item deleted successfully.", NotificationType.Success);
                                     Set(varSelectedRelease, Blank());
                                     Set(varDeletingItem, false);
@@ -2911,7 +3001,7 @@ Screens:
                               LayoutMaxHeight: =
                               LayoutMaxWidth: =
                               Size: =24
-                              Text: ="Delete"
+                              Text: ="Delete Link"
                               Weight: ='TextCanvas.Weight'.Semibold
                         - btnCloseModal_3:
                             Control: Button@0.0.45
@@ -2978,71 +3068,6 @@ Screens:
                                 );
                                 Set(varLoadingLinks, false)
                               Text: ="Delete"
-      - WarningBanner10Day:
-          Control: GroupContainer@1.5.0
-          Variant: ManualLayout
-          Properties:
-            Fill: =RGBA(255, 200, 0, 1)
-            Height: =50
-            Visible: |-
-              =varSelectPolicy = "Filled" &&
-              !IsBlank(Form1.Updates.'Planned Publish Date') &&
-              DateDiff(Today(), Form1.Updates.'Planned Publish Date', TimeUnit.Days) >= 0 &&
-              DateDiff(Today(), Form1.Updates.'Planned Publish Date', TimeUnit.Days) < 10 &&
-              !Form1.Updates.'High Priority' &&
-              (
-                  Form1.Mode = FormMode.New ||
-                  Form1.Updates.'Planned Publish Date' <> varSelectedRelease.'Planned Publish Date'
-              )
-            Width: =Parent.Width
-          Children:
-            - btnBannerDiscard:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderColor: =Color.Transparent
-                  Color: =RGBA(255, 255, 255, 1)
-                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  Fill: =RGBA(80, 40, 0, 1)
-                  Font: =Font.'Open Sans'
-                  Height: =36
-                  HoverBorderColor: =Color.Transparent
-                  HoverColor: =RGBA(255, 255, 255, 1)
-                  HoverFill: =RGBA(120, 60, 0, 1)
-                  OnSelect: |-
-                    =Set(varSelectPolicy, "Empty");
-                    Set(varSelectedRelease, Blank());
-                    Set(varUnsavedChanges, false);
-                    Set(varShowLinkModal, false);
-                    ResetForm(Form1);
-                    If(
-                        varSourceScreen = "Historic",
-                        Navigate(Historic, ScreenTransition.Fade),
-                        Navigate(Main, ScreenTransition.Fade)
-                    )
-                  PressedBorderColor: =Self.Fill
-                  PressedColor: =Self.Fill
-                  PressedFill: =Self.Color
-                  RadiusBottomLeft: =4
-                  RadiusBottomRight: =4
-                  RadiusTopLeft: =4
-                  RadiusTopRight: =4
-                  Text: ="Discard & Close"
-                  Width: =175
-                  X: =Parent.Width - 190
-                  Y: =7
-            - lblWarningText:
-                Control: Label@2.5.1
-                Properties:
-                  BorderColor: =RGBA(0, 18, 107, 1)
-                  Color: =RGBA(80, 40, 0, 1)
-                  Font: =Font.'Open Sans'
-                  FontWeight: =FontWeight.Bold
-                  Height: =34
-                  Size: =12
-                  Text: ="Less than 10 days to planned release date. Saving is blocked. Pick a later date or tick High Priority to override."
-                  Width: =Parent.Width - 220
-                  X: =15
-                  Y: =10
       - DuplicateModal:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
@@ -3113,6 +3138,7 @@ Screens:
                           If(
                               IsEmpty(Errors('Policy Proof Tracker', varNewDuplicate)),
                               Set(varShowDuplicateModal, false);
+                              ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
                               Notify(
                                   "Duplicated to " & dpkDuplicateDate.Selected.ThursdayLabel & ". Find it on the main screen.",
                                   NotificationType.Success
@@ -3163,7 +3189,7 @@ Screens:
                         Font: =Font.'Open Sans'
                         Height: =89
                         Overflow: =Overflow.Scroll
-                        Text: =If(varSelectedRelease.'High Priority', "High Priority is active — all upcoming Thursdays are shown.", "Thursdays within 10 days are hidden. Mark this entry as High Priority to override and show all dates.")
+                        Text: =If(varSelectedRelease.'High Priority', "High Priority is active - all upcoming Thursdays are shown.", "Thursdays within 10 days are hidden. Mark this entry as High Priority to override and show all dates.")
                         Width: =550
                         X: =20
                         Y: =135

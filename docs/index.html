@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Policy Tracker v2.6 — PowerApps Build Guide</title>
+  <title>Policy Tracker v2.7 — PowerApps Build Guide</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -111,8 +111,8 @@
 <body>
 
 <a class="back" href="https://phaderon.github.io/PowerApps/">&larr; Guide Library</a>
-<h1>Policy Tracker <span class="version-tag">V2.6</span></h1>
-<p class="build-stamp">Built 25 Jun 2026 &mdash; v2.6: Overview — column 1 = overdue + this week (no lower bound), columns 2-4 = rolling 7-day windows; bind colN+colEnd in With before Filter; badge width 32→48; --version flag on wrap so version shows on GitHub Pages screen pages</p>
+<h1>Policy Tracker <span class="version-tag">V2.7</span></h1>
+<p class="build-stamp">Built 25 Jun 2026 &mdash; v2.7: ViewItem — V2 rebuild; dark header + type band + title bar; two-panel layout (form 766px / links 600px); all 20 DataCards preserved verbatim; LayoutOverflowY scroll on conForm; DateDiff units use "Days" string throughout</p>
 <p class="subtitle">Canvas app tracking ACCT UK policy documents through the release pipeline. V2 is a complete redesign: dominant type-colour card panels, segmented type filter, inline search, owner initials circles, status dots, Newsletter Pack screen, and a new cool-grey palette throughout. Wraps the <code>Policy Proof Tracker</code> SharePoint list with a <code>PolicyLinks</code> child list.</p>
 
 <!-- BUILD PROGRESS -->
@@ -141,8 +141,8 @@
     </div>
     <div class="progress-row">
       <div class="progress-label">ViewItem</div>
-      <div class="progress-track"><div class="progress-fill" style="background:#4a4a1a;width:100%"></div></div>
-      <div class="progress-state state-old">V3 (old)</div>
+      <div class="progress-track"><div class="progress-fill fill-done"></div></div>
+      <div class="progress-state state-done">&#10003; V2 ready</div>
     </div>
     <div class="progress-row">
       <div class="progress-label">Newsletter Pack</div>
@@ -330,14 +330,14 @@ Set(
     <div class="screen-cta purple">Open and copy &rarr;</div>
   </a>
 
-  <a class="screen-card old-version" href="screens/ViewItem.html" target="_blank">
+  <a class="screen-card done" href="screens/ViewItem.html" target="_blank">
     <div>
-      <div class="status-pill pill-old">V3 &mdash; pending V2 rebuild</div>
+      <div class="status-pill pill-done">V2.1 &mdash; ready</div>
       <div class="screen-number">Screen 5</div>
       <div class="screen-name">ViewItem</div>
-      <div class="screen-desc">Detail and edit form. All fields including Top Item, High Priority, Newsletter Text (conditional), Approved For Release By radio, Links panel, Duplicate modal, Thursday picker.</div>
+      <div class="screen-desc">V2 rebuild. Dark header + 5px type band + title bar with colour-coded date status. Two-panel layout: form (766px, scrollable) + document links (600px). All 20 DataCards intact. Duplicate, Delete, and link modals preserved.</div>
     </div>
-    <div class="screen-cta purple">Open and copy &rarr;</div>
+    <div class="screen-cta green">Open and copy &rarr;</div>
   </a>
 
   <div class="screen-card pending">
