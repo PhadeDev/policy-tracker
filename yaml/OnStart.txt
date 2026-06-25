@@ -31,6 +31,7 @@ Set(gblMorphTimestamp, Text(Now(), "yyyymmddhhmmss"));
 Set(varTypeFilter, "All");
 Set(varSearchText, "");
 Set(varNextThursday, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
 
 // ── Newsletter access list (add rows here to grant access) ───────────────────
 ClearCollect(

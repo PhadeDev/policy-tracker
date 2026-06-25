@@ -3,7 +3,9 @@ Screens:
     Properties:
       Fill: =RGBA(243, 244, 248, 1)
       LoadingSpinner: =LoadingSpinner.None
-      OnVisible: =Set(varSourceScreen, "Overview")
+      OnVisible: |-
+        =Set(varSourceScreen, "Overview");
+        ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false))
     Children:
       - conHeader:
           Control: GroupContainer@1.5.0
@@ -183,7 +185,32 @@ Screens:
                     =AddColumns(
                         Sequence(4),
                         WeekDate,
-                        DateAdd(varNextThursday, (Value - 1) * 7, "Days")
+                        DateAdd(varNextThursday, (Value - 1) * 7, "Days"),
+                        WeekItems,
+                        Sort(
+                            Filter(
+                                colUnpublishedPolicies,
+                                'Planned Publish Date' = DateAdd(varNextThursday, (Value - 1) * 7, "Days")
+                            ),
+                            If(
+                                'Top Item',
+                                0,
+                                Switch(
+                                    Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
+                                    "Regulation", 1,
+                                    "ACSO", 2,
+                                    "CFSO", 3,
+                                    "CFI", 4,
+                                    "CBN", 5,
+                                    "SOI", 6,
+                                    "Internal Document", 7,
+                                    "Manual", 8,
+                                    "Newsletter Item", 9,
+                                    99
+                                )
+                            ),
+                            SortOrder.Ascending
+                        )
                     )
                   LoadingSpinner: =LoadingSpinner.None
                   ShowScrollbar: =false
@@ -272,7 +299,7 @@ Screens:
                               FontWeight: =FontWeight.Bold
                               Height: =26
                               Size: =10
-                              Text: =CountRows(galWeekItems.AllItems)
+                              Text: =CountRows(ThisItem.WeekItems)
                               VerticalAlign: =VerticalAlign.Middle
                               Width: =26
                               X: =0
@@ -282,32 +309,7 @@ Screens:
                       Variant: Vertical
                       Properties:
                         Height: =Parent.Height - 72
-                        Items: |-
-                          =Sort(
-                              Filter(
-                                  'Policy Proof Tracker',
-                                  'Planned Publish Date' = ThisItem.WeekDate,
-                                  Published = false
-                              ),
-                              If(
-                                  'Top Item',
-                                  0,
-                                  Switch(
-                                      Mid('Document Type'.Value, Find(" ", 'Document Type'.Value)+1),
-                                      "Regulation", 1,
-                                      "ACSO", 2,
-                                      "CFSO", 3,
-                                      "CFI", 4,
-                                      "CBN", 5,
-                                      "SOI", 6,
-                                      "Internal Document", 7,
-                                      "Manual", 8,
-                                      "Newsletter Item", 9,
-                                      99
-                                  )
-                              ),
-                              SortOrder.Ascending
-                          )
+                        Items: =ThisItem.WeekItems
                         LoadingSpinner: =LoadingSpinner.None
                         ShowScrollbar: =true
                         TemplatePadding: =6
