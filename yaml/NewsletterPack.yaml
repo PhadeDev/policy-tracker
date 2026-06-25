@@ -363,7 +363,7 @@ Screens:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(36, 100, 70, 1)
                         OnSelect: |-
-                          =Copy(Concat(colNewsletterPack, Char(8226) & " " & PackTitle & Char(10) & "    " & Char(9702) & " Intended audience: " & PackAudience & Char(10) & Char(10)));
+                          =Copy(Concat(colNewsletterPack, "• " & PackTitle & Char(10) & "    ◦ Intended audience: " & PackAudience & Char(10) & Char(10)));
                           Notify("Newsletter pack copied.", NotificationType.Success)
                         PressedBorderColor: =RGBA(28, 80, 55, 1)
                         PressedColor: =RGBA(255, 255, 255, 1)
@@ -424,7 +424,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =58
                               Size: =13
-                              Text: =Char(8226) & " " & ThisItem.PackTitle
+                              Text: ="• " & ThisItem.PackTitle
                               VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.TemplateWidth - 44
                               X: =14
@@ -439,7 +439,7 @@ Screens:
                               PaddingLeft: =0
                               Size: =12
                               Text: |-
-                                =Char(9702) & " Intended audience: " & ThisItem.PackAudience
+                                ="◦ Intended audience: " & ThisItem.PackAudience
                               VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.TemplateWidth - 74
                               X: =38
@@ -462,7 +462,7 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Default: |-
-                          =Concat(colNewsletterPack, Char(8226) & " " & PackTitle & Char(10) & "    " & Char(9702) & " Intended audience: " & PackAudience & Char(10) & Char(10))
+                          =Concat(colNewsletterPack, "• " & PackTitle & Char(10) & "    ◦ Intended audience: " & PackAudience & Char(10) & Char(10))
                         DisplayMode: =DisplayMode.View
                         Height: =1
                         Mode: =TextMode.MultiLine
