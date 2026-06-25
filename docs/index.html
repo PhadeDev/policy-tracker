@@ -231,7 +231,7 @@ Set(gblMorphTimestamp, Text(Now(), "yyyymmddhhmmss"));
 // ── V2 additions ─────────────────────────────────────────────────────────────
 Set(varTypeFilter, "All");
 Set(varSearchText, "");
-Set(varNextThursday, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), Days));
+Set(varNextThursday, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
 
 // ── Newsletter access list (add rows here to grant access) ───────────────────
 ClearCollect(
