@@ -1202,7 +1202,7 @@ Screens:
                         DisplayMode: =DisplayMode.View
                         Font: =Font.'Open Sans'
                         Height: =148
-                        HtmlText: ="<div style=""border: 1px solid #c8d5e0; border-radius: 8px; padding: 14px; background-color: #f0faf5; font-family: 'Open Sans', sans-serif; font-size: 13px;""><p style=""margin: 0 0 8px 0;""><strong>By ticking this box you confirm the item meets all publication criteria:</strong></p><ul style=""margin: 0; padding-left: 18px;""><li>Spelling and grammar checked throughout</li><li>All document links tested and valid</li><li>Formatting, bullets, page numbers, headers and footers applied correctly</li></ul></div>"
+                        HtmlText: '="<div style=""border: 1px solid #c8d5e0; border-radius: 8px; padding: 14px; background-color: #f0faf5; font-family: ''Open Sans'', sans-serif; font-size: 13px;""><p style=""margin: 0 0 8px 0;""><strong>By ticking this box you confirm the item meets all publication criteria:</strong></p><ul style=""margin: 0; padding-left: 18px;""><li>Spelling and grammar checked throughout</li><li>All document links tested and valid</li><li>Formatting, bullets, page numbers, headers and footers applied correctly</li></ul></div>"'
                         Width: =Parent.Width
                         X: =0
                         Y: =0
