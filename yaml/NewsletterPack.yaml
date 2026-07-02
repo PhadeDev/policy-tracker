@@ -4,72 +4,66 @@ Screens:
       Fill: =RGBA(243, 244, 248, 1)
       LoadingSpinnerColor: =RGBA(46, 125, 89, 1)
       OnVisible: |-
-        =If(
-            IsEmpty(Filter(colNewsletterUsers, Email = Lower(User().Email))),
-            Notify("You do not have access to the Newsletter Pack screen.", NotificationType.Error);
-            Navigate(Main, ScreenTransition.Fade),
-            Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
-            Refresh('Policy Proof Tracker');
-            ClearCollect(
-                colNewsletterPack,
-                Sort(
-                    AddColumns(
-                        Filter(
-                            'Policy Proof Tracker',
-                            Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
-                            Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
-                            Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
-                            (
-                                ReadyForRelease = true ||
-                                'Approved For Release By'.Value = "XO" ||
-                                'Approved For Release By'.Value = "ACOS" ||
-                                'Approved For Release By'.Value = "DCOMD" ||
-                                'Approved For Release By'.Value = "D Commander"
-                            ) &&
-                            Published = false
-                        ),
-                        SortKey,
-                        Switch(
-                            'Document Type'.Value,
-                            "📄 MoD Policy", 1,
-                            "MoD Policy", 1,
-                            "📄 ACSO", 2,
-                            "ACSO", 2,
-                            "📖 Regulation", 3,
-                            "Regulation", 3,
-                            "📄 CFSO", 4,
-                            "CFSO", 4,
-                            "📄 CFI", 5,
-                            "CFI", 5,
-                            "📄 CBN", 6,
-                            "CBN", 6,
-                            "📕 SOI", 9,
-                            "SOI", 9,
-                            "📑 Internal Document", 10,
-                            "Internal Document", 10,
-                            "📗 Manual", 7,
-                            "Manual", 7,
-                            "📜 Newsletter Item", 8,
-                            "Newsletter Item", 8,
-                            99
-                        ),
-                        IsFinalApproved,
-                        Or(
-                            'Approved For Release By'.Value = "XO",
-                            'Approved For Release By'.Value = "ACOS",
-                            'Approved For Release By'.Value = "DCOMD",
+        =Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+        Refresh('Policy Proof Tracker');
+        ClearCollect(
+            colNewsletterPack,
+            Sort(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
+                        Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
+                        Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
+                        (
+                            'Approved For Release By'.Value = "XO" ||
+                            'Approved For Release By'.Value = "ACOS" ||
+                            'Approved For Release By'.Value = "DCOMD" ||
                             'Approved For Release By'.Value = "D Commander"
-                        ),
-                        PackTitle,
-                        Coalesce('Title for Newsletter', Title),
-                        PackAudience,
-                        Coalesce(Audience, ""),
-                        PackSummary,
-                        Coalesce('Item summary', "")
+                        ) &&
+                        Published = false
                     ),
                     SortKey,
-                    SortOrder.Ascending
-                )
+                    Switch(
+                        'Document Type'.Value,
+                        "📄 MoD Policy", 1,
+                        "MoD Policy", 1,
+                        "📄 ACSO", 2,
+                        "ACSO", 2,
+                        "📖 Regulation", 3,
+                        "Regulation", 3,
+                        "📄 CFSO", 4,
+                        "CFSO", 4,
+                        "📄 CFI", 5,
+                        "CFI", 5,
+                        "📄 CBN", 6,
+                        "CBN", 6,
+                        "📕 SOI", 9,
+                        "SOI", 9,
+                        "📑 Internal Document", 10,
+                        "Internal Document", 10,
+                        "📗 Manual", 7,
+                        "Manual", 7,
+                        "📜 Newsletter Item", 8,
+                        "Newsletter Item", 8,
+                        99
+                    ),
+                    IsFinalApproved,
+                    Or(
+                        'Approved For Release By'.Value = "XO",
+                        'Approved For Release By'.Value = "ACOS",
+                        'Approved For Release By'.Value = "DCOMD",
+                        'Approved For Release By'.Value = "D Commander"
+                    ),
+                    PackTitle,
+                    Coalesce('Title for Newsletter', Title),
+                    PackAudience,
+                    Coalesce(Audience, ""),
+                    PackSummary,
+                    Coalesce('Item summary', "")
+                ),
+                SortKey,
+                SortOrder.Ascending
             )
         )
     Children:
@@ -144,7 +138,6 @@ Screens:
                                           Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
                                           Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
                                           (
-                                              ReadyForRelease = true ||
                                               'Approved For Release By'.Value = "XO" ||
                                               'Approved For Release By'.Value = "ACOS" ||
                                               'Approved For Release By'.Value = "DCOMD" ||
@@ -279,30 +272,224 @@ Screens:
                         Width: =120
                         X: =Parent.Width - 140
                         Y: =21
-                  - txtPlainPack:
-                      Control: Classic/TextInput@2.3.2
+                  - galPlainPack:
+                      Control: Gallery@2.15.0
+                      Variant: Vertical
                       Properties:
                         BorderColor: =RGBA(200, 204, 214, 1)
                         BorderThickness: =1
-                        Color: =RGBA(28, 32, 48, 1)
-                        Default: =Concat(colNewsletterPack, PackTitle & Char(10) & PackAudience & If(IsBlank(PackSummary), "", Char(10) & PackSummary) & Char(10) & Char(10) & "------------------------------------------------------------" & Char(10) & Char(10))
-                        DisplayMode: =DisplayMode.View
                         Fill: =RGBA(248, 249, 252, 1)
-                        Font: =Font.'Open Sans'
                         Height: =Parent.Height - 82
-                        Mode: =TextMode.MultiLine
-                        PaddingBottom: =12
-                        PaddingLeft: =12
-                        PaddingRight: =12
-                        PaddingTop: =12
-                        RadiusBottomLeft: =6
-                        RadiusBottomRight: =6
-                        RadiusTopLeft: =6
-                        RadiusTopRight: =6
-                        Size: =13
+                        Items: =colNewsletterPack
+                        LoadingSpinner: =LoadingSpinner.None
+                        TemplatePadding: =8
+                        TemplateSize: =210
                         Width: =Parent.Width - 40
                         X: =20
                         Y: =62
+                      Children:
+                        - pillTitleBG:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderThickness: =0
+                              Color: =RGBA(0, 0, 0, 0)
+                              DisplayMode: =DisplayMode.View
+                              Fill: =RGBA(214, 221, 224, 0.6)
+                              Height: =30
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =Self.Fill
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =Self.Fill
+                              RadiusBottomLeft: =15
+                              RadiusBottomRight: =15
+                              RadiusTopLeft: =15
+                              RadiusTopRight: =15
+                              Text: =""
+                              Width: =Parent.TemplateWidth - 55
+                              X: =8
+                              Y: =8
+                        - lblPlainTitle:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Color: =RGBA(28, 32, 48, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              Overflow: =Overflow.Hidden
+                              Size: =12
+                              Text: =ThisItem.PackTitle
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: =Parent.TemplateWidth - 72
+                              X: =16
+                              Y: =8
+                        - btnCopyTitle:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(46, 125, 89, 0.5)
+                              BorderThickness: =1
+                              Color: =RGBA(46, 125, 89, 1)
+                              DisplayMode: =DisplayMode.Edit
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Courier New'
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              HoverBorderColor: =RGBA(46, 125, 89, 1)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =RGBA(46, 125, 89, 1)
+                              OnSelect: |-
+                                =Copy(ThisItem.PackTitle);
+                                Notify("Title copied.", NotificationType.Success)
+                              PressedBorderColor: =RGBA(28, 80, 55, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(28, 80, 55, 1)
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Size: =9
+                              Text: ="Copy"
+                              Width: =40
+                              X: =Parent.TemplateWidth - 48
+                              Y: =8
+                        - pillAudienceBG:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderThickness: =0
+                              Color: =RGBA(0, 0, 0, 0)
+                              DisplayMode: =DisplayMode.View
+                              Fill: =RGBA(214, 221, 224, 0.6)
+                              Height: =30
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =Self.Fill
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =Self.Fill
+                              RadiusBottomLeft: =15
+                              RadiusBottomRight: =15
+                              RadiusTopLeft: =15
+                              RadiusTopRight: =15
+                              Text: =""
+                              Width: =Parent.TemplateWidth - 55
+                              X: =8
+                              Y: =46
+                        - lblPlainAudience:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Color: =RGBA(70, 74, 88, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =30
+                              Overflow: =Overflow.Hidden
+                              Size: =12
+                              Text: =ThisItem.PackAudience
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: =Parent.TemplateWidth - 72
+                              X: =16
+                              Y: =46
+                        - btnCopyAudience:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(46, 125, 89, 0.5)
+                              BorderThickness: =1
+                              Color: =RGBA(46, 125, 89, 1)
+                              DisplayMode: =DisplayMode.Edit
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Courier New'
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              HoverBorderColor: =RGBA(46, 125, 89, 1)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =RGBA(46, 125, 89, 1)
+                              OnSelect: |-
+                                =Copy(ThisItem.PackAudience);
+                                Notify("Audience copied.", NotificationType.Success)
+                              PressedBorderColor: =RGBA(28, 80, 55, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(28, 80, 55, 1)
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Size: =9
+                              Text: ="Copy"
+                              Width: =40
+                              X: =Parent.TemplateWidth - 48
+                              Y: =46
+                        - pillSummaryBG:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderThickness: =0
+                              Color: =RGBA(0, 0, 0, 0)
+                              DisplayMode: =DisplayMode.View
+                              Fill: =RGBA(214, 221, 224, 0.6)
+                              Height: =62
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =Self.Fill
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =Self.Fill
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Text: =""
+                              Visible: =!IsBlank(ThisItem.PackSummary)
+                              Width: =Parent.TemplateWidth - 55
+                              X: =8
+                              Y: =84
+                        - lblPlainSummary:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Color: =RGBA(70, 74, 88, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =62
+                              Overflow: =Overflow.Hidden
+                              Size: =11
+                              Text: =ThisItem.PackSummary
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =!IsBlank(ThisItem.PackSummary)
+                              Width: =Parent.TemplateWidth - 72
+                              X: =16
+                              Y: =84
+                        - btnCopySummary:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(46, 125, 89, 0.5)
+                              BorderThickness: =1
+                              Color: =RGBA(46, 125, 89, 1)
+                              DisplayMode: =DisplayMode.Edit
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Courier New'
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              HoverBorderColor: =RGBA(46, 125, 89, 1)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =RGBA(46, 125, 89, 1)
+                              OnSelect: |-
+                                =Copy(ThisItem.PackSummary);
+                                Notify("Summary copied.", NotificationType.Success)
+                              PressedBorderColor: =RGBA(28, 80, 55, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(28, 80, 55, 1)
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Size: =9
+                              Text: ="Copy"
+                              Visible: =!IsBlank(ThisItem.PackSummary)
+                              Width: =40
+                              X: =Parent.TemplateWidth - 48
+                              Y: =84
                   - lblPlainEmpty:
                       Control: Label@2.5.1
                       Properties:
