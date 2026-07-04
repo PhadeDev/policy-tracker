@@ -84,6 +84,9 @@
     .pill-done { background: #1a3a1a; color: #4caf7d; border: 1px solid #2a7d4e; }
     .pill-old { background: #2a2a1a; color: #aaaa44; border: 1px solid #4a4a1a; }
     .pill-pending { background: #2a2a2a; color: #666; border: 1px solid #3a3a3a; }
+    .pill-test { background: #2a1a2a; color: #d888e8; border: 1px solid #5a2a6a; }
+    .screen-card.test-version { border-color: #6a2a7a; }
+    .screen-card.test-version:hover { border-color: #a04ac0; background: #221a2a; }
     .note { background: #1a2a1a; border-left: 3px solid #2a7d4e; padding: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #aaa; margin: 14px 0; }
     .warning { background: #2a1a1a; border-left: 3px solid #7d2a2a; padding: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #aaa; margin: 14px 0; }
     .info { background: #1a1a2a; border-left: 3px solid #4466aa; padding: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #aaa; margin: 14px 0; }
@@ -359,6 +362,22 @@ Set(
       <div class="screen-desc">Dual-panel screen. Left: plain reference text with Item summary and separators. Right: email-ready bullet preview with Copy All using an indented intended-audience bullet.</div>
     </div>
     <div class="screen-cta green">Open and copy &rarr;</div>
+  </a>
+
+</div>
+
+<h2>Test Screens (not yet promoted)</h2>
+<p>Full redesign in progress, pasted onto <strong>new</strong> screens (<code>Main_1</code>, <code>ViewItem_1</code>) rather than overwriting the real <code>Main</code>/<code>ViewItem</code> above — safe to test without risking the live screens. Once happy, delete the old screens and rename these to <code>Main</code>/<code>ViewItem</code>.</p>
+<div class="screen-grid">
+
+  <a class="screen-card test-version" href="screens/Main_1.html" target="_blank">
+    <div>
+      <div class="status-pill pill-test">Test — paste as new screen</div>
+      <div class="screen-number">Main_1</div>
+      <div class="screen-name">Main (redesign)</div>
+      <div class="screen-desc">Hero "next release" band, slim segmented dashboard tabs (rose tint only when Issues &gt; 0), data-driven doc-type chip gallery, 3-dot approval stepper on every card, copy-link, per-item + bulk "Mark all as Published" (staff-gated), Release Pipeline sidebar using the real <code>Progress</code> control.</div>
+    </div>
+    <div class="screen-cta purple">Open and copy &rarr;</div>
   </a>
 
 </div>
