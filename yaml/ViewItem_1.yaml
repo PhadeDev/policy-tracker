@@ -50,7 +50,24 @@ Screens:
             Refresh(PolicyLinks);
             ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID)),
             Clear(colLinks)
-        )
+        );
+        Reset(txtTitle1);
+        Reset(drpDocType1);
+        Reset(cmb_Owner1);
+        Reset(dpkPublishDate1);
+        Reset(ckbHighPriority1);
+        Reset(txtReasonHighPri1);
+        Reset(ckbExtConsult1);
+        Reset(txtExtConsultDetails1);
+        Reset(ckbTopItem1);
+        Reset(txtNewsletterTitle1);
+        Reset(txtAudience1);
+        Reset(txtSummary1);
+        Reset(txtRemarks1);
+        Reset(ckbPillarLead1);
+        Reset(radApproval1);
+        Reset(ckbPublished1);
+        Reset(dpkPublishedDate1)
     Children:
       - conScreen1:
           Control: GroupContainer@1.5.0
