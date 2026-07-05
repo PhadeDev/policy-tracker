@@ -71,6 +71,7 @@ Screens:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =64
@@ -79,7 +80,6 @@ Screens:
                   RadiusTopLeft: =14
                   RadiusTopRight: =14
                   Visible: =!(DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 && DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 && !ckbHighPriority1.Value)
-                  Width: =Parent.Width
                 Children:
                   - lblAppTitle1:
                       Control: Label@2.5.1
@@ -228,6 +228,7 @@ Screens:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(255, 248, 225, 1)
                   Height: =64
@@ -236,7 +237,6 @@ Screens:
                   RadiusTopLeft: =14
                   RadiusTopRight: =14
                   Visible: =DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 && DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 && !ckbHighPriority1.Value
-                  Width: =Parent.Width
                 Children:
                   - lblWarningTitle1:
                       Control: Label@2.5.1
@@ -284,6 +284,7 @@ Screens:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =44
@@ -291,7 +292,6 @@ Screens:
                   RadiusBottomRight: =12
                   RadiusTopLeft: =12
                   RadiusTopRight: =12
-                  Width: =Parent.Width
                 Children:
                   - compactLine1:
                       Control: Rectangle@2.3.0
@@ -431,8 +431,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =76
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - lblTitleLabel1:
                                         Control: Label@2.5.1
@@ -487,8 +487,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =76
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - lblDocTypeLabel1:
                                         Control: Label@2.5.1
@@ -541,8 +541,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =104
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - lblOwnerLabel1:
                                         Control: Label@2.5.1
@@ -658,8 +658,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =84
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - lblPublishDateLabel1:
                                         Control: Label@2.5.1
@@ -727,8 +727,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =130
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - lblSummaryLabel1:
                                         Control: Label@2.5.1
@@ -765,8 +765,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =168
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - ckbHighPriority1:
                                         Control: Classic/CheckBox@2.1.0
@@ -983,13 +983,13 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Fill: =RGBA(244, 246, 243, 1)
                                     Height: =88
                                     RadiusBottomLeft: =12
                                     RadiusBottomRight: =12
                                     RadiusTopLeft: =12
                                     RadiusTopRight: =12
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - fullLine1:
                                         Control: Rectangle@2.3.0
@@ -1155,8 +1155,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =76
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - dpkPublishedDate1:
                                         Control: Classic/DatePicker@2.6.0
@@ -1382,7 +1382,7 @@ Screens:
                                     Height: =Max(120, CountRows(colLinks) * 92)
                                     Items: |-
                                       =AddColumns(
-                                          colLinks,
+                                          DropColumns(colLinks, "FileExt"),
                                           FileExt,
                                           Lower(
                                               Last(
@@ -1574,8 +1574,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
                                     Height: =44
-                                    Width: =Parent.Width - 36
                                   Children:
                                     - btnCancelLink1:
                                         Control: Classic/Button@2.2.0
