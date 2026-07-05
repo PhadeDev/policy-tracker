@@ -742,7 +742,7 @@ Screens:
                                           X: =-2
                                           Y: =22
                                     - drpDocType1:
-                                        Control: ModernDropdown@1.0.1
+                                        Control: ModernDropdown@1.0.2
                                         Properties:
                                           Default: |-
                                             =With({_v: Coalesce(varSelectedRelease.'Document Type'.Value, "")}, {Value: _v})
@@ -916,7 +916,7 @@ Screens:
                                                 X: =-2
                                                 Y: =22
                                           - dpkPublishDate1:
-                                              Control: ModernDatePicker@1.0.0
+                                              Control: ModernDatePicker@1.0.1
                                               Properties:
                                                 Height: =40
                                                 IsEditable: =true
@@ -1457,7 +1457,7 @@ Screens:
                                           Visible: =ckbPublished1.Value
                                           Width: =Parent.Width
                                     - dpkPublishedDate1:
-                                        Control: ModernDatePicker@1.0.0
+                                        Control: ModernDatePicker@1.0.1
                                         Properties:
                                           BorderColor: =RGBA(223, 229, 224, 1)
                                           Font: =Font.'Open Sans'
@@ -1863,7 +1863,7 @@ Screens:
                         X: =20
                         Y: =52
                   - dpkDuplicateDate1:
-                      Control: ModernDropdown@1.0.1
+                      Control: ModernDropdown@1.0.2
                       Properties:
                         Items: =colThursdays
                         ItemDisplayText: =ThisItem.ThursdayLabel
