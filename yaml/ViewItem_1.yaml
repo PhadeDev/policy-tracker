@@ -73,6 +73,7 @@ Screens:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
           Properties:
+            DropShadow: =DropShadow.None
             Fill: =RGBA(244, 246, 243, 1)
             Height: =Parent.Height
             LayoutAlignItems: =LayoutAlignItems.Stretch
@@ -662,6 +663,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =76
@@ -719,6 +721,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =76
@@ -771,6 +774,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =104
@@ -889,6 +893,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =84
@@ -897,6 +902,7 @@ Screens:
                                         Control: GroupContainer@1.5.0
                                         Variant: ManualLayout
                                         Properties:
+                                          DropShadow: =DropShadow.None
                                           Height: =84
                                           Width: =(Parent.Width - 16) / 2
                                         Children:
@@ -966,6 +972,7 @@ Screens:
                                         Control: GroupContainer@1.5.0
                                         Variant: ManualLayout
                                         Properties:
+                                          DropShadow: =DropShadow.None
                                           Height: =84
                                           Width: =(Parent.Width - 16) / 2
                                           X: =(Parent.Width - 16) / 2 + 16
@@ -1010,6 +1017,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =If(ckbHighPriority1.Value, 90, 0)
@@ -1052,6 +1060,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =46
@@ -1076,6 +1085,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =If(ckbExtConsult1.Value, 122, 0)
@@ -1256,6 +1266,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Fill: =RGBA(244, 246, 243, 1)
@@ -1420,6 +1431,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =56
@@ -1459,6 +1471,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =If(ckbPublished1.Value, 76, 0)
@@ -1763,6 +1776,7 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
                                     AlignInContainer: =AlignInContainer.Stretch
                                     FillPortions: =0
                                     Height: =44
@@ -1845,6 +1859,7 @@ Screens:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
+            DropShadow: =DropShadow.None
             Fill: =RGBA(0, 0, 0, 0.55)
             Height: =Parent.Height
             Visible: =varShowDuplicateModal1
@@ -1996,6 +2011,7 @@ Screens:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
           Properties:
+            DropShadow: =DropShadow.None
             Fill: =RGBA(53, 61, 63, 0.84)
             Height: =Parent.Height
             LayoutAlignItems: =LayoutAlignItems.End
@@ -2009,6 +2025,7 @@ Screens:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
+                  DropShadow: =DropShadow.None
                   AlignInContainer: =AlignInContainer.SetByContainer
                   Fill: =RGBA(255, 255, 255, 1)
                   FillPortions: =0
