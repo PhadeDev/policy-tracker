@@ -273,9 +273,11 @@ layered icon/label/actions) with a single purpose-built control.
 
 ### `Combobox` — already covered above as `ModernCombobox@1.1.1`, no further action.
 
-### `Copilot answer (preview)`
-**Fit:** none currently anticipated for this app. Low priority — verify only if a
-future feature actually calls for AI-generated answers in-app.
+### `Copilot answer (preview)` — ⛔ BLACKLISTED, do not use, in any project
+**User directive 2026-07-05: do not use anywhere, in any Power Apps project.** Likely
+government/organisational cost or licensing tier attached to AI/Copilot features at
+work. Do not propose, verify, or insert this control — treat as off-limits, not just
+low priority.
 
 ### `Info button`
 **Possible fit:** tooltip/help-text affordance — e.g. explaining what "Not Yet
