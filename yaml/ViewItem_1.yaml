@@ -7,7 +7,7 @@ Screens:
         =Set(varSaving, false);
         Set(varShowLinkModal, false);
         Set(varSelectedLink, Blank());
-        Set(varLinkDisplayNamePrefill, Blank());
+        Set(varLinkDisplayNamePrefill, "");
         Set(varErrTitle, false);
         Set(varErrOwner, false);
         Set(varErrDocType, false);
@@ -1543,7 +1543,7 @@ Screens:
                                     HoverFill: =RGBA(227, 239, 232, 1)
                                     OnSelect: |-
                                       =Set(varSelectedLink, Defaults(PolicyLinks));
-                                      Set(varLinkDisplayNamePrefill, Blank());
+                                      Set(varLinkDisplayNamePrefill, "");
                                       Set(varShowLinkModal, true)
                                     RadiusBottomLeft: =8
                                     RadiusBottomRight: =8
@@ -1639,7 +1639,7 @@ Screens:
                                           HoverFill: =RGBA(227, 239, 232, 1)
                                           OnSelect: |-
                                             =Set(varSelectedLink, ThisItem);
-                                            Set(varLinkDisplayNamePrefill, Blank());
+                                            Set(varLinkDisplayNamePrefill, "");
                                             Set(varShowLinkModal, true)
                                           RadiusBottomLeft: =6
                                           RadiusBottomRight: =6
@@ -1750,7 +1750,7 @@ Screens:
                                           StartsWith(txtLinkUrl1.Text, "https://modgovuk-my.sharepoint.com"),
                                           Set(varFileName, Last(Split(First(Split(txtLinkUrl1.Text, "?")).Value, "/")).Value);
                                           Set(varLinkDisplayNamePrefill, varFileName),
-                                          Set(varLinkDisplayNamePrefill, Blank())
+                                          Set(varLinkDisplayNamePrefill, "")
                                       )
                                     PaddingLeft: =10
                                     PaddingTop: =8
@@ -1780,7 +1780,7 @@ Screens:
                                           OnSelect: |-
                                             =Set(varShowLinkModal, false);
                                             Set(varSelectedLink, Blank());
-                                            Set(varLinkDisplayNamePrefill, Blank())
+                                            Set(varLinkDisplayNamePrefill, "")
                                           RadiusBottomLeft: =8
                                           RadiusBottomRight: =8
                                           RadiusTopLeft: =8
@@ -1830,7 +1830,7 @@ Screens:
                                                 ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
                                                 Set(varShowLinkModal, false);
                                                 Set(varSelectedLink, Blank());
-                                                Set(varLinkDisplayNamePrefill, Blank());
+                                                Set(varLinkDisplayNamePrefill, "");
                                                 Notify("Link saved successfully!", NotificationType.Success)
                                             )
                                           RadiusBottomLeft: =8
