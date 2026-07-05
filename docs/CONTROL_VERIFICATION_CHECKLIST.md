@@ -308,6 +308,15 @@ loading text/blank states with a real spinner control.
 - Check: default size, default colour, how it's shown/hidden (its own `Visible`
   property, or does it need a wrapping container?)
 
+### `Rating`
+**Missed entirely until an external research pass caught it — added 2026-07-05.** Not
+in Microsoft's own "Modern controls" summary list, but has its own docs page.
+**Fit:** none obvious yet for this app (no star-rating data anywhere in Policy
+Tracker), but verify anyway since it was missed once already — check the summary
+list itself isn't hiding other gaps.
+- Check: `Default`/`Value` split (same input/output pattern question as Slider/Number
+  input), default number of stars, default icon/style
+
 ### `Stream (preview)`
 **Fit:** none anticipated (no video content in this app). Lowest priority — skip
 unless time allows after everything else.
