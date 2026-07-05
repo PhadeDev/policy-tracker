@@ -10,6 +10,7 @@ Screens:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
           Properties:
+            DropShadow: =DropShadow.None
             Fill: =RGBA(244, 246, 243, 1)
             Height: =Parent.Height
             LayoutAlignItems: =LayoutAlignItems.Stretch
@@ -25,6 +26,7 @@ Screens:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
+                  FillPortions: =0
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =64
@@ -183,6 +185,7 @@ Screens:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
+                  FillPortions: =0
                   DropShadow: =DropShadow.Regular
                   Fill: =RGBA(11, 74, 54, 1)
                   Height: =108
@@ -287,6 +290,8 @@ Screens:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
                         Fill: =If(varSelectedState = "Current", RGBA(11, 74, 54, 1), RGBA(255, 255, 255, 1))
                         Height: =Parent.Height
                         LayoutMinWidth: =Parent.Width / 4 - 6
@@ -329,6 +334,8 @@ Screens:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
                         Fill: =If(varSelectedState = "Future", RGBA(11, 74, 54, 1), RGBA(255, 255, 255, 1))
                         Height: =Parent.Height
                         LayoutMinWidth: =Parent.Width / 4 - 6
@@ -371,6 +378,8 @@ Screens:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
                         Fill: |-
                           =If(
                               varSelectedState = "UnapprovedHistoric", RGBA(11, 74, 54, 1),
@@ -429,6 +438,8 @@ Screens:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
                         Fill: =If(varSelectedState = "Historic", RGBA(11, 74, 54, 1), RGBA(255, 255, 255, 1))
                         Height: =Parent.Height
                         LayoutMinWidth: =Parent.Width / 4 - 6
@@ -547,6 +558,7 @@ Screens:
                             Control: GroupContainer@1.5.0
                             Variant: ManualLayout
                             Properties:
+                              FillPortions: =0
                               DropShadow: =DropShadow.None
                               Fill: =RGBA(0, 0, 0, 0)
                               Height: =600
@@ -665,6 +677,7 @@ Screens:
                                         Control: GroupContainer@1.5.0
                                         Variant: ManualLayout
                                         Properties:
+                                          DropShadow: =DropShadow.None
                                           Fill: =RGBA(0, 0, 0, 0)
                                           Height: =36
                                           Width: =Parent.TemplateWidth
@@ -738,6 +751,7 @@ Screens:
                                         Control: GroupContainer@1.5.0
                                         Variant: ManualLayout
                                         Properties:
+                                          DropShadow: =DropShadow.None
                                           Fill: =RGBA(0, 0, 0, 0)
                                           Height: =CountRows(ThisItem.GroupedItems) * 130
                                           Width: =Parent.TemplateWidth
@@ -1212,6 +1226,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
                                     Fill: =RGBA(0, 0, 0, 0)
                                     Height: =32
                                     Width: =300
@@ -1255,6 +1271,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
                                     Fill: =RGBA(0, 0, 0, 0)
                                     Height: =32
                                     Width: =300
@@ -1301,6 +1319,8 @@ Screens:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
                                     Fill: =RGBA(0, 0, 0, 0)
                                     Height: =32
                                     Width: =300
