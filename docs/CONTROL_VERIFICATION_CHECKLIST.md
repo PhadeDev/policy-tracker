@@ -1,9 +1,14 @@
 # Control Verification Checklist
 
-Purpose: build a ground-truth reference for every control type this app actually uses,
-verified by looking at and interacting with a real freshly-inserted control — not by
-reading Microsoft's docs (repeatedly wrong this session) and not by exporting YAML
-(untouched properties aren't written to the export at all, so there's nothing to read).
+Purpose: build a ground-truth reference for every control type Microsoft's canvas apps
+offer — not just what this app happens to use today, but the full catalogue, so future
+features (Progress bar being the immediate example: wanted for `ViewItem`'s approval
+pipeline, never added because it was never verified) can be reached for with confidence
+instead of getting discovered-broken mid-build the way Combobox/Dropdown/DatePicker
+were this session. Verified by looking at and interacting with a real freshly-inserted
+control — not by reading Microsoft's docs (repeatedly wrong this session) and not by
+exporting YAML (untouched properties aren't written to the export at all, so there's
+nothing to read that way).
 
 **Method per control:** insert it fresh on a blank test screen, touch nothing, then:
 1. **Look** — screenshot it as-is. Note anything visually unexpected (shadow, border,
@@ -192,6 +197,120 @@ though a fresh look never hurts if something seems off later.
 - Only relevant if `Form@2.4.4` is in use. Check: can its rendered fields be styled
   (rounded corners, custom colours) at all, or does it fully resist styling as
   previously assumed?
+
+---
+
+## Full Modern control catalogue — not yet used anywhere in this app
+
+Microsoft lists 23 Modern controls total. The sections above cover every one we've
+actually used; these are the remaining ones — not used yet, so nothing's confirmed
+broken, but nothing's confirmed *working* either. Verify before the first real use
+rather than finding out mid-build, which is what happened with Combobox/Dropdown/
+DatePicker this session. Where there's an obvious fit for this app, it's noted.
+
+### `Progress bar` (likely tag `Progress@1.1.x` or similar — confirm exact tag on insert)
+**Why we want this one specifically:** wanted for `ViewItem` — a readiness/completion
+bar for the 3-stage approval pipeline (Pillar Lead → Approved → Published), similar to
+the aggregate "Release Pipeline" bars already built in `Main_1`. Never got added to
+`ViewItem_1` at all — first real gap to close once this control is verified.
+- Check: `Value`/`Max`/`Min` — plain numbers, or does it need a 0–1 ratio?
+- Check: determinate vs indeterminate mode — is that a separate property or inferred
+  from whether `Value` is set?
+- Check: default fill colour, default track colour, default height/corner style
+- Check: can it be made to visually match the mint/green "complete" theme already used
+  elsewhere on this screen, or does it fight the theme like ModernButton's palette does
+
+### `Avatar`
+**Possible fit:** could replace the hand-built avatar-circle-plus-initials-fallback
+pattern (`imgOwnerAvatar1`/`lblOwnerInitials1`) with one real control.
+- Check: does it accept an image URL directly, or does it need `Office365Users.
+  UserPhotoV2` piped through some intermediate property?
+- Check: built-in initials fallback when no image — does it generate initials itself,
+  or still need our own `Left`/`Find`-based formula?
+- Check: default size, default shape (circle vs square)
+
+### `Header`
+**Possible fit:** could replace the hand-built `conTopBar1` entirely.
+- Check: what slots/properties it exposes (title, actions, nav) — does it support a
+  free-form action-button cluster like Save/Close/Delete/Duplicate, or is it more
+  rigid/opinionated than a plain GroupContainer?
+- Check: default height, default colours — does it auto-theme from the app's palette?
+
+### `Tabs or tab list`
+**Possible fit:** `Main_1`'s segmented dashboard-tile control was hand-built — this
+might be the real control for that pattern, worth knowing for next time even though
+`Main_1` already works without it.
+- Check: default appearance (underline vs filled pill style)
+- Check: how selection state is read (`Selected`/`SelectedIndex`?) and set (`Default`?)
+
+### `Data Grid (preview)`
+**Possible fit:** an alternative to `Gallery@2.15.0` for anything that becomes a real
+table view (sortable/scrollable columns) rather than a card list.
+- Check: how columns are configured — via a Fields/Edit-columns panel like Combobox,
+  or via YAML properties directly?
+- Check: sorting/filtering — built in, or still manual via `Sort`/`Filter` on `Items`?
+- Note: preview feature — check for the same kind of instability warning we found for
+  ModernCombobox before relying on it for anything real
+
+### `Table (preview)`
+**Possible fit:** similar territory to Data Grid — check what actually differs between
+the two before picking either for future use.
+- Check: same points as Data Grid above
+
+### `Card (preview)`
+**Possible fit:** could replace the hand-built link-card pattern (`btnLinkCard1` +
+layered icon/label/actions) with a single purpose-built control.
+- Check: does it support the "whole card clickable, icons/actions layered on top and
+  independently clickable" pattern we had to hand-build, or does it fight that the way
+  ModernButton fights conditional colours?
+- Check: horizontal vs vertical orientation — property or separate variant?
+
+### `Checkbox` (Modern — distinct from `Classic/CheckBox@2.1.0`)
+- ✅ Already know Modern `Toggle` uses `Checked` not `Default`/`.Value` — check whether
+  Modern `Checkbox` follows the same convention or its own
+- Check: default size, default checkmark colour, whether label text is a separate
+  property or built in
+
+### `Combobox` — already covered above as `ModernCombobox@1.1.1`, no further action.
+
+### `Copilot answer (preview)`
+**Fit:** none currently anticipated for this app. Low priority — verify only if a
+future feature actually calls for AI-generated answers in-app.
+
+### `Info button`
+**Possible fit:** tooltip/help-text affordance — e.g. explaining what "Not Yet
+Approved" means, or clarifying the anomaly-amber stepper state, without cluttering
+the layout with permanent explanatory text.
+- Check: default icon, default popover styling, how the content is set (plain text
+  property vs a child-control popover)
+
+### `Link`
+**Possible fit:** the "Cadets Branch Writing Guide" reference inside the pillar-lead
+confirmation `HtmlViewer` text is currently a plain HTML `<a>` tag — this might be a
+cleaner native alternative if a non-HTML-embedded link control is ever needed.
+- Check: default styling (underline? colour?), whether `OnSelect` fires or it only
+  supports a raw URL to open directly
+
+### `Number input`
+**Fit:** not currently needed anywhere in this app (no numeric entry fields), but
+cheap to verify now while doing the rest of this pass.
+- Check: `Default` vs `Value` split (same input/output pattern as Slider, already
+  noted in the Bible) — confirm it still holds
+- Check: default `Min`/`Max`/`Step` when unset
+
+### `Slider`
+**Fit:** not currently needed, verify for completeness.
+- Check: same `Default`/`Value` split question as Number input
+
+### `Spinner`
+**Possible fit:** could replace the app's existing `varLoading`/`varLoadingLinks`-style
+loading text/blank states with a real spinner control.
+- Check: default size, default colour, how it's shown/hidden (its own `Visible`
+  property, or does it need a wrapping container?)
+
+### `Stream (preview)`
+**Fit:** none anticipated (no video content in this app). Lowest priority — skip
+unless time allows after everything else.
 
 ---
 
