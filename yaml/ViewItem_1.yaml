@@ -738,7 +738,10 @@ Screens:
                                         Control: ModernDropdown@1.0.2
                                         Properties:
                                           Default: |-
-                                            =With({_v: Coalesce(varSelectedRelease.'Document Type'.Value, "")}, {Value: _v})
+                                            =LookUp(
+                                                Choices('Policy Proof Tracker'.'Document Type'),
+                                                Value = Coalesce(varSelectedRelease.'Document Type'.Value, "")
+                                            )
                                           Height: =40
                                           Items: =Choices('Policy Proof Tracker'.'Document Type')
                                           ItemDisplayText: =ThisItem.Value
@@ -1408,7 +1411,10 @@ Screens:
                                         Control: ModernDropdown@1.0.2
                                         Properties:
                                           Default: |-
-                                            =With({_v: Coalesce(varSelectedRelease.'Approved For Release By'.Value, "Not Yet Approved")}, {Value: _v})
+                                            =LookUp(
+                                                Choices([@'Policy Proof Tracker'].'Approved For Release By'),
+                                                Value = Coalesce(varSelectedRelease.'Approved For Release By'.Value, "Not Yet Approved")
+                                            )
                                           Height: =40
                                           Items: =Choices([@'Policy Proof Tracker'].'Approved For Release By')
                                           ItemDisplayText: =ThisItem.Value
