@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main: Filters, Thin Tabs, Approval Stepper, Publish All</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 1180px; margin: 0 auto; padding: 34px 22px 80px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 2rem; }
+    h2 { margin: 44px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #293241; color: #c8d8f0; }
+    h3 { margin: 26px 0 10px; color: #f2f4f8; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .9rem; }
+    th, td { border: 1px solid #2b3546; padding: 8px 10px; vertical-align: top; }
+    th { background: #182131; color: #b7e4c7; text-align: left; }
+    tr:nth-child(even) td { background: #121926; }
+    .note, .warn, .step { border-radius: 8px; padding: 12px 14px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .step { background: #121926; border-left: 4px solid #4a6fa5; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .84rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    .del { color: #ff8b8b; }
+    .partnav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 34px; }
+    .partnav a { background: #182131; border: 1px solid #2b3546; border-radius: 6px; padding: 6px 12px; text-decoration: none; font-size: .85rem; }
+    .badge-order { display: inline-block; background: #2d6a4f; color: #fff; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: .78rem; margin-right: 8px; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Main: Filters, Thin Tabs, Approval Stepper, Publish All</h1>
+  <p>Five in-place changes to the real <code>Main</code> and <code>ViewItem</code> screens, built against the exact control names in the "ALL YAMLS" export attached to
+  <a href="https://github.com/PhadeDev/policy-tracker/issues/10">issue #10</a>. Every formula below is typed as-is into the property's formula bar &mdash; no leading equals sign, the bar already implies it.</p>
+
+  <div class="note">
+    <strong>Design note.</strong> Part 5 (Publish All) reuses the existing <code>colBossButtonUsers</code> allowlist &mdash; the same gate the current single Publish button already uses &mdash; instead of a separate "Staff view" toggle switch. Same result, one less control. Say the word if you actually want a visible toggle and I'll add one.
+    Also skipped the green "NEXT RELEASE" hero band from the mockup, per your note that you don't need it.
+  </div>
+
+  <div class="partnav">
+    <a href="#part1">Part 1 &middot; Release date fix</a>
+    <a href="#part2">Part 2 &middot; Type filter chips</a>
+    <a href="#part3">Part 3 &middot; Thin tabs</a>
+    <a href="#part4">Part 4 &middot; Approval stepper</a>
+    <a href="#part5">Part 5 &middot; Publish All</a>
+  </div>
+
+  <div class="step"><span class="badge-order">1</span><strong>Suggested build order:</strong> Part 1 first (it's a data-loss bug), then Part 2, then Part 3, then Part 5, then Part 4 last since it's purely cosmetic and safest to leave for the end.</div>
+
+  <h2 id="part1">Part 1 &mdash; Release date bug fix</h2>
+  <p>Screen: <code>ViewItem</code>. Root cause: the date picker's own <code>OnChange</code> was calling <code>Reset(Self)</code> whenever a non-Thursday was clicked. Since <code>SelectedDate</code> is bound live to <code>varSelectedRelease.'Planned Publish Date'</code>, <code>Reset(Self)</code> snapped it straight back to the old/blank value &mdash; reads as "randomly clears itself" but happens on every non-Thursday click.</p>
+
+  <table>
+    <tr><th>Control</th><th>Property</th><th>Change</th></tr>
+    <tr><td><code>dpkPublishDate1</code></td><td><code>OnChange</code></td><td>Remove the <code>Reset(Self)</code> line entirely, keep the <code>Notify</code></td></tr>
+    <tr><td>Both Save buttons (top bar and bottom bar)</td><td><code>OnSelect</code> &mdash; the <code>varErrPublishDate</code> line</td><td>Add a Weekday check so a non-Thursday date can no longer be saved at all</td></tr>
+  </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// dpkPublishDate1.OnChange &mdash; full replacement
+If(
+    Weekday(Self.SelectedDate, StartOfWeek.Monday) &lt;&gt; 4,
+    Notify("Only Thursdays are allowed - pick a different date before saving.", NotificationType.Error)
+);
+Set(varUnsavedChanges, true);
+Set(varErrPublishDate, false)</pre></div>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// Save button OnSelect &mdash; replace this one line (appears in both Save buttons)
+Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPublishDate1.SelectedDate, StartOfWeek.Monday) &lt;&gt; 4);</pre></div>
+
+  <h2 id="part2">Part 2 &mdash; Type filter chips</h2>
+  <p>Screen: <code>Main</code>. A horizontal row of clickable type pills above the list, reusing the <code>colChoiceColors</code> collection you already build in <code>OnStart</code>.</p>
+
+  <h3>Step 1 &mdash; new variable</h3>
+  <p>In <code>OnStart</code>, add this line anywhere near the other <code>Set()</code> calls:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varTypeFilter, "");</pre></div>
+  <p>Empty string means "All types".</p>
+
+  <h3>Step 2 &mdash; new container</h3>
+  <p>In <code>Main</code>'s Tree view, open <code>LeftSide</code>, insert a new container as the <em>first</em> child, directly above <code>GalleryContainer</code>. Name it <code>TypeFilterBar</code>.</p>
+
+  <table>
+    <tr><th>Control</th><th>Type</th><th>Properties</th></tr>
+    <tr><td><code>TypeFilterBar</code></td><td><code>GroupContainer@1.5.0</code>, AutoLayout</td>
+      <td><code>DropShadow=DropShadow.None</code>, <code>Fill=RGBA(255,255,255,1)</code>, <code>Height=44</code>, <code>LayoutDirection=LayoutDirection.Horizontal</code>, <code>LayoutGap=8</code>, <code>PaddingLeft=4</code>, <code>PaddingTop=6</code>, <code>Width=Parent.Width</code></td></tr>
+  </table>
+
+  <h3>Step 3 &mdash; the chip gallery</h3>
+  <p>Insert a Gallery inside <code>TypeFilterBar</code>, name it <code>TypeFilterGallery</code>, <strong>Variant: Horizontal</strong>.</p>
+
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td><code>Height</code></td><td><code>Parent.Height</code></td></tr>
+    <tr><td><code>TemplateSize</code></td><td><code>130</code></td></tr>
+    <tr><td><code>Width</code></td><td><code>Parent.Width</code></td></tr>
+  </table>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// TypeFilterGallery.Items
+Table({ChoiceValue: "All types", ColorCode: RGBA(0, 64, 47, 1)}) &amp; colChoiceColors</pre></div>
+
+  <h3>Step 4 &mdash; chip template (3 controls inside the gallery)</h3>
+  <table>
+    <tr><th>Control</th><th>Type</th><th>Properties</th></tr>
+    <tr><td><code>ChipBg</code></td><td>Rectangle</td>
+      <td><code>Height=28</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code>, radius (all 4 corners) <code>=14</code></td></tr>
+    <tr><td><code>ChipLabel</code></td><td>Label</td>
+      <td><code>Align=Align.Center</code>, <code>Font=Font.'Open Sans'</code>, <code>FontWeight=FontWeight.Semibold</code>, <code>Height=28</code>, <code>Size=10</code>, <code>Text=ThisItem.ChoiceValue</code>, <code>VerticalAlign=VerticalAlign.Middle</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code></td></tr>
+    <tr><td><code>ChipButton</code></td><td>Classic Button (transparent overlay, whole pill clickable)</td>
+      <td><code>BorderThickness=0</code>, <code>Fill=RGBA(0,0,0,0)</code>, <code>HoverFill=RGBA(0,0,0,0.05)</code>, <code>PressedFill=RGBA(0,0,0,0.1)</code>, <code>Height=28</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code>, <code>Text=</code> (blank)</td></tr>
+  </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipBg.Fill
+If(
+    If(ThisItem.ChoiceValue = "All types", IsBlank(varTypeFilter) || varTypeFilter = "", varTypeFilter = ThisItem.ChoiceValue),
+    ThisItem.ColorCode,
+    RGBA(238, 238, 238, 1)
+)
+
+// ChipLabel.Color
+If(
+    If(ThisItem.ChoiceValue = "All types", IsBlank(varTypeFilter) || varTypeFilter = "", varTypeFilter = ThisItem.ChoiceValue),
+    RGBA(255, 255, 255, 1),
+    RGBA(60, 60, 60, 1)
+)
+
+// ChipButton.OnSelect
+Set(varTypeFilter, If(ThisItem.ChoiceValue = "All types", "", ThisItem.ChoiceValue));
+Reset(HeaderGallery)</pre></div>
+
+  <h3>Step 5 &mdash; wire the filter into the list</h3>
+  <p>Replace the whole <code>Items</code> formula on <code>HeaderGallery</code> with this &mdash; the only change from what's there now is one extra line added inside each of the four <code>Filter()</code> calls.</p>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// HeaderGallery.Items &mdash; full replacement
+Switch(
+    varSelectedState,
+
+    "Historic",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' &gt;= DateAdd(Today(), -varHistoricLimit, "Days") &amp;&amp;
+                        'Planned Publish Date' &lt; Today() &amp;&amp;
+                        Published = true &amp;&amp;
+                        (varFilterOwner = false || Owner.Email = User().Email) &amp;&amp;
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Descending
+    ),
+
+    "Future",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' &gt; DateAdd(Today(), 28, "Days") &amp;&amp;
+                        (varFilterOwner = false || Owner.Email = User().Email) &amp;&amp;
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Ascending
+    ),
+
+    "Current",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' &gt;= Today() &amp;&amp;
+                        'Planned Publish Date' &lt;= DateAdd(Today(), 28, "Days") &amp;&amp;
+                        (varFilterOwner = false || Owner.Email = User().Email) &amp;&amp;
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Ascending
+    ),
+
+    "UnapprovedHistoric",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' &lt; Today() &amp;&amp;
+                        Published = false &amp;&amp;
+                        (varFilterOwner = false || Owner.Email = User().Email) &amp;&amp;
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Descending
+    )
+)</pre></div>
+
+  <h2 id="part3">Part 3 &mdash; Thin down the four section tabs</h2>
+  <p>Screen: <code>Main</code>. Two container-level height changes first:</p>
+  <table>
+    <tr><th>Control</th><th>Height change</th></tr>
+    <tr><td><code>DashboardContainer</code></td><td><span class="del">100</span> &rarr; <strong>56</strong></td></tr>
+    <tr><td><code>Dashboard</code></td><td><span class="del">100</span> &rarr; <strong>56</strong></td></tr>
+  </table>
+
+  <p>Then per tab: delete the big icon and any subtitle label, shrink the container, reposition the title and count. Same pattern on all four, only the control names differ.</p>
+
+  <table>
+    <tr><th>Tab container</th><th>Delete</th><th>Height</th><th>Title label</th><th>Count label</th><th>Underline rectangle</th></tr>
+    <tr>
+      <td><code>DueNextWeek</code></td>
+      <td><code>SVG_2</code></td>
+      <td><span class="del">85</span> &rarr; <strong>40</strong></td>
+      <td><code>Label2</code>: X 16, Y 11, Size 12</td>
+      <td><code>Count</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
+      <td><code>Rectangle2_1</code>: Height 3, Y 37</td>
+    </tr>
+    <tr>
+      <td><code>FutureReleases</code></td>
+      <td><code>SVG_4</code>, <code>Label2_4</code></td>
+      <td><span class="del">85</span> &rarr; <strong>40</strong></td>
+      <td><code>Label2_2</code>: X 16, Y 11, Size 12</td>
+      <td><code>Count_2</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
+      <td><code>Rectangle2</code>: Height 3, Y 37</td>
+    </tr>
+    <tr>
+      <td><code>ItemIssues</code></td>
+      <td><code>SVG_5</code>, <code>Label2_5</code></td>
+      <td><span class="del">85</span> &rarr; <strong>40</strong></td>
+      <td><code>Label2_3</code>: X 16, Y 11, Size 12</td>
+      <td><code>Count_3</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
+      <td><code>Rectangle2_2</code>: Height 3, Y 37</td>
+    </tr>
+    <tr>
+      <td><code>History</code></td>
+      <td><code>SVG_3</code>, <code>Label2_6</code></td>
+      <td><span class="del">85</span> &rarr; <strong>40</strong></td>
+      <td><code>Label2_1</code>: X 16, Y 11, Size 12</td>
+      <td><code>Count_1</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
+      <td><code>Rectangle2_3</code>: Height 3, Y 37</td>
+    </tr>
+  </table>
+
+  <div class="warn">If any tab still looks too tall after this, its container also has a <code>LayoutMinHeight</code> property &mdash; set that to <code>40</code> too. At least one of the four has it pinned to <code>Parent.Height</code>.</div>
+
+  <h2 id="part4">Part 4 &mdash; Pillar Lead / Approved / Published stepper on each card</h2>
+  <p>Screen: <code>Main</code>, on the <code>ReleaseGallery</code> card template. Delete two controls first: <code>ReadyForRelease</code> and <code>ApprovedBy</code> (the two <code>Text@0.0.51</code> pill controls). Keep <code>ExtConsult</code> &mdash; that one's unrelated.</p>
+  <p>In their place, add a new container called <code>ApprovalStepper</code>, positioned where <code>ApprovedBy</code> currently sits.</p>
+
+  <table>
+    <tr><th>Control</th><th>Properties</th></tr>
+    <tr><td><code>ApprovalStepper</code> (GroupContainer, ManualLayout)</td><td><code>DropShadow=DropShadow.None</code>, <code>Fill=RGBA(0,0,0,0)</code>, <code>Height=24</code>, <code>Width=340</code>, <code>X=825</code>, <code>Y=55</code></td></tr>
+  </table>
+
+  <p>Eight children inside it, all positioned absolutely:</p>
+
+  <table>
+    <tr><th>Control</th><th>Type</th><th>Position/size</th><th>Text / Fill</th></tr>
+    <tr><td><code>DotPillar</code></td><td>Rectangle</td><td>10x10, X 0, Y 7, radius 5 all corners</td><td>see code block below</td></tr>
+    <tr><td><code>LblPillar</code></td><td>Label</td><td>X 16, Y 2, Width 70, Size 9</td><td>Text: <code>"Pillar Lead"</code></td></tr>
+    <tr><td><code>LinePillarApproved</code></td><td>Rectangle</td><td>2x40, X 90, Y 11</td><td>see code block below</td></tr>
+    <tr><td><code>DotApproved</code></td><td>Rectangle</td><td>10x10, X 134, Y 7, radius 5 all corners</td><td>see code block below</td></tr>
+    <tr><td><code>LblApproved</code></td><td>Label</td><td>X 150, Y 2, Width 65, Size 9</td><td>Text: <code>"Approved"</code></td></tr>
+    <tr><td><code>LineApprovedPublished</code></td><td>Rectangle</td><td>2x40, X 218, Y 11</td><td>see code block below</td></tr>
+    <tr><td><code>DotPublished</code></td><td>Rectangle</td><td>10x10, X 262, Y 7, radius 5 all corners</td><td>see code block below</td></tr>
+    <tr><td><code>LblPublished</code></td><td>Label</td><td>X 278, Y 2, Width 70, Size 9</td><td>Text: <code>"Published"</code></td></tr>
+  </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// DotPillar.Fill and LinePillarApproved.Fill (same test)
+If(ThisItem.'Approved by Pillar Lead (Ready to Release)', RGBA(52, 152, 47, 1), RGBA(200, 200, 200, 1))
+
+// DotApproved.Fill
+If(!IsBlank(ThisItem.'Approved For Release By'.Value) &amp;&amp; ThisItem.'Approved For Release By'.Value &lt;&gt; "Not Yet Approved", RGBA(52, 152, 47, 1), RGBA(200, 200, 200, 1))
+
+// LineApprovedPublished.Fill and DotPublished.Fill (same test)
+If(ThisItem.Published, RGBA(52, 152, 47, 1), RGBA(200, 200, 200, 1))</pre></div>
+
+  <p>Line fills use the slightly lighter grey <code>RGBA(220, 220, 220, 1)</code> for the "off" state instead of the dot grey, so the dots read as the focal point. Swap that in on the two Line controls' false branch if you want the exact same shade as the dots &mdash; either looks fine.</p>
+
+  <div class="warn">If this overlaps <code>LinkCount</code> at X 1100, nudge <code>ApprovalStepper</code>'s X down a bit, or move <code>LinkCount</code> further right. The card is 1194 wide, so there's room either way.</div>
+
+  <h2 id="part5">Part 5 &mdash; Staff view: Publish All for one release date at a time</h2>
+  <p>Screen: <code>Main</code>. This button lives in the group header row (the grey <code>Banner</code> strip with the date and item count) &mdash; not per-card, and not global &mdash; so clicking it can only ever touch the items in that one date group, never the whole list.</p>
+  <p>In <code>Main</code>'s Tree view, find where <code>DateHeader</code>, <code>TextInput1</code> and <code>SVG_7</code> live (the group header row inside <code>Container1</code>). Add a new button there called <code>PublishAllBtn</code>.</p>
+
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td><code>BorderThickness</code></td><td><code>0</code></td></tr>
+    <tr><td><code>Color</code></td><td><code>RGBA(255, 255, 255, 1)</code></td></tr>
+    <tr><td><code>Fill</code></td><td><code>RGBA(0, 64, 47, 1)</code></td></tr>
+    <tr><td><code>Font</code></td><td><code>Font.'Open Sans'</code></td></tr>
+    <tr><td><code>FontWeight</code></td><td><code>FontWeight.Bold</code></td></tr>
+    <tr><td><code>Height</code></td><td><code>26</code></td></tr>
+    <tr><td><code>HoverFill</code></td><td><code>RGBA(45, 128, 40, 1)</code></td></tr>
+    <tr><td>Radius (all 4 corners)</td><td><code>6</code></td></tr>
+    <tr><td><code>Size</code></td><td><code>11</code></td></tr>
+    <tr><td><code>Width</code></td><td><code>150</code></td></tr>
+    <tr><td><code>X</code></td><td><code>950</code></td></tr>
+    <tr><td><code>Y</code></td><td><code>6</code></td></tr>
+  </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// PublishAllBtn.Text
+"Publish All (" &amp; CountRows(Filter(ThisItem.GroupedItems, Published = false)) &amp; ")"
+
+// PublishAllBtn.Visible
+!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &amp;&amp;
+ThisItem.PlannedDate &lt;= Today() &amp;&amp;
+CountRows(Filter(ThisItem.GroupedItems, Published = false)) &gt; 0</pre></div>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// PublishAllBtn.OnSelect
+Set(varPublishGroupDate, ThisItem.PlannedDate);
+Set(varPublishGroupCount, ThisItem.ItemCount);
+ForAll(
+    ThisItem.GroupedItems,
+    Patch(
+        'Policy Proof Tracker',
+        LookUp('Policy Proof Tracker', ID = ID),
+        {
+            Published: true,
+            'Published Date': varPublishGroupDate
+        }
+    )
+);
+Refresh('Policy Proof Tracker');
+Notify(
+    "Published all " &amp; varPublishGroupCount &amp; " items for " &amp; Text(varPublishGroupDate, "d mmm yyyy"),
+    NotificationType.Success
+)</pre></div>
+
+  <div class="note"><strong>Why this can't publish "hundreds":</strong> <code>ThisItem</code> here is the date-group record (it has <code>PlannedDate</code>, <code>ItemCount</code> and <code>GroupedItems</code> &mdash; only the items sharing that one date), because this button sits inside the outer date-grouped gallery, not the inner per-card one. It's also gated to <code>PlannedDate &lt;= Today()</code>, so it only shows up on a group that's actually due or overdue, and only if there's at least one unpublished item left in it.</div>
+
+  <p style="margin-top:40px;"><a href="https://github.com/PhadeDev/policy-tracker/issues/10">&larr; Back to issue #10</a></p>
+</main>
+<script>
+function copyBlock(btn) {
+  const text = btn.nextElementSibling.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('ok');
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.classList.remove('ok'); btn.textContent = 'Copy'; }, 1400);
+  });
+}
+</script>
+</body>
+</html>
