@@ -50,11 +50,12 @@
     <a href="#part1">Part 1 &middot; Release date fix</a>
     <a href="#part2">Part 2 &middot; Type filter chips</a>
     <a href="#part3">Part 3 &middot; Thin tabs</a>
+    <a href="#part3b">Part 3B &middot; Thin the cards</a>
     <a href="#part4">Part 4 &middot; Approval stepper</a>
     <a href="#part5">Part 5 &middot; Publish All</a>
   </div>
 
-  <div class="step"><span class="badge-order">1</span><strong>Suggested build order:</strong> Part 1 first (it's a data-loss bug), then Part 2, then Part 3, then Part 5, then Part 4 last since it's purely cosmetic and safest to leave for the end.</div>
+  <div class="step"><span class="badge-order">1</span><strong>Suggested build order:</strong> Part 1 first (it's a data-loss bug), then Part 2, then Part 3, then Part 3B, then Part 5, then Part 4 last &mdash; Part 3B has to come before Part 4 since the stepper's position depends on the card's new layout.</div>
 
   <h2 id="part1">Part 1 &mdash; Release date bug fix</h2>
   <p>Screen: <code>ViewItem</code>. Root cause: the date picker's own <code>OnChange</code> was calling <code>Reset(Self)</code> whenever a non-Thursday was clicked. Since <code>SelectedDate</code> is bound live to <code>varSelectedRelease.'Planned Publish Date'</code>, <code>Reset(Self)</code> snapped it straight back to the old/blank value &mdash; reads as "randomly clears itself" but happens on every non-Thursday click.</p>
@@ -370,6 +371,51 @@ Switch(
   </table>
 
   <div class="warn">If any tab still looks too tall after this, its container also has a <code>LayoutMinHeight</code> property &mdash; set that to <code>40</code> too. At least one of the four has it pinned to <code>Parent.Height</code>.</div>
+
+  <div class="changed"><span class="changed-tag">New 2026-07-06</span>
+  <h2 id="part3b">Part 3B &mdash; Thin the release cards (do this before Part 4)</h2>
+  <p>Screen: <code>Main</code>, the <code>ReleaseGallery</code> card template inside <code>Container6</code>. Card goes from 250px tall to 100px, closer to the original prototype. This has to happen before Part 4's approval stepper, since the stepper's position depends on where things end up here.</p>
+
+  <h3>Step 1 &mdash; the two container heights that drive everything</h3>
+  <table>
+    <tr><th>Control</th><th>Property</th><th>Change</th></tr>
+    <tr><td><code>Container6</code></td><td><code>Height</code></td><td><span class="del">250</span> &rarr; <strong>100</strong></td></tr>
+    <tr><td><code>Selector</code> (the full-card click overlay, sibling of <code>Container6</code>)</td><td><code>Height</code></td><td><span class="del">250</span> &rarr; <strong>100</strong> &mdash; must match <code>Container6</code> exactly or the click target and the visible card disagree</td></tr>
+    <tr><td><code>ReleaseGallery</code></td><td><code>TemplateSize</code></td><td><span class="del">260</span> &rarr; <strong>110</strong> (card height + a small gap)</td></tr>
+    <tr><td><code>ReleaseGallery</code></td><td><code>Height</code></td><td><code>CountRows(ThisItem.GroupedItems)*260</code> &rarr; <strong><code>CountRows(ThisItem.GroupedItems)*110</code></strong></td></tr>
+    <tr><td>The outer date-group container (one level up, holds <code>ReleaseGallery</code>)</td><td><code>Height</code></td><td><code>CountRows(ThisItem.GroupedItems)*300</code> &rarr; <strong><code>CountRows(ThisItem.GroupedItems)*130</code></strong></td></tr>
+  </table>
+
+  <h3>Step 2 &mdash; delete two controls, they don't fit at this scale</h3>
+  <table>
+    <tr><th>Control</th><th>Why</th></tr>
+    <tr><td><code>lblTypeWatermark</code></td><td>The giant faded letter behind the card (<code>Size=88</code>) only works at 250px tall &mdash; at 100px it'll dominate the whole card. Matches the original prototype, which didn't have it either.</td></tr>
+    <tr><td><code>Summary</code></td><td>The multi-line item-summary text box (<code>Height=65</code>) doesn't fit in a 100px card at all. The summary text isn't lost &mdash; it's still shown on <code>ViewItem</code> when the card is clicked, and <code>Title</code> already has a <code>Tooltip</code> with the full title on hover.</td></tr>
+  </table>
+
+  <h3>Step 3 &mdash; reposition everything that's staying</h3>
+  <p>New layout: row 1 (roughly Y=6 to Y=32) has the icon, title, and everything that used to be scattered at Y=15/200 down the right edge. Row 2 (roughly Y=40 to Y=66) has the owner, and a strip reserved for Part 4's stepper. One reserved zone: <strong>X=825 to X=1165, Y=40 to Y=80 &mdash; leave this empty, Part 4's <code>ApprovalStepper</code> goes there next.</strong></p>
+
+  <table>
+    <tr><th>Control</th><th>Change</th></tr>
+    <tr><td><code>SVG_6</code> (document icon)</td><td>Height=24, Width=24 (was 42x42) &mdash; X/Y formulas are already relative to the card, no change needed there</td></tr>
+    <tr><td><code>Title</code></td><td>Y=6 (was 60)<br>Size=14 (was 18)<br>PaddingTop=4 (was 17)</td></tr>
+    <tr><td><code>Published</code> badge</td><td>Y=6 (was 15)</td></tr>
+    <tr><td><code>LinkCount</code></td><td>Y=6 (was 200)</td></tr>
+    <tr><td><code>Attachment_Icon</code></td><td>Y=6 (was 200)</td></tr>
+    <tr><td><code>Released</code> (animated published checkmark)</td><td>Y=6 (add this explicitly &mdash; it had no <code>Y</code> set before)</td></tr>
+    <tr><td><code>TopItemBG</code> / <code>TopItemTop</code> / <code>TopItemTXT</code></td><td>Y=6 / Y=9 / Y=6 respectively (were 215/218/215)<br><code>TopItemBG.Height</code>=22 (was 26)</td></tr>
+    <tr><td><code>UsrIMG</code> (owner avatar)</td><td>Y=40 (was 200), Height=28, Width=28 (was 35x35)</td></tr>
+    <tr><td><code>Owner</code> (name text)</td><td>Y=44 (was 200), Height=24 (was 35), Width=260 (was 600 &mdash; that was always far more than the name needs)</td></tr>
+    <tr><td><code>ExtConsult</code></td><td>X=300, Y=40 (was X=825, Y=50 &mdash; moved off the reserved stepper zone)</td></tr>
+    <tr><td><code>BossPublishBtn</code></td><td>X=560, Y=40, Height=24 (was X=720, Y=204, Height=32 &mdash; also moved clear of the reserved zone)</td></tr>
+    <tr><td><code>rectBottomSeparator</code></td><td>Y=96 (was 192)</td></tr>
+  </table>
+
+  <div class="warn"><code>ReadyForRelease</code> and <code>ApprovedBy</code> are still sitting at their old <code>X=825, Y=50</code> spot right now &mdash; leave them, Part 4 deletes both of those anyway when the stepper goes in. Don't reposition them here, it's wasted effort.</div>
+
+  <div class="note">These X/Y numbers are a solid starting layout, not gospel &mdash; once this renders live, nudge anything that visually overlaps. The one that matters most is keeping <strong>X=825&ndash;1165, Y=40&ndash;80</strong> clear for Part 4.</div>
+  </div>
 
   <h2 id="part4">Part 4 &mdash; Pillar Lead / Approved / Published stepper on each card</h2>
   <p>Screen: <code>Main</code>, on the <code>ReleaseGallery</code> card template. Delete two controls first: <code>ReadyForRelease</code> and <code>ApprovedBy</code> (the two <code>Text@0.0.51</code> pill controls). Keep <code>ExtConsult</code> &mdash; that one's unrelated.</p>
