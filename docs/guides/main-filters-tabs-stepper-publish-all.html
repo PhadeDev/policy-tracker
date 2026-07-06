@@ -177,8 +177,19 @@ If(varTypeFilter = ThisItem.ChoiceValue, ThisItem.ColorCode, ColorFade(ThisItem.
   <p>Unselected pills now show a light pastel tint of their own type's colour instead of flat grey &mdash; same <code>ColorFade</code> approach the Main gallery cards already use for exactly this. Selecting a chip switches it to the full saturated colour. No change needed to <code>ChipLabel.Color</code>, the existing dark-grey/white split reads fine against both the pastel and the full colour.</p>
   </div>
 
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipLabel.Text - strips the emoji, adds a live count for the current tab
-Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1) & " (" &
+  <div class="changed"><span class="changed-tag">New 2026-07-06 &mdash; abbreviate the long labels</span>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipLabel.Text - strips the emoji, shortens the two long labels, adds a live count
+With(
+    {
+        FullLabel: Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1)
+    },
+    Switch(
+        FullLabel,
+        "Newsletter Item", "Newsletter",
+        "Internal Document", "Internal",
+        FullLabel
+    )
+) & " (" &
 CountRows(
     Filter(
         'Policy Proof Tracker',
@@ -193,9 +204,11 @@ CountRows(
         (varFilterOwner = false || Owner.Email = User().Email) &&
         'Document Type'.Value = ThisItem.ChoiceValue
     )
-) & ")"
+) & ")"</pre></div>
+  <p>Only "Newsletter Item" and "Internal Document" get shortened (to "Newsletter" and "Internal") &mdash; everything else keeps its full name since it already fits. Add more entries to the <code>Switch</code> the same way if another type ever runs long.</p>
+  </div>
 
-// ChipLabel.Color
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipLabel.Color
 If(varTypeFilter = ThisItem.ChoiceValue, RGBA(255, 255, 255, 1), RGBA(60, 60, 60, 1))
 
 // ChipButton.OnSelect
