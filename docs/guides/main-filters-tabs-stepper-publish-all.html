@@ -386,12 +386,28 @@ Switch(
     <tr><td>The outer date-group container (one level up, holds <code>ReleaseGallery</code>)</td><td><code>Height</code></td><td><code>CountRows(ThisItem.GroupedItems)*300</code> &rarr; <strong><code>CountRows(ThisItem.GroupedItems)*130</code></strong></td></tr>
   </table>
 
-  <h3>Step 2 &mdash; delete two controls, they don't fit at this scale</h3>
+  <div class="changed"><span class="changed-tag">Revised 2026-07-06 &mdash; shrink, don't delete</span>
+  <h3>Step 2 &mdash; shrink two controls instead of deleting them</h3>
+  <p>Both stay, both keep showing real information, just at card-appropriate size &mdash; losing the type indicator or the summary entirely would mean clicking into every card just to see what it is.</p>
   <table>
-    <tr><th>Control</th><th>Why</th></tr>
-    <tr><td><code>lblTypeWatermark</code></td><td>The giant faded letter behind the card (<code>Size=88</code>) only works at 250px tall &mdash; at 100px it'll dominate the whole card. Matches the original prototype, which didn't have it either.</td></tr>
-    <tr><td><code>Summary</code></td><td>The multi-line item-summary text box (<code>Height=65</code>) doesn't fit in a 100px card at all. The summary text isn't lost &mdash; it's still shown on <code>ViewItem</code> when the card is clicked, and <code>Title</code> already has a <code>Tooltip</code> with the full title on hover.</td></tr>
+    <tr><th>Control</th><th>Change</th></tr>
+    <tr><td><code>lblTypeWatermark</code></td>
+      <td>Shrunk from a card-spanning watermark to a small faded tag, top-right of the title row.<br><code>Size</code>=11 (was 88)<br><code>Height</code>=18 (was <code>Parent.Height</code>)<br><code>Width</code>=140 (was <code>Parent.Width - 15</code>)<br><code>X</code>=<code>Parent.Width - 370</code> (new &mdash; sits just left of the <code>Published</code> badge)<br><code>Y</code>=8 (new)<br>Text formula is unchanged, it already strips the emoji the same way the chips do.</td></tr>
+    <tr><td><code>Summary</code></td>
+      <td>Shrunk to one line instead of three.<br><code>Height</code>=20 (was 65)<br><code>Width</code>=780 (was <code>Parent.Width</code> &mdash; stops before the reserved stepper zone at X=825)<br><code>Y</code>=68 (was 100)<br><code>PaddingTop</code>=4 (was 8)<br>Remove <code>Mode: =TextMode.MultiLine</code> entirely &mdash; delete that one property, single-line is the default without it.<br>Also replace the <code>Default</code> formula (below) &mdash; only the truncation cutoff changes, 200 characters was sized for three lines, one line needs roughly 90.</td></tr>
   </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// Summary.Default &mdash; full replacement, only the two "200"s below became "90"
+If(
+    IsBlank(ThisItem.'Item summary'),
+    "No summary has been provided",
+    If(
+        Len(Substitute(Substitute(ThisItem.'Item summary', Char(10), " "), Char(13), " ")) > 90,
+        Left(Substitute(Substitute(ThisItem.'Item summary', Char(10), " "), Char(13), " "), 90) & "...",
+        Substitute(Substitute(ThisItem.'Item summary', Char(10), " "), Char(13), " ")
+    )
+)</pre></div>
+  </div>
 
   <h3>Step 3 &mdash; reposition everything that's staying</h3>
   <p>New layout: row 1 (roughly Y=6 to Y=32) has the icon, title, and everything that used to be scattered at Y=15/200 down the right edge. Row 2 (roughly Y=40 to Y=66) has the owner, and a strip reserved for Part 4's stepper. One reserved zone: <strong>X=825 to X=1165, Y=40 to Y=80 &mdash; leave this empty, Part 4's <code>ApprovalStepper</code> goes there next.</strong></p>
