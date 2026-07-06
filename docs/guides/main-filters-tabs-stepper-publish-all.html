@@ -137,8 +137,8 @@ colChoiceColors</pre></div>
   <h3>Step 4 &mdash; chip template (3 controls inside the gallery)</h3>
   <table>
     <tr><th>Control</th><th>Type</th><th>Properties</th></tr>
-    <tr><td><code>ChipBg</code></td><td>Rectangle</td>
-      <td><code>Height=28</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code>, radius (all 4 corners) <code>=14</code></td></tr>
+    <tr><td><code>ChipBg</code></td><td>Classic Button (shape only &mdash; <code>Rectangle</code> and <code>Label</code> don't support radius at all in this app, confirmed multiple times, Classic Button is the documented workaround for a plain rounded shape)</td>
+      <td><code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> (blank), <code>BorderThickness=0</code>, <code>Height=28</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code>, radius (all 4 corners) <code>=14</code></td></tr>
     <tr><td><code>ChipLabel</code></td><td>Label</td>
       <td><code>Align=Align.Center</code>, <code>Font=Font.'Open Sans'</code>, <code>FontWeight=FontWeight.Semibold</code>, <code>Height=28</code>, <code>Size=10</code>, <code>Text=ThisItem.ChoiceValue</code>, <code>VerticalAlign=VerticalAlign.Middle</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code></td></tr>
     <tr><td><code>ChipButton</code></td><td>Classic Button (transparent overlay, whole pill clickable)</td>
@@ -324,17 +324,17 @@ Switch(
     <tr><td><code>ApprovalStepper</code> (GroupContainer, ManualLayout)</td><td><code>DropShadow=DropShadow.None</code>, <code>Fill=RGBA(0,0,0,0)</code>, <code>Height=24</code>, <code>Width=340</code>, <code>X=825</code>, <code>Y=55</code></td></tr>
   </table>
 
-  <p>Eight children inside it, all positioned absolutely:</p>
+  <p>Eight children inside it, all positioned absolutely. The three dots are Classic Buttons, not Rectangles &mdash; a Rectangle can't have rounded corners at all in this app (same rule as the chips above), so a 10x10 fully-rounded "dot" has to be a Classic Button with radius 5 and <code>DisplayMode.View</code>, not a shape control. The two connecting lines are plain Rectangles &mdash; they're straight bars, no radius needed, so a Rectangle is correct there.</p>
 
   <table>
     <tr><th>Control</th><th>Type</th><th>Position/size</th><th>Text / Fill</th></tr>
-    <tr><td><code>DotPillar</code></td><td>Rectangle</td><td>10x10, X 0, Y 7, radius 5 all corners</td><td>see code block below</td></tr>
+    <tr><td><code>DotPillar</code></td><td>Classic Button</td><td>10x10, X 0, Y 7, radius 5 all corners, <code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> blank, <code>BorderThickness=0</code></td><td>see code block below</td></tr>
     <tr><td><code>LblPillar</code></td><td>Label</td><td>X 16, Y 2, Width 70, Size 9</td><td>Text: <code>"Pillar Lead"</code></td></tr>
     <tr><td><code>LinePillarApproved</code></td><td>Rectangle</td><td>2x40, X 90, Y 11</td><td>see code block below</td></tr>
-    <tr><td><code>DotApproved</code></td><td>Rectangle</td><td>10x10, X 134, Y 7, radius 5 all corners</td><td>see code block below</td></tr>
+    <tr><td><code>DotApproved</code></td><td>Classic Button</td><td>10x10, X 134, Y 7, radius 5 all corners, <code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> blank, <code>BorderThickness=0</code></td><td>see code block below</td></tr>
     <tr><td><code>LblApproved</code></td><td>Label</td><td>X 150, Y 2, Width 65, Size 9</td><td>Text: <code>"Approved"</code></td></tr>
     <tr><td><code>LineApprovedPublished</code></td><td>Rectangle</td><td>2x40, X 218, Y 11</td><td>see code block below</td></tr>
-    <tr><td><code>DotPublished</code></td><td>Rectangle</td><td>10x10, X 262, Y 7, radius 5 all corners</td><td>see code block below</td></tr>
+    <tr><td><code>DotPublished</code></td><td>Classic Button</td><td>10x10, X 262, Y 7, radius 5 all corners, <code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> blank, <code>BorderThickness=0</code></td><td>see code block below</td></tr>
     <tr><td><code>LblPublished</code></td><td>Label</td><td>X 278, Y 2, Width 70, Size 9</td><td>Text: <code>"Published"</code></td></tr>
   </table>
 
