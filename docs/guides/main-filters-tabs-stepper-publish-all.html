@@ -84,11 +84,12 @@ Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPubli
 
   <h3>Step 2 &mdash; new container</h3>
   <p>In <code>Main</code>'s Tree view, open <code>LeftSide</code>. From the Insert panel, insert a <strong>Horizontal container</strong> as the <em>first</em> child, directly above <code>GalleryContainer</code>. Name it <code>TypeFilterBar</code>. Set its <strong>Wrap</strong> setting (in the properties pane, next to Gap/Direction &mdash; check if it's there, don't assume) to wrap to a second row instead of overflowing, so nothing gets cut off or needs scrolling.</p>
+  <div class="warn">Set <code>Height=44</code>, not a taller fixed value &mdash; a fixed height reserves space for a second row whether or not the chips actually need one, which is exactly the dead white-space gap you hit. With the narrower chips below, one row should be enough most of the time; if it still wraps sometimes that's fine, it just won't be a permanently reserved gap.</div>
 
   <table>
     <tr><th>Control</th><th>Properties (formula bar)</th></tr>
     <tr><td><code>TypeFilterBar</code></td>
-      <td><code>DropShadow=DropShadow.None</code><br><code>Fill=RGBA(255,255,255,1)</code><br><code>Height=76</code><br><code>PaddingLeft=4</code><br><code>PaddingTop=6</code><br><code>Width=Parent.Width</code></td></tr>
+      <td><code>DropShadow=DropShadow.None</code><br><code>Fill=RGBA(255,255,255,1)</code><br><code>Height=44</code><br><code>PaddingLeft=4</code><br><code>PaddingTop=6</code><br><code>Width=Parent.Width</code></td></tr>
   </table>
 
   <p>First child of <code>TypeFilterBar</code>: a pinned <code>AllTypesBtn</code> (Classic Button) so there's always a one-click way back to "everything," regardless of which chip is selected.</p>
@@ -109,36 +110,78 @@ If(IsBlank(varTypeFilter) || varTypeFilter = "", RGBA(255, 255, 255, 1), RGBA(60
 Set(varTypeFilter, "");
 Reset(HeaderGallery)</pre></div>
 
-  <h3>Step 3 &mdash; the chip gallery</h3>
-  <p>Second child of <code>TypeFilterBar</code>, right after <code>AllTypesBtn</code>: a Gallery, name it <code>TypeFilterGallery</code>, <strong>Variant: Horizontal</strong>. No concatenation needed &mdash; <code>colChoiceColors</code> already holds every real document type, "All types" is handled by the pinned button above instead of a synthetic row.</p>
+  <h3>Step 3 &mdash; fix <code>colChoiceColors</code> in <code>OnStart</code> (do this even if you already built the gallery)</h3>
+  <div class="warn">If your <code>OnStart</code> still has the old two-step version (<code>ClearCollect(colChoiceColors, {ChoiceValue: "All types", ...}); Collect(colChoiceColors, ForAll(...))</code>), that's exactly what's producing a fake extra chip in the gallery labelled "types" &mdash; it's the leftover "All types" row from before the pinned button existed, still sitting in the same collection the gallery reads from. Replace the whole thing with the single-step version below.</div>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// OnStart &mdash; full replacement for the colChoiceColors block
+ClearCollect(
+    colChoiceColors,
+    ForAll(
+        Choices('Policy Proof Tracker'.'Document Type'),
+        {
+            ChoiceValue: Value,
+            ColorCode: Switch(
+                Value,
+                "📗 Manual", RGBA(0, 130, 60, 1),
+                "📄 CFI", RGBA(0, 100, 200, 1),
+                "📄 CFSO", RGBA(130, 0, 180, 1),
+                "📕 SOI", RGBA(190, 30, 30, 1),
+                "📖 Regulation", RGBA(0, 150, 150, 1),
+                "📄 CBN", RGBA(210, 100, 0, 1),
+                "📄 ACSO", RGBA(0, 60, 130, 1),
+                "📑 Internal Document", RGBA(90, 90, 110, 1),
+                "📜 Newsletter Item", RGBA(160, 120, 0, 1),
+                RGBA(150, 150, 150, 1)
+            )
+        }
+    )
+)</pre></div>
+
+  <h3>Step 4 &mdash; the chip gallery</h3>
+  <p>Second child of <code>TypeFilterBar</code>, right after <code>AllTypesBtn</code>: a Gallery, name it <code>TypeFilterGallery</code>, <strong>Variant: Horizontal</strong>.</p>
 
   <table>
     <tr><th>Property</th><th>Value</th></tr>
     <tr><td><code>Height</code></td><td><code>Parent.Height</code></td></tr>
-    <tr><td><code>TemplateSize</code></td><td><code>96</code></td></tr>
+    <tr><td><code>TemplateSize</code></td><td><code>120</code></td></tr>
     <tr><td><code>Width</code></td><td><code>Parent.Width - 90</code></td></tr>
   </table>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// TypeFilterGallery.Items
 colChoiceColors</pre></div>
 
-  <h3>Step 4 &mdash; chip template (3 controls inside the gallery)</h3>
-  <p>Labels drop the leading emoji for display &mdash; the emoji stays in <code>colChoiceColors</code>/the real SharePoint value for filtering, it's just not shown on the chip.</p>
+  <h3>Step 5 &mdash; chip template (3 controls inside the gallery)</h3>
+  <p>Labels drop the leading emoji and add a live count of matching items in the currently selected tab (Due Next 4 Weeks / Future / Issues / Previously Published), in brackets. <code>ChipLabel</code> switches from Label to <strong>ModernText</strong> here &mdash; Label doesn't have a confirmed <code>Wrap</code> property in this app, ModernText does (already confirmed elsewhere in this app's own <code>Main.yaml</code>), and with count text added the label needs to guarantee one line.</p>
   <table>
     <tr><th>Control</th><th>Type</th><th>Properties</th></tr>
     <tr><td><code>ChipBg</code></td><td>Classic Button (shape only &mdash; <code>Rectangle</code> and <code>Label</code> don't support radius at all in this app, confirmed multiple times, Classic Button is the documented workaround for a plain rounded shape)</td>
-      <td><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> (blank)<br><code>BorderThickness=0</code><br><code>Height=28</code><br><code>Width=88</code><br><code>X=4</code><br><code>Y=4</code><br>radius (all 4 corners)=14</td></tr>
-    <tr><td><code>ChipLabel</code></td><td>Label</td>
-      <td><code>Align=Align.Center</code><br><code>Font=Font.'Open Sans'</code><br><code>FontWeight=FontWeight.Semibold</code><br><code>Height=28</code><br><code>Size=9</code><br><code>VerticalAlign=VerticalAlign.Middle</code><br><code>Width=88</code><br><code>X=4</code><br><code>Y=4</code></td></tr>
+      <td><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> (blank)<br><code>BorderThickness=0</code><br><code>Height=28</code><br><code>Width=112</code><br><code>X=4</code><br><code>Y=4</code><br>radius (all 4 corners)=14</td></tr>
+    <tr><td><code>ChipLabel</code></td><td>ModernText</td>
+      <td><code>Align=Align.Center</code><br><code>Font=Font.'Open Sans'</code><br><code>FontWeight=FontWeight.Semibold</code><br><code>Height=28</code><br><code>Size=9</code><br><code>VerticalAlign=VerticalAlign.Middle</code><br><code>Wrap=false</code><br><code>Width=112</code><br><code>X=4</code><br><code>Y=4</code></td></tr>
     <tr><td><code>ChipButton</code></td><td>Classic Button (transparent overlay, whole pill clickable)</td>
-      <td><code>BorderThickness=0</code><br><code>Fill=RGBA(0,0,0,0)</code><br><code>HoverFill=RGBA(0,0,0,0.05)</code><br><code>PressedFill=RGBA(0,0,0,0.1)</code><br><code>Height=28</code><br><code>Width=88</code><br><code>X=4</code><br><code>Y=4</code><br><code>Text=</code> (blank)</td></tr>
+      <td><code>BorderThickness=0</code><br><code>Fill=RGBA(0,0,0,0)</code><br><code>HoverFill=RGBA(0,0,0,0.05)</code><br><code>PressedFill=RGBA(0,0,0,0.1)</code><br><code>Height=28</code><br><code>Width=112</code><br><code>X=4</code><br><code>Y=4</code><br><code>Text=</code> (blank)</td></tr>
   </table>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipBg.Fill
 If(varTypeFilter = ThisItem.ChoiceValue, ThisItem.ColorCode, RGBA(238, 238, 238, 1))
 
-// ChipLabel.Text - strips the emoji, keeps the real value for filtering untouched
-Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1)
+// ChipLabel.Text - strips the emoji, adds a live count for the current tab
+Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1) & " (" &
+CountRows(
+    Filter(
+        'Policy Proof Tracker',
+        Switch(
+            varSelectedState,
+            "Current", 'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days"),
+            "Future", 'Planned Publish Date' > DateAdd(Today(), 28, "Days"),
+            "UnapprovedHistoric", 'Planned Publish Date' < Today() && Published = false,
+            "Historic", 'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") && 'Planned Publish Date' < Today() && Published = true,
+            false
+        ) &&
+        (varFilterOwner = false || Owner.Email = User().Email) &&
+        'Document Type'.Value = ThisItem.ChoiceValue
+    )
+) & ")"
 
 // ChipLabel.Color
 If(varTypeFilter = ThisItem.ChoiceValue, RGBA(255, 255, 255, 1), RGBA(60, 60, 60, 1))
