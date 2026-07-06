@@ -171,10 +171,13 @@ colChoiceColors</pre></div>
       <td><code>BorderThickness=0</code><br><code>Fill=RGBA(0,0,0,0)</code><br><code>HoverFill=RGBA(0,0,0,0.05)</code><br><code>PressedFill=RGBA(0,0,0,0.1)</code><br><code>Height=28</code><br><code>Width=112</code><br><code>X=4</code><br><code>Y=4</code><br><code>Text=</code> (blank)</td></tr>
   </table>
 
+  <div class="changed"><span class="changed-tag">New 2026-07-06 &mdash; unselected pills now tinted by type colour</span>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipBg.Fill
-If(varTypeFilter = ThisItem.ChoiceValue, ThisItem.ColorCode, RGBA(238, 238, 238, 1))
+If(varTypeFilter = ThisItem.ChoiceValue, ThisItem.ColorCode, ColorFade(ThisItem.ColorCode, 0.8))</pre></div>
+  <p>Unselected pills now show a light pastel tint of their own type's colour instead of flat grey &mdash; same <code>ColorFade</code> approach the Main gallery cards already use for exactly this. Selecting a chip switches it to the full saturated colour. No change needed to <code>ChipLabel.Color</code>, the existing dark-grey/white split reads fine against both the pastel and the full colour.</p>
+  </div>
 
-// ChipLabel.Text - strips the emoji, adds a live count for the current tab
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipLabel.Text - strips the emoji, adds a live count for the current tab
 Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1) & " (" &
 CountRows(
     Filter(
