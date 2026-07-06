@@ -89,7 +89,7 @@ Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPubli
   <table>
     <tr><th>Control</th><th>Properties (formula bar)</th></tr>
     <tr><td><code>TypeFilterBar</code></td>
-      <td><code>DropShadow=DropShadow.None</code>, <code>Fill=RGBA(255,255,255,1)</code>, <code>Height=44</code>, <code>PaddingLeft=4</code>, <code>PaddingTop=6</code>, <code>Width=Parent.Width</code></td></tr>
+      <td><code>DropShadow=DropShadow.None</code><br><code>Fill=RGBA(255,255,255,1)</code><br><code>Height=44</code><br><code>PaddingLeft=4</code><br><code>PaddingTop=6</code><br><code>Width=Parent.Width</code></td></tr>
   </table>
 
   <h3>Step 3 &mdash; the chip gallery</h3>
@@ -138,11 +138,11 @@ colChoiceColors</pre></div>
   <table>
     <tr><th>Control</th><th>Type</th><th>Properties</th></tr>
     <tr><td><code>ChipBg</code></td><td>Classic Button (shape only &mdash; <code>Rectangle</code> and <code>Label</code> don't support radius at all in this app, confirmed multiple times, Classic Button is the documented workaround for a plain rounded shape)</td>
-      <td><code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> (blank), <code>BorderThickness=0</code>, <code>Height=28</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code>, radius (all 4 corners) <code>=14</code></td></tr>
+      <td><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> (blank)<br><code>BorderThickness=0</code><br><code>Height=28</code><br><code>Width=120</code><br><code>X=5</code><br><code>Y=4</code><br>radius (all 4 corners)=14</td></tr>
     <tr><td><code>ChipLabel</code></td><td>Label</td>
-      <td><code>Align=Align.Center</code>, <code>Font=Font.'Open Sans'</code>, <code>FontWeight=FontWeight.Semibold</code>, <code>Height=28</code>, <code>Size=10</code>, <code>Text=ThisItem.ChoiceValue</code>, <code>VerticalAlign=VerticalAlign.Middle</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code></td></tr>
+      <td><code>Align=Align.Center</code><br><code>Font=Font.'Open Sans'</code><br><code>FontWeight=FontWeight.Semibold</code><br><code>Height=28</code><br><code>Size=10</code><br><code>Text=ThisItem.ChoiceValue</code><br><code>VerticalAlign=VerticalAlign.Middle</code><br><code>Width=120</code><br><code>X=5</code><br><code>Y=4</code></td></tr>
     <tr><td><code>ChipButton</code></td><td>Classic Button (transparent overlay, whole pill clickable)</td>
-      <td><code>BorderThickness=0</code>, <code>Fill=RGBA(0,0,0,0)</code>, <code>HoverFill=RGBA(0,0,0,0.05)</code>, <code>PressedFill=RGBA(0,0,0,0.1)</code>, <code>Height=28</code>, <code>Width=120</code>, <code>X=5</code>, <code>Y=4</code>, <code>Text=</code> (blank)</td></tr>
+      <td><code>BorderThickness=0</code><br><code>Fill=RGBA(0,0,0,0)</code><br><code>HoverFill=RGBA(0,0,0,0.05)</code><br><code>PressedFill=RGBA(0,0,0,0.1)</code><br><code>Height=28</code><br><code>Width=120</code><br><code>X=5</code><br><code>Y=4</code><br><code>Text=</code> (blank)</td></tr>
   </table>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipBg.Fill
@@ -283,33 +283,33 @@ Switch(
       <td><code>DueNextWeek</code></td>
       <td><code>SVG_2</code></td>
       <td><span class="del">85</span> &rarr; <strong>40</strong></td>
-      <td><code>Label2</code>: X 16, Y 11, Size 12</td>
-      <td><code>Count</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
-      <td><code>Rectangle2_1</code>: Height 3, Y 37</td>
+      <td><code>Label2</code><br>X=16<br>Y=11<br>Size=12</td>
+      <td><code>Count</code><br>X=<code>Parent.Width - 40</code><br>Y=8<br>Width=32<br>Height=24<br>Size=13</td>
+      <td><code>Rectangle2_1</code><br>Height=3<br>Y=37</td>
     </tr>
     <tr>
       <td><code>FutureReleases</code></td>
-      <td><code>SVG_4</code>, <code>Label2_4</code></td>
+      <td><code>SVG_4</code><br><code>Label2_4</code></td>
       <td><span class="del">85</span> &rarr; <strong>40</strong></td>
-      <td><code>Label2_2</code>: X 16, Y 11, Size 12</td>
-      <td><code>Count_2</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
-      <td><code>Rectangle2</code>: Height 3, Y 37</td>
+      <td><code>Label2_2</code><br>X=16<br>Y=11<br>Size=12</td>
+      <td><code>Count_2</code><br>X=<code>Parent.Width - 40</code><br>Y=8<br>Width=32<br>Height=24<br>Size=13</td>
+      <td><code>Rectangle2</code><br>Height=3<br>Y=37</td>
     </tr>
     <tr>
       <td><code>ItemIssues</code></td>
-      <td><code>SVG_5</code>, <code>Label2_5</code></td>
+      <td><code>SVG_5</code><br><code>Label2_5</code></td>
       <td><span class="del">85</span> &rarr; <strong>40</strong></td>
-      <td><code>Label2_3</code>: X 16, Y 11, Size 12</td>
-      <td><code>Count_3</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
-      <td><code>Rectangle2_2</code>: Height 3, Y 37</td>
+      <td><code>Label2_3</code><br>X=16<br>Y=11<br>Size=12</td>
+      <td><code>Count_3</code><br>X=<code>Parent.Width - 40</code><br>Y=8<br>Width=32<br>Height=24<br>Size=13</td>
+      <td><code>Rectangle2_2</code><br>Height=3<br>Y=37</td>
     </tr>
     <tr>
       <td><code>History</code></td>
-      <td><code>SVG_3</code>, <code>Label2_6</code></td>
+      <td><code>SVG_3</code><br><code>Label2_6</code></td>
       <td><span class="del">85</span> &rarr; <strong>40</strong></td>
-      <td><code>Label2_1</code>: X 16, Y 11, Size 12</td>
-      <td><code>Count_1</code>: X <code>Parent.Width - 40</code>, Y 8, Width 32, Height 24, Size 13</td>
-      <td><code>Rectangle2_3</code>: Height 3, Y 37</td>
+      <td><code>Label2_1</code><br>X=16<br>Y=11<br>Size=12</td>
+      <td><code>Count_1</code><br>X=<code>Parent.Width - 40</code><br>Y=8<br>Width=32<br>Height=24<br>Size=13</td>
+      <td><code>Rectangle2_3</code><br>Height=3<br>Y=37</td>
     </tr>
   </table>
 
@@ -321,21 +321,21 @@ Switch(
 
   <table>
     <tr><th>Control</th><th>Properties</th></tr>
-    <tr><td><code>ApprovalStepper</code> (GroupContainer, ManualLayout)</td><td><code>DropShadow=DropShadow.None</code>, <code>Fill=RGBA(0,0,0,0)</code>, <code>Height=24</code>, <code>Width=340</code>, <code>X=825</code>, <code>Y=55</code></td></tr>
+    <tr><td><code>ApprovalStepper</code> (GroupContainer, ManualLayout)</td><td><code>DropShadow=DropShadow.None</code><br><code>Fill=RGBA(0,0,0,0)</code><br><code>Height=24</code><br><code>Width=340</code><br><code>X=825</code><br><code>Y=55</code></td></tr>
   </table>
 
   <p>Eight children inside it, all positioned absolutely. The three dots are Classic Buttons, not Rectangles &mdash; a Rectangle can't have rounded corners at all in this app (same rule as the chips above), so a 10x10 fully-rounded "dot" has to be a Classic Button with radius 5 and <code>DisplayMode.View</code>, not a shape control. The two connecting lines are plain Rectangles &mdash; they're straight bars, no radius needed, so a Rectangle is correct there.</p>
 
   <table>
     <tr><th>Control</th><th>Type</th><th>Position/size</th><th>Text / Fill</th></tr>
-    <tr><td><code>DotPillar</code></td><td>Classic Button</td><td>10x10, X 0, Y 7, radius 5 all corners, <code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> blank, <code>BorderThickness=0</code></td><td>see code block below</td></tr>
-    <tr><td><code>LblPillar</code></td><td>Label</td><td>X 16, Y 2, Width 70, Size 9</td><td>Text: <code>"Pillar Lead"</code></td></tr>
-    <tr><td><code>LinePillarApproved</code></td><td>Rectangle</td><td>2x40, X 90, Y 11</td><td>see code block below</td></tr>
-    <tr><td><code>DotApproved</code></td><td>Classic Button</td><td>10x10, X 134, Y 7, radius 5 all corners, <code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> blank, <code>BorderThickness=0</code></td><td>see code block below</td></tr>
-    <tr><td><code>LblApproved</code></td><td>Label</td><td>X 150, Y 2, Width 65, Size 9</td><td>Text: <code>"Approved"</code></td></tr>
-    <tr><td><code>LineApprovedPublished</code></td><td>Rectangle</td><td>2x40, X 218, Y 11</td><td>see code block below</td></tr>
-    <tr><td><code>DotPublished</code></td><td>Classic Button</td><td>10x10, X 262, Y 7, radius 5 all corners, <code>DisplayMode=DisplayMode.View</code>, <code>Text=</code> blank, <code>BorderThickness=0</code></td><td>see code block below</td></tr>
-    <tr><td><code>LblPublished</code></td><td>Label</td><td>X 278, Y 2, Width 70, Size 9</td><td>Text: <code>"Published"</code></td></tr>
+    <tr><td><code>DotPillar</code></td><td>Classic Button</td><td>Height=10<br>Width=10<br>X=0<br>Y=7<br>radius (all 4 corners)=5<br><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> blank<br><code>BorderThickness=0</code></td><td>see code block below</td></tr>
+    <tr><td><code>LblPillar</code></td><td>Label</td><td>X=16<br>Y=2<br>Width=70<br>Size=9</td><td>Text: <code>"Pillar Lead"</code></td></tr>
+    <tr><td><code>LinePillarApproved</code></td><td>Rectangle</td><td>Height=2<br>Width=40<br>X=90<br>Y=11</td><td>see code block below</td></tr>
+    <tr><td><code>DotApproved</code></td><td>Classic Button</td><td>Height=10<br>Width=10<br>X=134<br>Y=7<br>radius (all 4 corners)=5<br><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> blank<br><code>BorderThickness=0</code></td><td>see code block below</td></tr>
+    <tr><td><code>LblApproved</code></td><td>Label</td><td>X=150<br>Y=2<br>Width=65<br>Size=9</td><td>Text: <code>"Approved"</code></td></tr>
+    <tr><td><code>LineApprovedPublished</code></td><td>Rectangle</td><td>Height=2<br>Width=40<br>X=218<br>Y=11</td><td>see code block below</td></tr>
+    <tr><td><code>DotPublished</code></td><td>Classic Button</td><td>Height=10<br>Width=10<br>X=262<br>Y=7<br>radius (all 4 corners)=5<br><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> blank<br><code>BorderThickness=0</code></td><td>see code block below</td></tr>
+    <tr><td><code>LblPublished</code></td><td>Label</td><td>X=278<br>Y=2<br>Width=70<br>Size=9</td><td>Text: <code>"Published"</code></td></tr>
   </table>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// DotPillar.Fill and LinePillarApproved.Fill (same test)
