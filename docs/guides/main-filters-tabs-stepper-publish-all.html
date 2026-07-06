@@ -83,12 +83,13 @@ Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPubli
   <p>Empty string means "All types".</p>
 
   <h3>Step 2 &mdash; new container</h3>
-  <p>In <code>Main</code>'s Tree view, open <code>LeftSide</code>, insert a new container as the <em>first</em> child, directly above <code>GalleryContainer</code>. Name it <code>TypeFilterBar</code>.</p>
+  <p>In <code>Main</code>'s Tree view, open <code>LeftSide</code>. From the Insert panel, insert a <strong>Horizontal container</strong> (not a plain Container, not Vertical) as the <em>first</em> child, directly above <code>GalleryContainer</code>. Name it <code>TypeFilterBar</code>.</p>
+  <div class="warn">Direction is fixed by which of the three container types you pick at insert time &mdash; there's no <code>LayoutDirection</code> property to set afterward, and no <code>LayoutGap</code> formula property either. Picking "Horizontal container" gives you the row layout directly. For spacing between chips, use the <strong>Gap</strong> stepper in the properties pane (next to the alignment icons when the container is selected) instead of a formula &mdash; set it to <code>8</code>. Everything else below (<code>Fill</code>, <code>Height</code>, <code>Width</code>, padding, <code>DropShadow</code>) are normal formula properties, only direction and gap are insert-time/UI-only.</div>
 
   <table>
-    <tr><th>Control</th><th>Type</th><th>Properties</th></tr>
-    <tr><td><code>TypeFilterBar</code></td><td><code>GroupContainer@1.5.0</code>, AutoLayout</td>
-      <td><code>DropShadow=DropShadow.None</code>, <code>Fill=RGBA(255,255,255,1)</code>, <code>Height=44</code>, <code>LayoutDirection=LayoutDirection.Horizontal</code>, <code>LayoutGap=8</code>, <code>PaddingLeft=4</code>, <code>PaddingTop=6</code>, <code>Width=Parent.Width</code></td></tr>
+    <tr><th>Control</th><th>Properties (formula bar)</th></tr>
+    <tr><td><code>TypeFilterBar</code></td>
+      <td><code>DropShadow=DropShadow.None</code>, <code>Fill=RGBA(255,255,255,1)</code>, <code>Height=44</code>, <code>PaddingLeft=4</code>, <code>PaddingTop=6</code>, <code>Width=Parent.Width</code></td></tr>
   </table>
 
   <h3>Step 3 &mdash; the chip gallery</h3>
@@ -100,8 +101,38 @@ Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPubli
     <tr><td><code>TemplateSize</code></td><td><code>130</code></td></tr>
     <tr><td><code>Width</code></td><td><code>Parent.Width</code></td></tr>
   </table>
+
+  <div class="warn"><code>&amp;</code> only concatenates text/number/date scalars, not two tables &mdash; that's the exact error you hit ("Invalid argument type. Expecting one of the following: Text, Number, ..."). Instead of trying to build the "All types" row at gallery-Items time, add it straight into <code>colChoiceColors</code> itself back in <code>OnStart</code>, so the gallery's <code>Items</code> can just point at the collection directly.</div>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// OnStart &mdash; replace the existing ClearCollect(colChoiceColors, ...) block with this
+ClearCollect(colChoiceColors, {ChoiceValue: "All types", ColorCode: RGBA(0, 64, 47, 1)});
+Collect(
+    colChoiceColors,
+    ForAll(
+        Choices('Policy Proof Tracker'.'Document Type'),
+        {
+            ChoiceValue: Value,
+            ColorCode: Switch(
+                Value,
+                "📗 Manual", RGBA(0, 130, 60, 1),
+                "📄 CFI", RGBA(0, 100, 200, 1),
+                "📄 CFSO", RGBA(130, 0, 180, 1),
+                "📕 SOI", RGBA(190, 30, 30, 1),
+                "📖 Regulation", RGBA(0, 150, 150, 1),
+                "📄 CBN", RGBA(210, 100, 0, 1),
+                "📄 ACSO", RGBA(0, 60, 130, 1),
+                "📑 Internal Document", RGBA(90, 90, 110, 1),
+                "📜 Newsletter Item", RGBA(160, 120, 0, 1),
+                RGBA(150, 150, 150, 1)
+            )
+        }
+    )
+)</pre></div>
+
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// TypeFilterGallery.Items
-Table({ChoiceValue: "All types", ColorCode: RGBA(0, 64, 47, 1)}) &amp; colChoiceColors</pre></div>
+colChoiceColors</pre></div>
+
+  <p>The <code>ClearCollect</code> puts the "All types" row in first, then <code>Collect</code> appends the real document types after it &mdash; same two functions your app already uses elsewhere, just split into two calls instead of one, so order is preserved and the gallery needs no concatenation at all.</p>
 
   <h3>Step 4 &mdash; chip template (3 controls inside the gallery)</h3>
   <table>
