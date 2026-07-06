@@ -30,6 +30,8 @@
     .partnav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 34px; }
     .partnav a { background: #182131; border: 1px solid #2b3546; border-radius: 6px; padding: 6px 12px; text-decoration: none; font-size: .85rem; }
     .badge-order { display: inline-block; background: #2d6a4f; color: #fff; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: .78rem; margin-right: 8px; }
+    .changed { border: 2px solid #d4af37 !important; border-radius: 8px; padding: 10px; margin: 14px 0; position: relative; background: rgba(212, 175, 55, 0.06); }
+    .changed-tag { position: absolute; top: -12px; left: 10px; background: #d4af37; color: #10131b; font-weight: 700; font-size: .72rem; padding: 2px 8px; border-radius: 4px; letter-spacing: .03em; }
   </style>
 </head>
 <body>
@@ -84,6 +86,7 @@ Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPubli
 
   <h3>Step 2 &mdash; new container</h3>
   <p>In <code>Main</code>'s Tree view, open <code>LeftSide</code>. From the Insert panel, insert a <strong>Horizontal container</strong> as the <em>first</em> child, directly above <code>GalleryContainer</code>. Name it <code>TypeFilterBar</code>. Set its <strong>Wrap</strong> setting (in the properties pane, next to Gap/Direction &mdash; check if it's there, don't assume) to wrap to a second row instead of overflowing, so nothing gets cut off or needs scrolling.</p>
+  <div class="changed"><span class="changed-tag">Updated 2026-07-06</span>
   <div class="warn">Set <code>Height=44</code>, not a taller fixed value &mdash; a fixed height reserves space for a second row whether or not the chips actually need one, which is exactly the dead white-space gap you hit. With the narrower chips below, one row should be enough most of the time; if it still wraps sometimes that's fine, it just won't be a permanently reserved gap.</div>
 
   <table>
@@ -91,6 +94,7 @@ Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPubli
     <tr><td><code>TypeFilterBar</code></td>
       <td><code>DropShadow=DropShadow.None</code><br><code>Fill=RGBA(255,255,255,1)</code><br><code>Height=44</code><br><code>PaddingLeft=4</code><br><code>PaddingTop=6</code><br><code>Width=Parent.Width</code></td></tr>
   </table>
+  </div>
 
   <p>First child of <code>TypeFilterBar</code>: a pinned <code>AllTypesBtn</code> (Classic Button) so there's always a one-click way back to "everything," regardless of which chip is selected.</p>
 
@@ -110,6 +114,7 @@ If(IsBlank(varTypeFilter) || varTypeFilter = "", RGBA(255, 255, 255, 1), RGBA(60
 Set(varTypeFilter, "");
 Reset(HeaderGallery)</pre></div>
 
+  <div class="changed"><span class="changed-tag">New 2026-07-06</span>
   <h3>Step 3 &mdash; fix <code>colChoiceColors</code> in <code>OnStart</code> (do this even if you already built the gallery)</h3>
   <div class="warn">If your <code>OnStart</code> still has the old two-step version (<code>ClearCollect(colChoiceColors, {ChoiceValue: "All types", ...}); Collect(colChoiceColors, ForAll(...))</code>), that's exactly what's producing a fake extra chip in the gallery labelled "types" &mdash; it's the leftover "All types" row from before the pinned button existed, still sitting in the same collection the gallery reads from. Replace the whole thing with the single-step version below.</div>
 
@@ -136,20 +141,24 @@ ClearCollect(
         }
     )
 )</pre></div>
+  </div>
 
   <h3>Step 4 &mdash; the chip gallery</h3>
   <p>Second child of <code>TypeFilterBar</code>, right after <code>AllTypesBtn</code>: a Gallery, name it <code>TypeFilterGallery</code>, <strong>Variant: Horizontal</strong>.</p>
 
+  <div class="changed"><span class="changed-tag">Updated 2026-07-06 &mdash; TemplateSize/Width</span>
   <table>
     <tr><th>Property</th><th>Value</th></tr>
     <tr><td><code>Height</code></td><td><code>Parent.Height</code></td></tr>
     <tr><td><code>TemplateSize</code></td><td><code>120</code></td></tr>
     <tr><td><code>Width</code></td><td><code>Parent.Width - 90</code></td></tr>
   </table>
+  </div>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// TypeFilterGallery.Items
 colChoiceColors</pre></div>
 
+  <div class="changed"><span class="changed-tag">Updated 2026-07-06 &mdash; wider, ModernText, live counts</span>
   <h3>Step 5 &mdash; chip template (3 controls inside the gallery)</h3>
   <p>Labels drop the leading emoji and add a live count of matching items in the currently selected tab (Due Next 4 Weeks / Future / Issues / Previously Published), in brackets. <code>ChipLabel</code> switches from Label to <strong>ModernText</strong> here &mdash; Label doesn't have a confirmed <code>Wrap</code> property in this app, ModernText does (already confirmed elsewhere in this app's own <code>Main.yaml</code>), and with count text added the label needs to guarantee one line.</p>
   <table>
@@ -189,6 +198,7 @@ If(varTypeFilter = ThisItem.ChoiceValue, RGBA(255, 255, 255, 1), RGBA(60, 60, 60
 // ChipButton.OnSelect
 Set(varTypeFilter, ThisItem.ChoiceValue);
 Reset(HeaderGallery)</pre></div>
+  </div>
 
   <p>Last child of <code>TypeFilterBar</code>: move the existing "Show only my items" toggle here, after <code>TypeFilterGallery</code>. With <code>AllTypesBtn</code> pinned at the start and the toggle pinned at the end, both stay put no matter how the chips wrap.</p>
 
