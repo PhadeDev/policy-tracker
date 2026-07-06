@@ -83,85 +83,71 @@ Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPubli
   <p>Empty string means "All types".</p>
 
   <h3>Step 2 &mdash; new container</h3>
-  <p>In <code>Main</code>'s Tree view, open <code>LeftSide</code>. From the Insert panel, insert a <strong>Horizontal container</strong> (not a plain Container, not Vertical) as the <em>first</em> child, directly above <code>GalleryContainer</code>. Name it <code>TypeFilterBar</code>.</p>
-  <div class="warn">Direction is fixed by which of the three container types you pick at insert time &mdash; there's no <code>LayoutDirection</code> property to set afterward, and no <code>LayoutGap</code> formula property either. Picking "Horizontal container" gives you the row layout directly. For spacing between chips, use the <strong>Gap</strong> stepper in the properties pane (next to the alignment icons when the container is selected) instead of a formula &mdash; set it to <code>8</code>. Everything else below (<code>Fill</code>, <code>Height</code>, <code>Width</code>, padding, <code>DropShadow</code>) are normal formula properties, only direction and gap are insert-time/UI-only.</div>
+  <p>In <code>Main</code>'s Tree view, open <code>LeftSide</code>. From the Insert panel, insert a <strong>Horizontal container</strong> as the <em>first</em> child, directly above <code>GalleryContainer</code>. Name it <code>TypeFilterBar</code>. Set its <strong>Wrap</strong> setting (in the properties pane, next to Gap/Direction &mdash; check if it's there, don't assume) to wrap to a second row instead of overflowing, so nothing gets cut off or needs scrolling.</p>
 
   <table>
     <tr><th>Control</th><th>Properties (formula bar)</th></tr>
     <tr><td><code>TypeFilterBar</code></td>
-      <td><code>DropShadow=DropShadow.None</code><br><code>Fill=RGBA(255,255,255,1)</code><br><code>Height=44</code><br><code>PaddingLeft=4</code><br><code>PaddingTop=6</code><br><code>Width=Parent.Width</code></td></tr>
+      <td><code>DropShadow=DropShadow.None</code><br><code>Fill=RGBA(255,255,255,1)</code><br><code>Height=76</code><br><code>PaddingLeft=4</code><br><code>PaddingTop=6</code><br><code>Width=Parent.Width</code></td></tr>
   </table>
 
+  <p>First child of <code>TypeFilterBar</code>: a pinned <code>AllTypesBtn</code> (Classic Button) so there's always a one-click way back to "everything," regardless of which chip is selected.</p>
+
+  <table>
+    <tr><th>Control</th><th>Properties</th></tr>
+    <tr><td><code>AllTypesBtn</code></td>
+      <td><code>Text="All types"</code><br><code>Height=28</code><br><code>Width=80</code><br>radius (all 4 corners)=14<br><code>BorderThickness=0</code><br><code>Font=Font.'Open Sans'</code><br><code>FontWeight=FontWeight.Semibold</code><br><code>Size=10</code></td></tr>
+  </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// AllTypesBtn.Fill
+If(IsBlank(varTypeFilter) || varTypeFilter = "", RGBA(0, 64, 47, 1), RGBA(238, 238, 238, 1))
+
+// AllTypesBtn.Color
+If(IsBlank(varTypeFilter) || varTypeFilter = "", RGBA(255, 255, 255, 1), RGBA(60, 60, 60, 1))
+
+// AllTypesBtn.OnSelect
+Set(varTypeFilter, "");
+Reset(HeaderGallery)</pre></div>
+
   <h3>Step 3 &mdash; the chip gallery</h3>
-  <p>Insert a Gallery inside <code>TypeFilterBar</code>, name it <code>TypeFilterGallery</code>, <strong>Variant: Horizontal</strong>.</p>
+  <p>Second child of <code>TypeFilterBar</code>, right after <code>AllTypesBtn</code>: a Gallery, name it <code>TypeFilterGallery</code>, <strong>Variant: Horizontal</strong>. No concatenation needed &mdash; <code>colChoiceColors</code> already holds every real document type, "All types" is handled by the pinned button above instead of a synthetic row.</p>
 
   <table>
     <tr><th>Property</th><th>Value</th></tr>
     <tr><td><code>Height</code></td><td><code>Parent.Height</code></td></tr>
-    <tr><td><code>TemplateSize</code></td><td><code>130</code></td></tr>
-    <tr><td><code>Width</code></td><td><code>Parent.Width</code></td></tr>
+    <tr><td><code>TemplateSize</code></td><td><code>96</code></td></tr>
+    <tr><td><code>Width</code></td><td><code>Parent.Width - 90</code></td></tr>
   </table>
-
-  <div class="warn"><code>&amp;</code> only concatenates text/number/date scalars, not two tables &mdash; that's the exact error you hit ("Invalid argument type. Expecting one of the following: Text, Number, ..."). Instead of trying to build the "All types" row at gallery-Items time, add it straight into <code>colChoiceColors</code> itself back in <code>OnStart</code>, so the gallery's <code>Items</code> can just point at the collection directly.</div>
-
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// OnStart &mdash; replace the existing ClearCollect(colChoiceColors, ...) block with this
-ClearCollect(colChoiceColors, {ChoiceValue: "All types", ColorCode: RGBA(0, 64, 47, 1)});
-Collect(
-    colChoiceColors,
-    ForAll(
-        Choices('Policy Proof Tracker'.'Document Type'),
-        {
-            ChoiceValue: Value,
-            ColorCode: Switch(
-                Value,
-                "📗 Manual", RGBA(0, 130, 60, 1),
-                "📄 CFI", RGBA(0, 100, 200, 1),
-                "📄 CFSO", RGBA(130, 0, 180, 1),
-                "📕 SOI", RGBA(190, 30, 30, 1),
-                "📖 Regulation", RGBA(0, 150, 150, 1),
-                "📄 CBN", RGBA(210, 100, 0, 1),
-                "📄 ACSO", RGBA(0, 60, 130, 1),
-                "📑 Internal Document", RGBA(90, 90, 110, 1),
-                "📜 Newsletter Item", RGBA(160, 120, 0, 1),
-                RGBA(150, 150, 150, 1)
-            )
-        }
-    )
-)</pre></div>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// TypeFilterGallery.Items
 colChoiceColors</pre></div>
 
-  <p>The <code>ClearCollect</code> puts the "All types" row in first, then <code>Collect</code> appends the real document types after it &mdash; same two functions your app already uses elsewhere, just split into two calls instead of one, so order is preserved and the gallery needs no concatenation at all.</p>
-
   <h3>Step 4 &mdash; chip template (3 controls inside the gallery)</h3>
+  <p>Labels drop the leading emoji for display &mdash; the emoji stays in <code>colChoiceColors</code>/the real SharePoint value for filtering, it's just not shown on the chip.</p>
   <table>
     <tr><th>Control</th><th>Type</th><th>Properties</th></tr>
     <tr><td><code>ChipBg</code></td><td>Classic Button (shape only &mdash; <code>Rectangle</code> and <code>Label</code> don't support radius at all in this app, confirmed multiple times, Classic Button is the documented workaround for a plain rounded shape)</td>
-      <td><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> (blank)<br><code>BorderThickness=0</code><br><code>Height=28</code><br><code>Width=120</code><br><code>X=5</code><br><code>Y=4</code><br>radius (all 4 corners)=14</td></tr>
+      <td><code>DisplayMode=DisplayMode.View</code><br><code>Text=</code> (blank)<br><code>BorderThickness=0</code><br><code>Height=28</code><br><code>Width=88</code><br><code>X=4</code><br><code>Y=4</code><br>radius (all 4 corners)=14</td></tr>
     <tr><td><code>ChipLabel</code></td><td>Label</td>
-      <td><code>Align=Align.Center</code><br><code>Font=Font.'Open Sans'</code><br><code>FontWeight=FontWeight.Semibold</code><br><code>Height=28</code><br><code>Size=10</code><br><code>Text=ThisItem.ChoiceValue</code><br><code>VerticalAlign=VerticalAlign.Middle</code><br><code>Width=120</code><br><code>X=5</code><br><code>Y=4</code></td></tr>
+      <td><code>Align=Align.Center</code><br><code>Font=Font.'Open Sans'</code><br><code>FontWeight=FontWeight.Semibold</code><br><code>Height=28</code><br><code>Size=9</code><br><code>VerticalAlign=VerticalAlign.Middle</code><br><code>Width=88</code><br><code>X=4</code><br><code>Y=4</code></td></tr>
     <tr><td><code>ChipButton</code></td><td>Classic Button (transparent overlay, whole pill clickable)</td>
-      <td><code>BorderThickness=0</code><br><code>Fill=RGBA(0,0,0,0)</code><br><code>HoverFill=RGBA(0,0,0,0.05)</code><br><code>PressedFill=RGBA(0,0,0,0.1)</code><br><code>Height=28</code><br><code>Width=120</code><br><code>X=5</code><br><code>Y=4</code><br><code>Text=</code> (blank)</td></tr>
+      <td><code>BorderThickness=0</code><br><code>Fill=RGBA(0,0,0,0)</code><br><code>HoverFill=RGBA(0,0,0,0.05)</code><br><code>PressedFill=RGBA(0,0,0,0.1)</code><br><code>Height=28</code><br><code>Width=88</code><br><code>X=4</code><br><code>Y=4</code><br><code>Text=</code> (blank)</td></tr>
   </table>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipBg.Fill
-If(
-    If(ThisItem.ChoiceValue = "All types", IsBlank(varTypeFilter) || varTypeFilter = "", varTypeFilter = ThisItem.ChoiceValue),
-    ThisItem.ColorCode,
-    RGBA(238, 238, 238, 1)
-)
+If(varTypeFilter = ThisItem.ChoiceValue, ThisItem.ColorCode, RGBA(238, 238, 238, 1))
+
+// ChipLabel.Text - strips the emoji, keeps the real value for filtering untouched
+Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1)
 
 // ChipLabel.Color
-If(
-    If(ThisItem.ChoiceValue = "All types", IsBlank(varTypeFilter) || varTypeFilter = "", varTypeFilter = ThisItem.ChoiceValue),
-    RGBA(255, 255, 255, 1),
-    RGBA(60, 60, 60, 1)
-)
+If(varTypeFilter = ThisItem.ChoiceValue, RGBA(255, 255, 255, 1), RGBA(60, 60, 60, 1))
 
 // ChipButton.OnSelect
-Set(varTypeFilter, If(ThisItem.ChoiceValue = "All types", "", ThisItem.ChoiceValue));
+Set(varTypeFilter, ThisItem.ChoiceValue);
 Reset(HeaderGallery)</pre></div>
+
+  <p>Last child of <code>TypeFilterBar</code>: move the existing "Show only my items" toggle here, after <code>TypeFilterGallery</code>. With <code>AllTypesBtn</code> pinned at the start and the toggle pinned at the end, both stay put no matter how the chips wrap.</p>
 
   <h3>Step 5 &mdash; wire the filter into the list</h3>
   <p>Replace the whole <code>Items</code> formula on <code>HeaderGallery</code> with this &mdash; the only change from what's there now is one extra line added inside each of the four <code>Filter()</code> calls.</p>
