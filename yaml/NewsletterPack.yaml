@@ -16,6 +16,7 @@ Screens:
                         Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
                         Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
                         (
+                            ReadyForRelease = true ||
                             'Approved For Release By'.Value = "XO" ||
                             'Approved For Release By'.Value = "ACOS" ||
                             'Approved For Release By'.Value = "DCOMD" ||
@@ -93,7 +94,6 @@ Screens:
                         Height: =38
                         Size: =20
                         Text: ="Newsletter Pack"
-                        VerticalAlign: =VerticalAlign.Middle
                         Width: =260
                         X: =24
                         Y: =13
@@ -107,7 +107,6 @@ Screens:
                         Height: =30
                         Size: =12
                         Text: ="Thursday " & Text(varNewsletterTargetDate, "d mmmm yyyy")
-                        VerticalAlign: =VerticalAlign.Middle
                         Width: =360
                         X: =300
                         Y: =17
@@ -138,6 +137,7 @@ Screens:
                                           Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
                                           Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
                                           (
+                                              ReadyForRelease = true ||
                                               'Approved For Release By'.Value = "XO" ||
                                               'Approved For Release By'.Value = "ACOS" ||
                                               'Approved For Release By'.Value = "DCOMD" ||
@@ -253,10 +253,22 @@ Screens:
                         Height: =34
                         Size: =16
                         Text: ="Plain text reference"
-                        VerticalAlign: =VerticalAlign.Middle
                         Width: =Parent.Width - 40
                         X: =20
                         Y: =16
+                  - lblPlainEmpty:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Color: =RGBA(112, 116, 134, 1)
+                        Font: =Font.'Open Sans'
+                        Height: =80
+                        Text: ="No matching newsletter items for this Thursday."
+                        Visible: =CountRows(colNewsletterPack) = 0
+                        Width: =Parent.Width - 80
+                        X: =40
+                        Y: =Parent.Height / 2 - 40
                   - lblPlainCount:
                       Control: Label@2.5.1
                       Properties:
@@ -268,7 +280,6 @@ Screens:
                         Height: =24
                         Size: =10
                         Text: =Text(CountRows(colNewsletterPack)) & " items"
-                        VerticalAlign: =VerticalAlign.Middle
                         Width: =120
                         X: =Parent.Width - 140
                         Y: =21
@@ -319,10 +330,8 @@ Screens:
                               Font: =Font.'Open Sans'
                               FontWeight: =FontWeight.Semibold
                               Height: =30
-                              Overflow: =Overflow.Hidden
                               Size: =12
                               Text: =ThisItem.PackTitle
-                              VerticalAlign: =VerticalAlign.Middle
                               Width: =Parent.TemplateWidth - 72
                               X: =16
                               Y: =8
@@ -332,7 +341,6 @@ Screens:
                               BorderColor: =RGBA(46, 125, 89, 0.5)
                               BorderThickness: =1
                               Color: =RGBA(46, 125, 89, 1)
-                              DisplayMode: =DisplayMode.Edit
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Courier New'
                               FontWeight: =FontWeight.Bold
@@ -346,14 +354,10 @@ Screens:
                               PressedBorderColor: =RGBA(28, 80, 55, 1)
                               PressedColor: =RGBA(255, 255, 255, 1)
                               PressedFill: =RGBA(28, 80, 55, 1)
-                              RadiusBottomLeft: =6
-                              RadiusBottomRight: =6
-                              RadiusTopLeft: =6
-                              RadiusTopRight: =6
                               Size: =9
                               Text: ="Copy"
                               Width: =40
-                              X: =Parent.TemplateWidth - 48
+                              X: =Parent.TemplateWidth - 44
                               Y: =8
                         - pillAudienceBG:
                             Control: Classic/Button@2.2.0
@@ -385,10 +389,8 @@ Screens:
                               Color: =RGBA(70, 74, 88, 1)
                               Font: =Font.'Open Sans'
                               Height: =30
-                              Overflow: =Overflow.Hidden
                               Size: =12
                               Text: =ThisItem.PackAudience
-                              VerticalAlign: =VerticalAlign.Middle
                               Width: =Parent.TemplateWidth - 72
                               X: =16
                               Y: =46
@@ -398,7 +400,6 @@ Screens:
                               BorderColor: =RGBA(46, 125, 89, 0.5)
                               BorderThickness: =1
                               Color: =RGBA(46, 125, 89, 1)
-                              DisplayMode: =DisplayMode.Edit
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Courier New'
                               FontWeight: =FontWeight.Bold
@@ -412,14 +413,10 @@ Screens:
                               PressedBorderColor: =RGBA(28, 80, 55, 1)
                               PressedColor: =RGBA(255, 255, 255, 1)
                               PressedFill: =RGBA(28, 80, 55, 1)
-                              RadiusBottomLeft: =6
-                              RadiusBottomRight: =6
-                              RadiusTopLeft: =6
-                              RadiusTopRight: =6
                               Size: =9
                               Text: ="Copy"
                               Width: =40
-                              X: =Parent.TemplateWidth - 48
+                              X: =Parent.TemplateWidth - 44
                               Y: =46
                         - pillSummaryBG:
                             Control: Classic/Button@2.2.0
@@ -436,10 +433,6 @@ Screens:
                               PressedBorderColor: =RGBA(0, 0, 0, 0)
                               PressedColor: =RGBA(0, 0, 0, 0)
                               PressedFill: =Self.Fill
-                              RadiusBottomLeft: =10
-                              RadiusBottomRight: =10
-                              RadiusTopLeft: =10
-                              RadiusTopRight: =10
                               Text: =""
                               Visible: =!IsBlank(ThisItem.PackSummary)
                               Width: =Parent.TemplateWidth - 55
@@ -452,7 +445,6 @@ Screens:
                               Color: =RGBA(70, 74, 88, 1)
                               Font: =Font.'Open Sans'
                               Height: =62
-                              Overflow: =Overflow.Hidden
                               Size: =11
                               Text: =ThisItem.PackSummary
                               VerticalAlign: =VerticalAlign.Top
@@ -466,11 +458,10 @@ Screens:
                               BorderColor: =RGBA(46, 125, 89, 0.5)
                               BorderThickness: =1
                               Color: =RGBA(46, 125, 89, 1)
-                              DisplayMode: =DisplayMode.Edit
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Courier New'
                               FontWeight: =FontWeight.Bold
-                              Height: =30
+                              Height: =62
                               HoverBorderColor: =RGBA(46, 125, 89, 1)
                               HoverColor: =RGBA(255, 255, 255, 1)
                               HoverFill: =RGBA(46, 125, 89, 1)
@@ -480,30 +471,12 @@ Screens:
                               PressedBorderColor: =RGBA(28, 80, 55, 1)
                               PressedColor: =RGBA(255, 255, 255, 1)
                               PressedFill: =RGBA(28, 80, 55, 1)
-                              RadiusBottomLeft: =6
-                              RadiusBottomRight: =6
-                              RadiusTopLeft: =6
-                              RadiusTopRight: =6
                               Size: =9
                               Text: ="Copy"
                               Visible: =!IsBlank(ThisItem.PackSummary)
                               Width: =40
-                              X: =Parent.TemplateWidth - 48
+                              X: =Parent.TemplateWidth - 44
                               Y: =84
-                  - lblPlainEmpty:
-                      Control: Label@2.5.1
-                      Properties:
-                        Align: =Align.Center
-                        BorderColor: =RGBA(0, 0, 0, 0)
-                        Color: =RGBA(112, 116, 134, 1)
-                        Font: =Font.'Open Sans'
-                        Height: =80
-                        Size: =13
-                        Text: ="No matching newsletter items for this Thursday."
-                        Visible: =CountRows(colNewsletterPack) = 0
-                        Width: =Parent.Width - 80
-                        X: =40
-                        Y: =Parent.Height / 2 - 40
             - conRightPanel:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
@@ -530,7 +503,6 @@ Screens:
                         Height: =34
                         Size: =16
                         Text: ="Email-ready format"
-                        VerticalAlign: =VerticalAlign.Middle
                         Width: =Parent.Width - 190
                         X: =20
                         Y: =16
@@ -574,7 +546,6 @@ Screens:
                         Height: =Parent.Height - 82
                         Items: =colNewsletterPack
                         LoadingSpinner: =LoadingSpinner.None
-                        ShowScrollbar: =true
                         TemplatePadding: =10
                         TemplateSize: =156
                         Width: =Parent.Width - 40
@@ -610,7 +581,6 @@ Screens:
                               Font: =Font.'Open Sans'
                               FontWeight: =FontWeight.Semibold
                               Height: =58
-                              Size: =13
                               Text: ="• " & ThisItem.PackTitle
                               VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.TemplateWidth - 44
@@ -643,7 +613,7 @@ Screens:
                               Text: ="Needs XO / ACOS / DCOMD approval"
                               Visible: =!ThisItem.IsFinalApproved
                               Width: =Parent.TemplateWidth - 34
-                              X: =38
+                              X: =34
                               Y: =126
                   - txtEmailPackHidden:
                       Control: Classic/TextInput@2.3.2
@@ -655,8 +625,6 @@ Screens:
                         Mode: =TextMode.MultiLine
                         Visible: =false
                         Width: =1
-                        X: =0
-                        Y: =0
                   - lblEmailEmpty:
                       Control: Label@2.5.1
                       Properties:
@@ -665,7 +633,6 @@ Screens:
                         Color: =RGBA(112, 116, 134, 1)
                         Font: =Font.'Open Sans'
                         Height: =80
-                        Size: =13
                         Text: ="No matching newsletter items for this Thursday."
                         Visible: =CountRows(colNewsletterPack) = 0
                         Width: =Parent.Width - 80
