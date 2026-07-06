@@ -178,6 +178,8 @@ If(varTypeFilter = ThisItem.ChoiceValue, ThisItem.ColorCode, ColorFade(ThisItem.
   </div>
 
   <div class="changed"><span class="changed-tag">New 2026-07-06 &mdash; abbreviate the long labels</span>
+  <div class="changed"><span class="changed-tag">Fixed 2026-07-06 &mdash; counts weren't respecting the selected tab</span>
+  <div class="warn"><code>Switch()</code>/<code>If()</code> used <em>inside</em> a <code>Filter()</code>'s predicate against a SharePoint data source can silently break delegation &mdash; the exact same conditions that work fine when <code>Switch</code> picks between whole separate <code>Filter()</code> calls (which is what <code>HeaderGallery.Items</code> itself already does) can give wrong/inconsistent results when the <code>Switch</code> is embedded as one term inside a single <code>Filter</code>'s boolean expression instead. Confirmed live: chip counts summed to 25 while the actual "Issues" tab showed 0 items, which is only possible if the count formula wasn't really gating on the selected tab at all. Fix: expand each tab's condition inline with <code>&amp;&amp;</code>/<code>||</code> instead of <code>Switch</code>, same shape as every other Filter in this app.</div>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipLabel.Text - strips the emoji, shortens the two long labels, adds a live count
 With(
     {
@@ -193,19 +195,18 @@ With(
 CountRows(
     Filter(
         'Policy Proof Tracker',
-        Switch(
-            varSelectedState,
-            "Current", 'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days"),
-            "Future", 'Planned Publish Date' > DateAdd(Today(), 28, "Days"),
-            "UnapprovedHistoric", 'Planned Publish Date' < Today() && Published = false,
-            "Historic", 'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") && 'Planned Publish Date' < Today() && Published = true,
-            false
+        (
+            (varSelectedState = "Current" && 'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days")) ||
+            (varSelectedState = "Future" && 'Planned Publish Date' > DateAdd(Today(), 28, "Days")) ||
+            (varSelectedState = "UnapprovedHistoric" && 'Planned Publish Date' < Today() && Published = false) ||
+            (varSelectedState = "Historic" && 'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") && 'Planned Publish Date' < Today() && Published = true)
         ) &&
         (varFilterOwner = false || Owner.Email = User().Email) &&
         'Document Type'.Value = ThisItem.ChoiceValue
     )
 ) & ")"</pre></div>
   <p>Only "Newsletter Item" and "Internal Document" get shortened (to "Newsletter" and "Internal") &mdash; everything else keeps its full name since it already fits. Add more entries to the <code>Switch</code> the same way if another type ever runs long.</p>
+  </div>
   </div>
 
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ChipLabel.Color
