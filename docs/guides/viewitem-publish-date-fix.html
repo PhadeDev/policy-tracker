@@ -30,40 +30,17 @@
 <main>
   <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
   <h1>ViewItem &mdash; Planned Publish Date showing "2 Jul26 2026"</h1>
-  <p>Screen: <code>ViewItem</code>, control <code>dpkPublishDate1</code>. Not a format string typo &mdash; the control itself is wrong. It's currently <code>ModernDatePicker@1.0.1</code>, not <code>DatePicker@0.0.46</code> &mdash; the exact control already blacklisted in the Bible for a different bug (a <code>SelectedDate</code> authoring error). Looks like this field got rebuilt by hand at some point and "Modern Date picker" got picked from the Insert panel instead of the plain "Date picker." <code>ModernDatePicker</code>'s <code>Format</code> property doesn't behave like a free-text formula the way the classic one does, which is almost certainly why it renders that squashed "2 Jul26 2026" instead of respecting the format string.</p>
 
-  <div class="warn">This is a full control swap, not a property tweak. Delete the existing <code>dpkPublishDate1</code> and paste this in as a new control with the same name.</div>
+  <div class="warn"><strong>Correction:</strong> the first version of this page told you to swap the whole control out for <code>DatePicker@0.0.46</code>. That was unnecessary and wrong &mdash; you found the real fix yourself before that guidance was even useful, and it's much simpler.</div>
 
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- dpkPublishDate1:
-    Control: DatePicker@0.0.46
-    Properties:
-      BorderColor: =If(!IsBlank(Self.SelectedDate) && Weekday(Self.SelectedDate, StartOfWeek.Monday) <> 4, Color.Red, RGBA(223, 229, 224, 1))
-      BorderStyle: =BorderStyle.Solid
-      BorderThickness: =1
-      Fill: =RGBA(255, 255, 255, 1)
-      Font: =Font.'Open Sans'
-      FontSize: =14
-      Format: =Text(Self.SelectedDate, "d mmmm yyyy")
-      Height: =40
-      OnChange: |-
-        =If(
-            Weekday(Self.SelectedDate, StartOfWeek.Monday) <> 4,
-            Notify("Only Thursdays are allowed - pick a different date before saving.", NotificationType.Error)
-        );
-        Set(varUnsavedChanges, true);
-        Set(varErrPublishDate, false)
-      SelectedDate: =varSelectedRelease.'Planned Publish Date'
-      StartOfWeek: ="Monday"
-      Width: =Parent.Width
-      Y: =22</pre></div>
+  <p>Screen: <code>ViewItem</code>, control <code>dpkPublishDate1</code> (<code>ModernDatePicker@1.0.1</code>). The actual cause: <code>ModernDatePicker.Format</code> does not support the 4-<code>m</code> <code>"mmmm"</code> token (full month name) the way <code>DatePicker@0.0.46.Format</code> does. With four <code>m</code>s it silently mis-renders &mdash; no error, just garbled output like "2 Jul26 2026" &mdash; instead of the expected "2 July 2026".</p>
 
-  <h3>Two syntax differences from what you had</h3>
-  <table>
-    <tr><th>Property</th><th>Why it changed</th></tr>
-    <tr><td><code>SelectedDate</code> replaces <code>DefaultDate</code></td><td>This control's actual settable property is different from <code>ModernDatePicker</code>'s.</td></tr>
-    <tr><td><code>StartOfWeek: ="Monday"</code></td><td>Plain quoted string on this control &mdash; not the <code>StartOfWeek.Monday</code> enum, which is specific to <code>ModernDatePicker</code> and will error here.</td></tr>
-  </table>
-  <p>Also dropped <code>FontWeight: =""</code> and <code>Placeholder</code> &mdash; neither is a real property on <code>DatePicker@0.0.46</code>, they were just silently accepted/ignored by <code>ModernDatePicker</code>.</p>
+  <div class="note"><strong>The fix:</strong> drop to three <code>m</code>s. The exact same control, no swap needed at all.</div>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// dpkPublishDate1.Format
+Text(Self.SelectedDate, "d mmm yyyy")</pre></div>
+
+  <p>That renders "2 Jul 2026". Everything else on the control &mdash; <code>DefaultDate</code>, the Thursday-only <code>OnChange</code> check, <code>BorderColor</code>, all of it &mdash; stays exactly as it was. Just the one property, just those four characters shortened to three.</p>
 </main>
 <script>
 function copyBlock(btn) {
