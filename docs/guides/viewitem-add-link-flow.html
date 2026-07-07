@@ -217,6 +217,56 @@ If(
     Set(varShowLinkModal, true)
 )</pre></div>
 
+  <div class="warn"><strong>Follow-up &mdash; 2026-07-08, quality-of-life pass after the fixes above:</strong> two more things reported after live-testing: a brief flash of "Add Document Link" on an existing item before its real links appear, and the compact 3-dot approval stepper under the top bar having no way to tell which dot means what. Steps 9 and 10 below.</div>
+
+  <h3>Step 9 &mdash; stop the "Add Document Link" flash when opening an existing item</h3>
+  <p>Every time <code>ViewItem</code> becomes visible for an existing item, its <code>OnVisible</code> calls <code>Refresh(PolicyLinks)</code> &mdash; a real network round-trip &mdash; before repopulating <code>colLinks</code>. For that brief window <code>colLinks</code> reads as empty, so <code>Activator_1</code> (Step 2) shows the empty state before flipping to the real link list once the refresh lands. The screen already has a <code>varLoadingLinks</code> flag built for exactly this (<code>LinksGallery_1.Visible</code> already checks it) &mdash; it's just never set during this particular load. Two small insertions in <code>OnVisible</code>, plus one property update on <code>Activator_1</code>.</p>
+
+  <p><strong>9a.</strong> In the deep-link branch of <code>OnVisible</code> (the one that starts <code>If(!varDeepLinkHandled &amp;&amp; !IsBlank(Param("ID")), ...)</code>), find this exact sequence:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedPerson, varDeepLinkItem.Owner);
+Refresh(PolicyLinks);
+ClearCollect(
+    colLinks,</pre></div>
+  <p>and change it to:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedPerson, varDeepLinkItem.Owner);
+Set(varLoadingLinks, true);
+Refresh(PolicyLinks);
+ClearCollect(
+    colLinks,</pre></div>
+  <p>Then find where that same <code>ClearCollect</code> call ends, right before <code>Set(varOwnerDefault, Office365Users.SearchUserV2(...))</code> a few lines later, and insert <code>Set(varLoadingLinks, false);</code> immediately after its closing <code>);</code>.</p>
+
+  <p><strong>9b.</strong> In the second, non-deep-link branch of <code>OnVisible</code> (the one that starts <code>If(!IsBlank(varSelectedRelease.ID), ...)</code>) &mdash; this is the path that actually runs every time you open an existing item from <code>Main</code>, not just via a deep link &mdash; find:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varSelectedRelease.ID),
+    Refresh(PolicyLinks);
+    ClearCollect(
+        colLinks,</pre></div>
+  <p>and change it to:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varSelectedRelease.ID),
+    Set(varLoadingLinks, true);
+    Refresh(PolicyLinks);
+    ClearCollect(
+        colLinks,</pre></div>
+  <p>Then find the end of that same <code>ClearCollect</code> call &mdash; the closing <code>)</code> immediately followed by the comma before <code>Clear(colLinks)</code> (the <code>If</code>'s false-branch) &mdash; and insert <code>Set(varLoadingLinks, false);</code> right after that closing <code>)</code>, before the comma.</p>
+
+  <p><strong>9c.</strong> Update <code>Activator_1.Visible</code> one more time so it also respects the flag:</p>
+  <table>
+    <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
+    <tr><td><code>Activator_1</code></td><td><code>Visible</code></td><td><code>=CountRows(colLinks) = 0</code></td><td><code>=!varLoadingLinks &amp;&amp; CountRows(colLinks) = 0</code></td></tr>
+  </table>
+  <div class="note">This mirrors exactly what <code>LinksGallery_1.Visible</code> already does (<code>=!varLoadingLinks &amp;&amp; ...</code>) &mdash; with both panels checking the same flag, there's a brief moment where neither shows anything (just the app's native loading spinner, already wired via the screen's own <code>LoadingSpinnerColor</code>), then the correct one appears once <code>colLinks</code> is actually populated. No more flash of the wrong one first.</div>
+
+  <h3>Step 10 &mdash; label the compact approval stepper dots</h3>
+  <p><code>conCompactStepper1</code>'s three dots (<code>compactDot1</code>/<code>compactDot2</code>/<code>compactDot3</code>) only ever change colour &mdash; nothing on screen says which stage each one represents. Add a <code>Tooltip</code> to each, matching the real field names used elsewhere in this app so the wording stays consistent:</p>
+  <table>
+    <tr><th>Control</th><th>Property</th><th>Value</th></tr>
+    <tr><td><code>compactDot1</code></td><td><code>Tooltip</code></td><td><code>="Approved by Pillar Lead (Ready to Release)"</code></td></tr>
+    <tr><td><code>compactDot2</code></td><td><code>Tooltip</code></td><td><code>="Approved For Release By set"</code></td></tr>
+    <tr><td><code>compactDot3</code></td><td><code>Tooltip</code></td><td><code>="Published"</code></td></tr>
+  </table>
+  <div class="note">Kept to tooltips rather than redesigning the stepper to fit inline labels &mdash; <code>conCompactStepper1</code> is a fixed 44px-tall row and squeezing three text labels under three 14px dots at that height would mean widening the whole bar and touching layout that works fine today. <code>lblCompactStatus1</code> on the right already gives the rolled-up "Not started" / "In progress" / "Complete" summary; tooltips fill the one gap that was actually missing (which dot is which) without resizing anything. If you'd rather have permanent visible captions instead of hover-only tooltips, say so and I'll do the taller version properly instead of squeezing it in.</div>
+
   <h3>Result</h3>
   <ul>
     <li>Brand-new item, required fields still blank: empty-state panel shows the muted "No document links yet" heading, the red hint line naming exactly what's missing, and the Add Document Link pill button &mdash; clicking it just shows the same warning toast, no confusing full-screen block.</li>
