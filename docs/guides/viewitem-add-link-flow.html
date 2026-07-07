@@ -219,11 +219,14 @@ If(
 
   <div class="warn"><strong>Follow-up &mdash; 2026-07-08, quality-of-life pass after the fixes above:</strong> two more things reported after live-testing: a brief flash of "Add Document Link" on an existing item before its real links appear, and the compact 3-dot approval stepper under the top bar having no way to tell which dot means what. Steps 9 and 10 below.</div>
 
+  <div class="warn"><strong>Second correction, same day:</strong> a remaining zero-links item still flickered ("Add Document Link" &rarr; goes white &rarr; "Add Document Link" again). Real cause: <code>varLoadingLinks</code> only got set to <code>true</code> partway into <code>OnVisible</code>, <em>after</em> an <code>Office365Users.SearchUserV2</code> network call that runs first &mdash; for that gap the screen is still showing whatever was left over from the previous item, which is the first flash. Step 9's formula below is now the corrected version: the flag is set on the very first line, before anything else runs, and there's also a fix for a case where it could get stuck <code>true</code> forever on a genuinely blank/new item (which would have permanently hidden the empty-state panel). Also swapped Step 10 from tooltips to actual visible caption text under each dot, per your feedback that tooltips aren't intuitive enough for this.</div>
+
   <h3>Step 9 &mdash; stop the "Add Document Link" flash when opening an existing item</h3>
   <p>Every time <code>ViewItem</code> becomes visible for an existing item, its <code>OnVisible</code> calls <code>Refresh(PolicyLinks)</code> &mdash; a real network round-trip &mdash; before repopulating <code>colLinks</code>. For that brief window <code>colLinks</code> reads as empty, so <code>Activator_1</code> (Step 2) shows the empty state before flipping to the real link list once the refresh lands. The screen already has a <code>varLoadingLinks</code> flag built for exactly this (<code>LinksGallery_1.Visible</code> already checks it) &mdash; it's just never set during this particular load.</p>
 
-  <p><strong>9a.</strong> This is the screen's own <code>OnVisible</code>, not a control property &mdash; select <code>ViewItem</code> in the Tree view, choose <code>OnVisible</code> in the property dropdown at the top of the formula bar, select all, and paste this whole thing over it (adds <code>Set(varLoadingLinks, true/false)</code> around both <code>Refresh(PolicyLinks)</code> calls, nothing else changed):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSaving, false);
+  <p><strong>9a.</strong> This is the screen's own <code>OnVisible</code>, not a control property &mdash; select <code>ViewItem</code> in the Tree view, choose <code>OnVisible</code> in the property dropdown at the top of the formula bar, select all, and paste this whole thing over it. <code>varLoadingLinks</code> is now set <code>true</code> as the very first line, before the <code>Office365Users</code> lookup or anything else runs, and is guaranteed to come back to <code>false</code> down every possible path (existing item, deep link, or a genuinely new/blank item) so it can never get stuck hiding the empty-state panel:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
+Set(varSaving, false);
 Set(varShowLinkModal, false);
 Set(varSelectedLink, Blank());
 Set(varErrTitle, false);
@@ -253,7 +256,6 @@ If(
         Set(varSelectedItem, varDeepLinkItem);
         Set(varSourceScreen, "Main");
         Set(varSelectedPerson, varDeepLinkItem.Owner);
-        Set(varLoadingLinks, true);
         Refresh(PolicyLinks);
         ClearCollect(
             colLinks,
@@ -288,14 +290,12 @@ If(
                 )
             )
         );
-        Set(varLoadingLinks, false);
         Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value)
     );
     Set(varLoading, false)
 );
 If(
     !IsBlank(varSelectedRelease.ID),
-    Set(varLoadingLinks, true);
     Refresh(PolicyLinks);
     ClearCollect(
         colLinks,
@@ -331,7 +331,8 @@ If(
         )
     );
     Set(varLoadingLinks, false),
-    Clear(colLinks)
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
 );
 
 Reset(txtTitle1);
@@ -350,6 +351,7 @@ Reset(ckbPillarLead1);
 Reset(radApproval1);
 Reset(ckbPublished1);
 Reset(dpkPublishedDate1)</pre></div>
+  <div class="note">What changed from the version you already pasted: <code>Set(varLoadingLinks, true)</code> moved from mid-formula to line 1 (so nothing, including the <code>Office365Users</code> owner-default lookup, runs before the loading state is flagged), and the "genuinely new/blank item" path (<code>Clear(colLinks)</code>) now also sets <code>Set(varLoadingLinks, false)</code> right after it &mdash; that path never touched the flag before, so it wasn't the cause of any bug you'd have noticed yet, but it was a latent one waiting to happen.</div>
 
   <p><strong>9b.</strong> Update <code>Activator_1.Visible</code> one more time so it also respects the flag &mdash; full replacement, not an addition:</p>
   <table>
@@ -358,15 +360,41 @@ Reset(dpkPublishedDate1)</pre></div>
   </table>
   <div class="note">This mirrors exactly what <code>LinksGallery_1.Visible</code> already does (<code>=!varLoadingLinks &amp;&amp; ...</code>) &mdash; with both panels checking the same flag, there's a brief moment where neither shows anything (just the app's native loading spinner, already wired via the screen's own <code>LoadingSpinnerColor</code>), then the correct one appears once <code>colLinks</code> is actually populated. No more flash of the wrong one first.</div>
 
-  <h3>Step 10 &mdash; label the compact approval stepper dots</h3>
-  <p><code>conCompactStepper1</code>'s three dots (<code>compactDot1</code>/<code>compactDot2</code>/<code>compactDot3</code>) only ever change colour &mdash; nothing on screen says which stage each one represents. Add a <code>Tooltip</code> to each, matching the real field names used elsewhere in this app so the wording stays consistent:</p>
+  <h3>Step 10 &mdash; visible caption text under each stepper dot (not tooltips)</h3>
+  <p><code>conCompactStepper1</code>'s three dots (<code>compactDot1</code>/<code>compactDot2</code>/<code>compactDot3</code>) only ever change colour &mdash; nothing says which stage each one represents. Rather than a hover-only tooltip, this adds a real caption label under each dot, same idea as the full labelled stepper further down the page, just compact. There's room: <code>conCompactStepper1</code> is full-width, it's only short on <em>height</em>, so this grows the bar down slightly rather than sideways.</p>
+
+  <p><strong>10a.</strong> <code>conCompactStepper1</code> &mdash; grow the bar to fit a caption row underneath the dots:</p>
+  <table>
+    <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
+    <tr><td><code>conCompactStepper1</code></td><td><code>Height</code></td><td><code>44</code></td><td><code>58</code></td></tr>
+  </table>
+
+  <p><strong>10b.</strong> Add three new <code>Label@2.5.1</code> controls as children of <code>conCompactStepper1</code>, one under each dot &mdash; Tree-view order doesn't matter here since this is a <strong>ManualLayout</strong> container (every child is positioned by its own <code>X</code>/<code>Y</code>, not stacking order):</p>
+  <table>
+    <tr><th>New control name</th><th>Text</th><th>X</th></tr>
+    <tr><td><code>lblCompactDot1Caption1</code></td><td><code>="Pillar Lead"</code></td><td><code>=Parent.Width / 2 - 166</code></td></tr>
+    <tr><td><code>lblCompactDot2Caption1</code></td><td><code>="Approved"</code></td><td><code>=Parent.Width / 2 - 55</code></td></tr>
+    <tr><td><code>lblCompactDot3Caption1</code></td><td><code>="Published"</code></td><td><code>=Parent.Width / 2 + 56</code></td></tr>
+  </table>
+  <p>All three share the same remaining properties &mdash; set these on each of the three:</p>
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td><code>Align</code></td><td><code>=Align.Center</code></td></tr>
+    <tr><td><code>Font</code></td><td><code>=Font.'Open Sans'</code></td></tr>
+    <tr><td><code>FontWeight</code></td><td><code>=FontWeight.Semibold</code></td></tr>
+    <tr><td><code>Size</code></td><td><code>9</code></td></tr>
+    <tr><td><code>Height</code></td><td><code>16</code></td></tr>
+    <tr><td><code>Width</code></td><td><code>110</code></td></tr>
+    <tr><td><code>Y</code></td><td><code>31</code></td></tr>
+  </table>
+  <p>And the <code>Color</code> on each &mdash; deliberately pointed at the matching dot's own <code>Fill</code>, so the caption automatically picks up the exact same grey/green/mint/amber state colour that dot already computes, with no new colour logic to duplicate or get out of sync:</p>
   <table>
     <tr><th>Control</th><th>Property</th><th>Value</th></tr>
-    <tr><td><code>compactDot1</code></td><td><code>Tooltip</code></td><td><code>="Approved by Pillar Lead (Ready to Release)"</code></td></tr>
-    <tr><td><code>compactDot2</code></td><td><code>Tooltip</code></td><td><code>="Approved For Release By set"</code></td></tr>
-    <tr><td><code>compactDot3</code></td><td><code>Tooltip</code></td><td><code>="Published"</code></td></tr>
+    <tr><td><code>lblCompactDot1Caption1</code></td><td><code>Color</code></td><td><code>=compactDot1.Fill</code></td></tr>
+    <tr><td><code>lblCompactDot2Caption1</code></td><td><code>Color</code></td><td><code>=compactDot2.Fill</code></td></tr>
+    <tr><td><code>lblCompactDot3Caption1</code></td><td><code>Color</code></td><td><code>=compactDot3.Fill</code></td></tr>
   </table>
-  <div class="note">Kept to tooltips rather than redesigning the stepper to fit inline labels &mdash; <code>conCompactStepper1</code> is a fixed 44px-tall row and squeezing three text labels under three 14px dots at that height would mean widening the whole bar and touching layout that works fine today. <code>lblCompactStatus1</code> on the right already gives the rolled-up "Not started" / "In progress" / "Complete" summary; tooltips fill the one gap that was actually missing (which dot is which) without resizing anything. If you'd rather have permanent visible captions instead of hover-only tooltips, say so and I'll do the taller version properly instead of squeezing it in.</div>
+  <div class="note">Left <code>lblCompactStatus1</code> (the "Not started" / "In progress" / "Complete" rollup on the right) untouched &mdash; it still reads correctly in the taller bar, just sitting slightly above dead-centre rather than perfectly centred. Say if you want that nudged down to match; it's a one-property <code>Y</code> tweak once you've seen it live.</div>
 
   <h3>Result</h3>
   <ul>
