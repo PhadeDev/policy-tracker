@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Main: Filters, Thin Tabs, Approval Stepper, Publish All</title>
+  <title>Main: Top Bar, Tabs, Filter Row Tidy-Up</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
@@ -29,102 +29,100 @@
     .del { color: #ff8b8b; }
     .partnav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 34px; }
     .partnav a { background: #182131; border: 1px solid #2b3546; border-radius: 6px; padding: 6px 12px; text-decoration: none; font-size: .85rem; }
-    .badge-order { display: inline-block; background: #2d6a4f; color: #fff; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: .78rem; margin-right: 8px; }
-    .fixed-tag { display: inline-block; background: #2d6a4f; color: #fff; font-weight: 700; font-size: .72rem; padding: 2px 8px; border-radius: 4px; letter-spacing: .03em; margin-bottom: 8px; }
   </style>
 </head>
 <body>
 <main>
   <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
-  <h1>Main: Gap Fix, Top Bar, Stepper Collision, Formula Audit</h1>
-  <p>This page was wiped and rebuilt from scratch on 2026-07-07 against your actual live export (the "ALL YAMLS" attachments on <a href="https://github.com/PhadeDev/policy-tracker/issues/10">issue #10</a>) rather than the original plan &mdash; a lot of real numbers (radius, control types, final coordinates) diverged from the first draft of this guide as you built it live, so this version matches what's actually in your app now, not what was originally proposed. No leading equals sign on any formula below, same as always.</p>
-
-  <div class="note">
-    <strong>What changed since the last version of this guide:</strong> everything here is new content addressing four things you found live &mdash; the growing gap between date groups, the top bar not matching the original prototype's visual hierarchy, a real overlap between <code>ExtConsult</code> and the now-built <code>ApprovalStepper</code>, and a request to verify the tab count formulas aren't secretly sharing logic. Parts 1/2/5 from the old guide (release date fix, type filters, Publish All) are done and working &mdash; not repeated here, see the bottom reference section for their final settled values.
-  </div>
+  <h1>Main: Top Bar, Tabs, and the Filter-Row Gap</h1>
+  <p>Rebuilt fresh again, 2026-07-07, against your last export plus the two screenshots you posted (live vs. the original prototype). Three real, fixable causes for "it's not quite right yet," plus the one confirmed dead-space bug. No leading equals sign on any formula, as always.</p>
 
   <div class="partnav">
-    <a href="#gap">Card gap</a>
-    <a href="#dashboard">Dashboard height</a>
-    <a href="#collision">Stepper collision</a>
-    <a href="#topbar">Top bar</a>
-    <a href="#counts">Tab count audit</a>
-    <a href="#reference">Reference: settled values</a>
+    <a href="#tabs">Unify the tab bar</a>
+    <a href="#issues-tint">Issues tab colour</a>
+    <a href="#newsletter">Newsletter icon button</a>
+    <a href="#gap">The gap under the chips</a>
+    <a href="#toggle">Show only my items</a>
   </div>
 
-  <h2 id="gap">Fix 1 &mdash; the growing gap under each date group</h2>
-  <p>Screen: <code>Main</code>. This is a real formula bug, not a setting you're missing. <code>Container1</code> (the per-date-group container, direct child of <code>HeaderGallery</code>) has:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Height: CountRows(ThisItem.GroupedItems)*130</pre></div>
-  <p>and its child <code>ReleaseGallery</code> has:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Height: CountRows(ThisItem.GroupedItems)*110
-Y: 40</pre></div>
-  <p>Do the maths on those two together and the leftover empty space at the bottom of <code>Container1</code> works out to <code>(N &times; 20) - 40</code>, where <code>N</code> is how many items are in that date group. For a 2-item group that's exactly 0 (flush, looks fine). For a 5-item group &mdash; like your "Thursday, 25th June" one &mdash; that's <strong>60px of dead space</strong> before the next group starts. The gap gets worse the more items are in a group, which is exactly the symptom you're seeing. The <code>*130</code> was a rough per-card estimate that never accounted for the fixed <code>Y=40</code> offset being a one-time cost, not a per-card one.</p>
+  <h2 id="tabs">Fix 1 &mdash; the four tabs read as four separate buttons, not one bar</h2>
+  <p>Screen: <code>Main</code>. This is the biggest single difference from the prototype. Right now every one of <code>DueNextWeek</code>/<code>FutureReleases</code>/<code>ItemIssues</code>/<code>History</code> has its own full <code>BorderThickness=1</code> and its own corner radius &mdash; four bordered boxes sitting next to each other with gaps between them. The prototype instead uses one shared rounded bar with the tabs as borderless segments inside it, so the selection state is the only thing that changes, not four independent boxes competing for attention.</p>
 
-  <div class="fixed-tag">The fix</div>
-  <p>Replace <code>Container1.Height</code> with a formula that has zero leftover for any group size:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>40 + CountRows(ThisItem.GroupedItems)*110</pre></div>
-  <p>The 20px breathing room between separate date groups is already handled by <code>HeaderGallery.TemplatePadding=20</code> &mdash; you don't need to add anything for that here, this fix is purely about not over-allocating space inside a single group.</p>
+  <h3>Step 1 &mdash; give <code>Dashboard</code> (the row holding all four tabs) the shared bar treatment</h3>
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td><code>BorderColor</code></td><td><code>RGBA(223, 229, 224, 1)</code></td></tr>
+    <tr><td><code>BorderThickness</code></td><td><code>1</code></td></tr>
+    <tr><td>Radius (all 4 corners)</td><td><code>12</code></td></tr>
+    <tr><td><code>PaddingLeft</code> / <code>PaddingRight</code> / <code>PaddingTop</code> / <code>PaddingBottom</code></td><td><code>4</code> each</td></tr>
+    <tr><td><code>LayoutGap</code></td><td><code>4</code> (small gap between segments, replaces the visual separation the individual borders used to give)</td></tr>
+  </table>
 
-  <h2 id="dashboard">Fix 2 &mdash; a leftover height mismatch above the tabs</h2>
-  <p>Screen: <code>Main</code>. <code>DashboardContainer</code> was correctly resized to <code>Height=56</code> when the four tabs were thinned, but its child <code>Dashboard</code> (the row that actually holds the four tab tiles) is still <code>Height=100</code> &mdash; never updated at the same time. A child taller than its own AutoLayout parent either overflows the header band or gets clipped depending on how the browser's rendering it right now; worth fixing regardless of which one you're seeing.</p>
+  <h3>Step 2 &mdash; on each of the four tab containers: remove the individual border, add a real selected-state fill</h3>
+  <p>Same pattern on all four, only the <code>varSelectedState</code> match and control names differ:</p>
+  <table>
+    <tr><th>Control</th><th>Change</th></tr>
+    <tr><td><code>DueNextWeek</code></td><td><code>BorderThickness</code>: <span class="del">1</span> &rarr; <strong>0</strong><br>Radius (all 4 corners): <strong>8</strong></td></tr>
+    <tr><td><code>FutureReleases</code></td><td>same as above</td></tr>
+    <tr><td><code>ItemIssues</code></td><td>same as above</td></tr>
+    <tr><td><code>History</code></td><td>same as above</td></tr>
+  </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// DueNextWeek.Fill — repeat on the other three, only the state name changes
+If(varSelectedState = "Current", RGBA(11, 74, 54, 1), RGBA(255, 255, 255, 1))
+
+// FutureReleases.Fill
+If(varSelectedState = "Future", RGBA(11, 74, 54, 1), RGBA(255, 255, 255, 1))
+
+// History.Fill
+If(varSelectedState = "Historic", RGBA(11, 74, 54, 1), RGBA(255, 255, 255, 1))</pre></div>
+  <p><code>ItemIssues</code> gets its own version, covered separately below since its unselected state is a colour, not white.</p>
+
+  <p>Right now <code>Label2</code>/<code>Label2_2</code>/<code>Label2_3</code>/<code>Label2_1</code> (the tab title text) and <code>Icon1</code>/<code>Icon1_1</code>/<code>Icon1_1</code>/<code>Icon1_3</code> (the tab icon) are plain black on every tab, selected or not &mdash; on a solid dark green fill that goes unreadable. Same fix on all four, swap in the matching state name:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// Label2.Color (repeat per tab, matching state name)
+If(varSelectedState = "Current", RGBA(255, 255, 255, 1), RGBA(30, 30, 30, 1))
+
+// Icon1.IconColor (repeat per tab, matching state name)
+If(varSelectedState = "Current", RGBA(255, 255, 255, 1), RGBA(30, 30, 30, 1))</pre></div>
+  <div class="warn"><code>BadgeCanvas1</code> (the count pill) already renders as its own green success-coloured badge regardless of the tab's own background &mdash; check live once the tab goes solid dark green whether the badge still stands out against it, or blends in. If it blends in, give that specific <code>BadgeCanvas1</code> a plain white <code>Fill</code> when its tab is selected, same conditional pattern as above.</div>
+
+  <h2 id="issues-tint">Fix 2 &mdash; Issues tab is a solid coral block, prototype uses a pale tint</h2>
+  <p><code>ItemIssues.Fill</code> is currently a flat <code>RGBA(255, 184, 174, 1)</code> all the time. The prototype does two things differently: the warning tint is much paler, and it disappears entirely once you've actually selected the tab (you're already looking at it, it doesn't need to keep warning you) &mdash; matching the same rule already used for this tab in the original mockup.</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// ItemIssues.Fill — full replacement
+If(
+    varSelectedState = "UnapprovedHistoric",
+    RGBA(11, 74, 54, 1),
+    RGBA(251, 234, 229, 1)
+)</pre></div>
+  <p><code>Label2_3</code>/<code>Icon1_1</code> use the same Color/IconColor formula pattern as Fix 1 above, just matching <code>"UnapprovedHistoric"</code> as the selected-state check.</p>
+
+  <h2 id="newsletter">Fix 3 &mdash; the Newsletter icon button is still solid blue</h2>
+  <p><code>Button4</code> (the Newsletter/feedback icon, staff-only) is a <code>ModernButton@1.0.0</code> with no explicit colour properties set &mdash; it's rendering with its default Fluent theme fill, which is why it's still solid blue after the other three nav buttons got the ghost-style recolour. This app family has already had trouble getting <code>ModernButton</code> to behave predictably for exactly this kind of light/outline styling (documented in the Bible), so rather than fighting its <code>Appearance</code> enum, replace it with a <code>Classic/Button@2.2.0</code> icon-only button matching the other three exactly.</p>
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td><code>Fill</code></td><td><code>RGBA(255, 255, 255, 1)</code></td></tr>
+    <tr><td><code>Color</code></td><td><code>RGBA(91, 105, 97, 1)</code></td></tr>
+    <tr><td><code>BorderColor</code></td><td><code>RGBA(214, 221, 224, 1)</code></td></tr>
+    <tr><td><code>BorderThickness</code></td><td><code>1</code></td></tr>
+    <tr><td><code>HoverFill</code></td><td><code>RGBA(227, 239, 232, 1)</code></td></tr>
+    <tr><td><code>HoverColor</code></td><td><code>RGBA(11, 74, 54, 1)</code></td></tr>
+    <tr><td><code>Text</code></td><td><code>&#128231;</code> (or keep a real news/envelope icon glyph &mdash; whatever reads clearly at button size)</td></tr>
+    <tr><td><code>OnSelect</code></td><td><code>Navigate(NewsletterPack)</code> (unchanged)</td></tr>
+    <tr><td><code>Visible</code></td><td>keep the existing <code>colBossButtonUsers</code> condition exactly as it is &mdash; don't touch the gating, only the styling</td></tr>
+  </table>
+
+  <h2 id="gap">Fix 4 &mdash; the actual cause of the big gap under the chip row</h2>
+  <p>Found it. <code>HeaderGallery</code> (the outer gallery, direct child of <code>GalleryContainer</code>) has:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Y: 48</pre></div>
+  <p>That's a fixed 48px of empty space at the very top of the gallery before the first date group even starts rendering &mdash; on top of <code>LeftSide</code>'s own <code>LayoutGap=10</code> between the chip row and the gallery. Combined, that's roughly 58px of dead space before any content, which reads exactly like the gap in your screenshot.</p>
   <table>
     <tr><th>Control</th><th>Property</th><th>Change</th></tr>
-    <tr><td><code>Dashboard</code></td><td><code>Height</code></td><td><span class="del">100</span> &rarr; <strong>56</strong></td></tr>
+    <tr><td><code>HeaderGallery</code></td><td><code>Y</code></td><td><span class="del">48</span> &rarr; <strong>8</strong></td></tr>
   </table>
+  <div class="warn">This <code>Y=48</code> looks like a leftover from an earlier version of the screen that had more header content above the gallery. If dropping it to <code>8</code> causes the very first date group's header banner to sit too close to the chip row above it, nudge it up slightly (<code>12</code>&ndash;<code>16</code>) rather than back to 48.</div>
 
-  <h2 id="collision">Fix 3 &mdash; ExtConsult and the approval stepper genuinely overlap</h2>
-  <p>Screen: <code>Main</code>, on the card template. <code>ApprovalStepper</code> now exists at <code>X=825, Y=55, Width=340</code> (spans 825&ndash;1165). <code>ExtConsult</code> is still sitting at its old spot, <code>X=825, Y=50, Width=300</code> &mdash; almost the exact same footprint. On any card where "external consultation required" is true and the stepper's showing real progress, these two will visually stack on top of each other. <code>LinkCount</code>/<code>Attachment_Icon</code> at <code>X=1150</code>/<code>1153</code> also creep into the stepper's tail end at <code>Y=75</code>/<code>79</code>.</p>
-  <table>
-    <tr><th>Control</th><th>Change</th><th>Why this spot</th></tr>
-    <tr><td><code>ExtConsult</code></td><td><code>X</code>: <span class="del">825</span> &rarr; <strong>300</strong><br><code>Y</code>: <span class="del">50</span> &rarr; <strong>6</strong></td><td>Row 1 (icon/title row), clear of the reserved stepper zone entirely.</td></tr>
-    <tr><td><code>LinkCount</code></td><td><code>Y</code>: <span class="del">75</span> &rarr; <strong>6</strong></td><td>Moves up to row 1 instead of sideways &mdash; sliding it right would push it past the card's own right edge (<code>Container6.Width</code> only has about 14px of slack past its current position).</td></tr>
-    <tr><td><code>Attachment_Icon</code></td><td><code>Y</code>: <span class="del">79</span> &rarr; <strong>10</strong></td><td>Stays paired with <code>LinkCount</code>, same reasoning.</td></tr>
-  </table>
-  <div class="warn">If <code>ExtConsult</code> at <code>X=300</code> ends up sitting under the title text on a card with a long title, nudge its <code>X</code> further right &mdash; <code>Title</code> lives inside an AutoLayout row (<code>Container5</code>) so its actual rendered width isn't something this guide can predict exactly from the YAML alone.</div>
-
-  <h2 id="topbar">Fix 4 &mdash; top bar doesn't match the original prototype's hierarchy</h2>
-  <p>Screen: <code>Main</code>, the header row. The prototype used one visual language for the three secondary nav actions &mdash; a quiet "ghost" style: white/transparent fill, a thin border, muted text &mdash; so the single dark green <strong>+ New Entry</strong> button reads as the one primary action on the bar. Your live version instead gives <code>View Archive</code>, <code>Overview</code>, and <code>Search</code> three unrelated solid colours (grey-blue, purple, blue), which reads as three equally-important buttons competing with each other and with New Entry, rather than one primary action and three quiet secondary ones.</p>
-  <table>
-    <tr><th>Control</th><th>Current</th><th>Change to</th></tr>
-    <tr><td><code>Button1_8</code> ("View Archive")</td><td><code>Fill=RGBA(122,138,143,1)</code></td><td rowspan="3">Same four properties on all three:<br><code>Fill=RGBA(255,255,255,1)</code><br><code>Color=RGBA(91,105,97,1)</code><br><code>BorderColor=RGBA(214,221,224,1)</code><br><code>BorderThickness=1</code><br><code>HoverFill=RGBA(227,239,232,1)</code><br><code>HoverColor=RGBA(11,74,54,1)</code><br><code>PressedFill=RGBA(214,221,224,1)</code><br><code>PressedColor=RGBA(11,74,54,1)</code></td></tr>
-    <tr><td><code>OverviewBTN_1</code> ("Overview")</td><td><code>Fill=RGBA(109,49,162,1)</code></td></tr>
-    <tr><td><code>btnSearchOpen</code> ("Search")</td><td><code>Fill=RGBA(30,80,160,1)</code></td></tr>
-  </table>
-  <p>Leave <code>+ New Entry</code>'s dark green (<code>RGBA(0,64,47,1)</code>) exactly as it is &mdash; that's the one button that should stay coloured, it's the primary action. Don't touch position, width, height, text, or the newsletter icon button (that one's correctly gated to staff already and is a different kind of control).</p>
-  <div class="note">Optional, lower priority: the prototype made Search an icon-only circular button rather than a labelled one. Didn't include that here since it means reworking the button's content, not just recolouring &mdash; say the word if you want that too.</div>
-
-  <h2 id="counts">Formula audit &mdash; verifying "12" and "12" aren't the same formula</h2>
-  <p>Fair thing to be suspicious of. Checked both directly against your export &mdash; they're genuinely different conditions that happen to produce the same number right now, not a copy-paste:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// Future Releases tab count (Count_2)
-CountRows(
-    Filter(
-        'Policy Proof Tracker',
-        'Planned Publish Date' > DateAdd(Today(), 28, "Days")
-    )
-)
-
-// Previously Published tab count (Count_1)
-CountRows(
-    Filter(
-        'Policy Proof Tracker',
-        'Planned Publish Date' >= DateAdd(Today(), -28, "Days") &&
-        'Planned Publish Date' < Today() &&
-        Published = true
-    )
-)</pre></div>
-  <p>One counts anything more than 4 weeks in the future with no <code>Published</code> condition at all; the other counts things published in the last 4 weeks specifically. Both landing on 12 today is a coincidence of your current data, not a bug. Also checked <code>Due Next 4 Weeks</code> (already fixed to the correct <code>&gt;=Today() &amp;&amp; &lt;=+28 days</code> logic, showing 5 correctly) and <code>Issues</code> (<code>&lt;Today() &amp;&amp; Published=false</code>, showing 0 correctly) &mdash; all four tabs are using four genuinely distinct, correct conditions.</p>
-
-  <h2 id="reference">Reference &mdash; settled values from earlier parts, for the record</h2>
-  <p>These are done and working, no action needed &mdash; kept here so the guide reflects what's actually true rather than what was originally guessed.</p>
-  <table>
-    <tr><th>Area</th><th>Settled at</th></tr>
-    <tr><td>Chip/button radius (<code>ChipBg</code>, <code>AllTypesBtn</code>, stepper dots)</td><td><code>4</code>, not the originally-suggested <code>14</code> &mdash; more restrained, looks better.</td></tr>
-    <tr><td><code>ChipLabel</code> control type</td><td>Plain <code>Label@2.5.1</code>, not <code>ModernText</code> &mdash; no <code>Wrap</code> control either way, but it isn't wrapping at the current chip width. If a longer type name gets added later and it starts wrapping, that's why.</td></tr>
-    <tr><td>Wrap on <code>TypeFilterBar</code></td><td>Real property name is <code>LayoutWrap</code> (boolean) &mdash; confirmed, settable directly via formula bar.</td></tr>
-    <tr><td><code>lblTypeWatermark</code></td><td>Kept full <code>Height</code>/<code>Width</code>, just <code>Size=44</code> (was 88) with <code>VerticalAlign=Top</code> &mdash; simpler than the small-corner-tag approach originally suggested, and it works.</td></tr>
-    <tr><td><code>colChoiceColors</code> / <code>varTypeFilter</code></td><td>Single-step <code>ClearCollect</code>+<code>ForAll</code> in <code>OnStart</code>, no synthetic "All types" row &mdash; that's handled by the separate pinned <code>AllTypesBtn</code> instead.</td></tr>
-    <tr><td><code>Published</code> badge / <code>Released</code> checkmark</td><td>Both removed entirely from the card &mdash; the card's own border/fill already tints on <code>Published=true</code>, and the stepper's <code>DotPublished</code> now covers the same information.</td></tr>
-  </table>
+  <h2 id="toggle">"Show only my items" &mdash; leave it where it is</h2>
+  <p>Checked this against the prototype directly: the toggle sits in the exact same spot in both &mdash; far right of the chip row. It isn't actually in the wrong place. Once Fix 4 closes the dead space underneath it, it should stop feeling like an isolated floating row and just read as the end of the filter bar, same as the prototype. No control changes needed here.</p>
 </main>
 <script>
 function copyBlock(btn) {
