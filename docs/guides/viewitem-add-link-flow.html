@@ -34,6 +34,13 @@
 
   <div class="note">Why this is safe: a <code>PolicyLinks</code> row stores <code>PolicyTrackerSource</code> as a lookup to the parent's SharePoint <code>ID</code>, so a link genuinely cannot be created before the parent record has one. This guide doesn't remove that requirement &mdash; it just runs the same <code>Patch</code> the Save button already runs, automatically, at the moment the user asks to add a link, instead of making them click Save first and come back.</div>
 
+  <div class="warn"><strong>Corrections &mdash; 2026-07-08, after first live test:</strong>
+    <ul style="margin:8px 0 0 18px;">
+      <li><strong>Right panel went completely blank.</strong> Step 2 below is a full property replacement, not an addition &mdash; the <code>!IsBlank(varSelectedRelease) &amp;&amp;</code> part at the front has to go, not just get appended to. If your <code>Activator_1.Visible</code> still starts with <code>!IsBlank(varSelectedRelease)</code>, that's why nothing shows on a new item: the old blocking panel was deleted in Step 1, and this condition alone still evaluates false for it, so both panels are hidden at once. Re-check this one property first.</li>
+      <li><strong>The 10-day release-date block could be bypassed.</strong> <code>btnSaveClose1</code>/<code>btnSave1</code> both refuse to save (and show a warning instead) when the planned date is within 10 days and High Priority isn't ticked &mdash; the original Step 7 formula below skipped that check entirely, so a brand-new near-term item could be auto-saved via Add Document Link without ever hitting that guard. Fixed in Step 7 below: the same date check now runs before the auto-save Patch, matching Save's behaviour exactly.</li>
+    </ul>
+  </div>
+
   <h3>Step 1 &mdash; delete the old blocking controls</h3>
   <p>In the Tree view, inside <code>ViewItem &rarr; Attachments_1 &rarr; AttachmentsGal_1</code>, delete these three controls entirely (all three currently share <code>Visible: =!varParentSaved</code>):</p>
   <table>
@@ -44,12 +51,12 @@
   </table>
 
   <h3>Step 2 &mdash; widen the existing empty-state condition</h3>
-  <p><code>Activator_1</code> (the "Associated document links" panel with the magnet icon) already exists and already looks reasonable &mdash; it just wasn't allowed to show for a brand-new unsaved item. Widen its <code>Visible</code> so the same panel covers both cases:</p>
+  <p><code>Activator_1</code> (the "Associated document links" panel with the magnet icon) already exists and already looks reasonable &mdash; it just wasn't allowed to show for a brand-new unsaved item. Replace its <code>Visible</code> property with the new formula below &mdash; delete the whole old value, don't just add to it:</p>
   <table>
-    <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
+    <tr><th>Control</th><th>Property</th><th>Old (delete this entirely)</th><th>New (replacement)</th></tr>
     <tr><td><code>Activator_1</code></td><td><code>Visible</code></td><td><code>=!IsBlank(varSelectedRelease) &amp;&amp; CountRows(colLinks) = 0</code></td><td><code>=CountRows(colLinks) = 0</code></td></tr>
   </table>
-  <p>This is the one thing that actually removes the separate blocking panel &mdash; <code>colLinks</code> is already empty for a brand-new item (nothing to look up yet), so the same friendly empty state now appears immediately instead of the "must save" wall.</p>
+  <p>This is the one thing that actually removes the separate blocking panel &mdash; <code>colLinks</code> is already empty for a brand-new item (nothing to look up yet), so the same friendly empty state now appears immediately instead of the "must save" wall. If the <code>!IsBlank(varSelectedRelease) &amp;&amp;</code> part is still there afterwards, this panel will stay hidden for any new item and the whole right-hand side will look blank &mdash; there's nothing else in this guide that shows in its place, so this one property has to end up exactly as <code>=CountRows(colLinks) = 0</code>, nothing more.</p>
 
   <h3>Step 3 &mdash; restyle the heading text</h3>
   <table>
@@ -131,56 +138,63 @@ If(
         varParentSaved,
         Set(varSelectedLink, Defaults(PolicyLinks));
         Set(varShowLinkModal, true),
-        Set(varSaving, true);
-        Set(
-            varSavedRecord,
-            Patch(
-                'Policy Proof Tracker',
-                If(IsBlank(varSelectedRelease.ID), Defaults('Policy Proof Tracker'), varSelectedRelease),
-                {
-                    Title: Trim(txtTitle1.Text),
-                    'Document Type': {Value: drpDocType1.Selected.Value},
-                    Owner: {
-                        Claims: "i:0#.f|membership|" & cmb_Owner1.Selected.Mail,
-                        Department: "",
-                        DisplayName: cmb_Owner1.Selected.DisplayName,
-                        Email: cmb_Owner1.Selected.Mail,
-                        JobTitle: "",
-                        Picture: ""
-                    },
-                    'Planned Publish Date': dpkPublishDate1.SelectedDate,
-                    'High Priority': ckbHighPriority1.Value,
-                    'Reason for High Priority': txtReasonHighPri1.Text,
-                    'External consultation required': ckbExtConsult1.Value,
-                    'External consultation details': txtExtConsultDetails1.Text,
-                    'Top Item': ckbTopItem1.Value,
-                    'Title for Newsletter': txtNewsletterTitle1.Text,
-                    Audience: txtAudience1.Text,
-                    'Item summary': txtSummary1.Text,
-                    Remarks: txtRemarks1.Text,
-                    'Approved by Pillar Lead (Ready to Release)': ckbPillarLead1.Value,
-                    'Approved For Release By': {Value: Coalesce(radApproval1.Selected.Value, "Not Yet Approved")},
-                    Published: ckbPublished1.Value,
-                    'Published Date': If(ckbPublished1.Value, Coalesce(dpkPublishedDate1.SelectedDate, Today()), Blank())
-                }
-            )
-        );
         If(
-            IsEmpty(Errors('Policy Proof Tracker')),
-            Set(varSelectedRelease, varSavedRecord);
-            Set(varSelectedItem, varSavedRecord);
-            Set(varSelectPolicy, "Filled");
-            Set(varOwnerDefault, Table({DisplayName: cmb_Owner1.Selected.DisplayName, Mail: cmb_Owner1.Selected.Mail}));
-            Set(varParentSaved, true);
-            Set(varUnsavedChanges, false);
-            ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
-            ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID));
-            Set(varSaving, false);
-            Notify("Saved - you can now add links.", NotificationType.Success);
-            Set(varSelectedLink, Defaults(PolicyLinks));
-            Set(varShowLinkModal, true),
-            Set(varSaving, false);
-            Notify("Save failed. Please check your connection and try again.", NotificationType.Error)
+            !IsBlank(dpkPublishDate1.SelectedDate) &&
+            DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
+            DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
+            !ckbHighPriority1.Value,
+            Notify("Release date is within 10 days. Tick High Priority to override, or pick a later date, before adding links.", NotificationType.Warning),
+            Set(varSaving, true);
+            Set(
+                varSavedRecord,
+                Patch(
+                    'Policy Proof Tracker',
+                    If(IsBlank(varSelectedRelease.ID), Defaults('Policy Proof Tracker'), varSelectedRelease),
+                    {
+                        Title: Trim(txtTitle1.Text),
+                        'Document Type': {Value: drpDocType1.Selected.Value},
+                        Owner: {
+                            Claims: "i:0#.f|membership|" & cmb_Owner1.Selected.Mail,
+                            Department: "",
+                            DisplayName: cmb_Owner1.Selected.DisplayName,
+                            Email: cmb_Owner1.Selected.Mail,
+                            JobTitle: "",
+                            Picture: ""
+                        },
+                        'Planned Publish Date': dpkPublishDate1.SelectedDate,
+                        'High Priority': ckbHighPriority1.Value,
+                        'Reason for High Priority': txtReasonHighPri1.Text,
+                        'External consultation required': ckbExtConsult1.Value,
+                        'External consultation details': txtExtConsultDetails1.Text,
+                        'Top Item': ckbTopItem1.Value,
+                        'Title for Newsletter': txtNewsletterTitle1.Text,
+                        Audience: txtAudience1.Text,
+                        'Item summary': txtSummary1.Text,
+                        Remarks: txtRemarks1.Text,
+                        'Approved by Pillar Lead (Ready to Release)': ckbPillarLead1.Value,
+                        'Approved For Release By': {Value: Coalesce(radApproval1.Selected.Value, "Not Yet Approved")},
+                        Published: ckbPublished1.Value,
+                        'Published Date': If(ckbPublished1.Value, Coalesce(dpkPublishedDate1.SelectedDate, Today()), Blank())
+                    }
+                )
+            );
+            If(
+                IsEmpty(Errors('Policy Proof Tracker')),
+                Set(varSelectedRelease, varSavedRecord);
+                Set(varSelectedItem, varSavedRecord);
+                Set(varSelectPolicy, "Filled");
+                Set(varOwnerDefault, Table({DisplayName: cmb_Owner1.Selected.DisplayName, Mail: cmb_Owner1.Selected.Mail}));
+                Set(varParentSaved, true);
+                Set(varUnsavedChanges, false);
+                ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+                ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID));
+                Set(varSaving, false);
+                Notify("Saved - you can now add links.", NotificationType.Success);
+                Set(varSelectedLink, Defaults(PolicyLinks));
+                Set(varShowLinkModal, true),
+                Set(varSaving, false);
+                Notify("Save failed. Please check your connection and try again.", NotificationType.Error)
+            )
         )
     )
 )</pre></div>
@@ -206,8 +220,9 @@ If(
   <h3>Result</h3>
   <ul>
     <li>Brand-new item, required fields still blank: empty-state panel shows the muted "No document links yet" heading, the red hint line naming exactly what's missing, and the Add Document Link pill button &mdash; clicking it just shows the same warning toast, no confusing full-screen block.</li>
-    <li>Brand-new item, Title/Document Type/Planned Publish Date filled in: clicking Add Document Link saves the record in the background (same as clicking Save) and opens the link editor in one step &mdash; no separate manual save, no "you must save first" message ever seen.</li>
-    <li>Existing item with no links yet: identical empty state and identical validation, just skips straight to opening the modal since <code>varParentSaved</code> is already true.</li>
+    <li>Brand-new item, required fields filled in, planned date 10+ days out (or High Priority ticked): clicking Add Document Link saves the record in the background (same as clicking Save) and opens the link editor in one step &mdash; no separate manual save, no "you must save first" message ever seen.</li>
+    <li>Brand-new item, required fields filled in, planned date within 10 days and High Priority not ticked: same warning Save already shows &mdash; nothing saves, no link gets added, exactly matching Save's own rule instead of quietly bypassing it.</li>
+    <li>Existing item with no links yet: identical empty state and identical field validation, just skips straight to opening the modal since <code>varParentSaved</code> is already true (the 10-day check only applies to the not-yet-saved path).</li>
     <li>Existing item with links already: the "+" FAB now respects the same three required fields before letting you add another one, closing the gap where it previously had no validation at all.</li>
   </ul>
 </main>
