@@ -220,39 +220,140 @@ If(
   <div class="warn"><strong>Follow-up &mdash; 2026-07-08, quality-of-life pass after the fixes above:</strong> two more things reported after live-testing: a brief flash of "Add Document Link" on an existing item before its real links appear, and the compact 3-dot approval stepper under the top bar having no way to tell which dot means what. Steps 9 and 10 below.</div>
 
   <h3>Step 9 &mdash; stop the "Add Document Link" flash when opening an existing item</h3>
-  <p>Every time <code>ViewItem</code> becomes visible for an existing item, its <code>OnVisible</code> calls <code>Refresh(PolicyLinks)</code> &mdash; a real network round-trip &mdash; before repopulating <code>colLinks</code>. For that brief window <code>colLinks</code> reads as empty, so <code>Activator_1</code> (Step 2) shows the empty state before flipping to the real link list once the refresh lands. The screen already has a <code>varLoadingLinks</code> flag built for exactly this (<code>LinksGallery_1.Visible</code> already checks it) &mdash; it's just never set during this particular load. Two small insertions in <code>OnVisible</code>, plus one property update on <code>Activator_1</code>.</p>
+  <p>Every time <code>ViewItem</code> becomes visible for an existing item, its <code>OnVisible</code> calls <code>Refresh(PolicyLinks)</code> &mdash; a real network round-trip &mdash; before repopulating <code>colLinks</code>. For that brief window <code>colLinks</code> reads as empty, so <code>Activator_1</code> (Step 2) shows the empty state before flipping to the real link list once the refresh lands. The screen already has a <code>varLoadingLinks</code> flag built for exactly this (<code>LinksGallery_1.Visible</code> already checks it) &mdash; it's just never set during this particular load.</p>
 
-  <p><strong>9a.</strong> In the deep-link branch of <code>OnVisible</code> (the one that starts <code>If(!varDeepLinkHandled &amp;&amp; !IsBlank(Param("ID")), ...)</code>), find this exact sequence:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedPerson, varDeepLinkItem.Owner);
-Refresh(PolicyLinks);
-ClearCollect(
-    colLinks,</pre></div>
-  <p>and change it to:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedPerson, varDeepLinkItem.Owner);
-Set(varLoadingLinks, true);
-Refresh(PolicyLinks);
-ClearCollect(
-    colLinks,</pre></div>
-  <p>Then find where that same <code>ClearCollect</code> call ends, right before <code>Set(varOwnerDefault, Office365Users.SearchUserV2(...))</code> a few lines later, and insert <code>Set(varLoadingLinks, false);</code> immediately after its closing <code>);</code>.</p>
-
-  <p><strong>9b.</strong> In the second, non-deep-link branch of <code>OnVisible</code> (the one that starts <code>If(!IsBlank(varSelectedRelease.ID), ...)</code>) &mdash; this is the path that actually runs every time you open an existing item from <code>Main</code>, not just via a deep link &mdash; find:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    !IsBlank(varSelectedRelease.ID),
-    Refresh(PolicyLinks);
-    ClearCollect(
-        colLinks,</pre></div>
-  <p>and change it to:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+  <p><strong>9a.</strong> This is the screen's own <code>OnVisible</code>, not a control property &mdash; select <code>ViewItem</code> in the Tree view, choose <code>OnVisible</code> in the property dropdown at the top of the formula bar, select all, and paste this whole thing over it (adds <code>Set(varLoadingLinks, true/false)</code> around both <code>Refresh(PolicyLinks)</code> calls, nothing else changed):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Office365Users.SearchUserV2({searchTerm: User().Email, isSearchTermRequired: true, top: 1}).value,
+        Office365Users.SearchUserV2({searchTerm: varSelectedRelease.Owner.Email, isSearchTermRequired: true, top: 1}).value
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Set(varLoadingLinks, true);
+        Refresh(PolicyLinks);
+        ClearCollect(
+            colLinks,
+            AddColumns(
+                Filter(PolicyLinks, PolicyTrackerSource.Id = varDeepLinkItem.ID),
+                FileExt,
+                With(
+                    {FileParamStart: Find("file=", LinkUrl, 1)},
+                    With(
+                        {
+                            FileNamePart: If(
+                                FileParamStart > 0,
+                                With(
+                                    {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                                ),
+                                If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+                            )
+                        },
+                        Switch(
+                            true,
+                            Right(FileNamePart, 5) = ".docx", "docx",
+                            Right(FileNamePart, 4) = ".doc", "doc",
+                            Right(FileNamePart, 5) = ".xlsx", "xlsx",
+                            Right(FileNamePart, 4) = ".xls", "xls",
+                            Right(FileNamePart, 5) = ".pptx", "pptx",
+                            Right(FileNamePart, 4) = ".ppt", "ppt",
+                            Right(FileNamePart, 4) = ".pdf", "pdf",
+                            ""
+                        )
+                    )
+                )
+            )
+        );
+        Set(varLoadingLinks, false);
+        Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value)
+    );
+    Set(varLoading, false)
+);
+If(
     !IsBlank(varSelectedRelease.ID),
     Set(varLoadingLinks, true);
     Refresh(PolicyLinks);
     ClearCollect(
-        colLinks,</pre></div>
-  <p>Then find the end of that same <code>ClearCollect</code> call &mdash; the closing <code>)</code> immediately followed by the comma before <code>Clear(colLinks)</code> (the <code>If</code>'s false-branch) &mdash; and insert <code>Set(varLoadingLinks, false);</code> right after that closing <code>)</code>, before the comma.</p>
+        colLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID),
+            FileExt,
+            With(
+                {FileParamStart: Find("file=", LinkUrl, 1)},
+                With(
+                    {
+                        FileNamePart: If(
+                            FileParamStart > 0,
+                            With(
+                                {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                                Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                            ),
+                            If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+                        )
+                    },
+                    Switch(
+                        true,
+                        Right(FileNamePart, 5) = ".docx", "docx",
+                        Right(FileNamePart, 4) = ".doc", "doc",
+                        Right(FileNamePart, 5) = ".xlsx", "xlsx",
+                        Right(FileNamePart, 4) = ".xls", "xls",
+                        Right(FileNamePart, 5) = ".pptx", "pptx",
+                        Right(FileNamePart, 4) = ".ppt", "ppt",
+                        Right(FileNamePart, 4) = ".pdf", "pdf",
+                        ""
+                    )
+                )
+            )
+        )
+    );
+    Set(varLoadingLinks, false),
+    Clear(colLinks)
+);
 
-  <p><strong>9c.</strong> Update <code>Activator_1.Visible</code> one more time so it also respects the flag:</p>
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1)</pre></div>
+
+  <p><strong>9b.</strong> Update <code>Activator_1.Visible</code> one more time so it also respects the flag &mdash; full replacement, not an addition:</p>
   <table>
-    <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
+    <tr><th>Control</th><th>Property</th><th>Old (delete entirely)</th><th>New (replacement)</th></tr>
     <tr><td><code>Activator_1</code></td><td><code>Visible</code></td><td><code>=CountRows(colLinks) = 0</code></td><td><code>=!varLoadingLinks &amp;&amp; CountRows(colLinks) = 0</code></td></tr>
   </table>
   <div class="note">This mirrors exactly what <code>LinksGallery_1.Visible</code> already does (<code>=!varLoadingLinks &amp;&amp; ...</code>) &mdash; with both panels checking the same flag, there's a brief moment where neither shows anything (just the app's native loading spinner, already wired via the screen's own <code>LoadingSpinnerColor</code>), then the correct one appears once <code>colLinks</code> is actually populated. No more flash of the wrong one first.</div>
