@@ -376,15 +376,23 @@ Switch(
   <h2 id="part3b">Part 3B &mdash; Thin the release cards (do this before Part 4)</h2>
   <p>Screen: <code>Main</code>, the <code>ReleaseGallery</code> card template inside <code>Container6</code>. Card goes from 250px tall to 100px, closer to the original prototype. This has to happen before Part 4's approval stepper, since the stepper's position depends on where things end up here.</p>
 
-  <h3>Step 1 &mdash; the two container heights that drive everything</h3>
+  <div class="changed"><span class="changed-tag">Clarified 2026-07-07 &mdash; every control in the chain named explicitly</span>
+  <h3>Step 1 &mdash; the full container chain that drives card height</h3>
+  <p>Top to bottom, every control's real name and the properties that actually matter for card height. Nothing here is vague or "one level up" anymore:</p>
   <table>
-    <tr><th>Control</th><th>Property</th><th>Change</th></tr>
-    <tr><td><code>Container6</code></td><td><code>Height</code></td><td><span class="del">250</span> &rarr; <strong>100</strong></td></tr>
-    <tr><td><code>Selector</code> (the full-card click overlay, sibling of <code>Container6</code>)</td><td><code>Height</code></td><td><span class="del">250</span> &rarr; <strong>100</strong> &mdash; must match <code>Container6</code> exactly or the click target and the visible card disagree</td></tr>
-    <tr><td><code>ReleaseGallery</code></td><td><code>TemplateSize</code></td><td><span class="del">260</span> &rarr; <strong>110</strong> (card height + a small gap)</td></tr>
-    <tr><td><code>ReleaseGallery</code></td><td><code>Height</code></td><td><code>CountRows(ThisItem.GroupedItems)*260</code> &rarr; <strong><code>CountRows(ThisItem.GroupedItems)*110</code></strong></td></tr>
-    <tr><td>The outer date-group container (one level up, holds <code>ReleaseGallery</code>)</td><td><code>Height</code></td><td><code>CountRows(ThisItem.GroupedItems)*300</code> &rarr; <strong><code>CountRows(ThisItem.GroupedItems)*130</code></strong></td></tr>
+    <tr><th>Control</th><th>What it is</th><th>Relevant properties</th></tr>
+    <tr><td><code>HeaderGallery</code></td><td>The outermost gallery &mdash; one row per release date (Thursday). <code>Variant: VariableHeight</code>.</td>
+      <td><code>Height</code>=450 &mdash; <strong>no change</strong>, this is just the scrollable viewport size on screen, unrelated to card height.<br><code>TemplatePadding</code>=20 &mdash; <strong>no change</strong>, this is the gap between date groups, not between cards inside one group.</td></tr>
+    <tr><td><code>Container1</code></td><td>Direct child of <code>HeaderGallery</code>. One instance per date group &mdash; this is the exact control that was vaguely called "the outer date-group container" before. <code>GroupContainer@1.5.0</code>, <code>ManualLayout</code>.</td>
+      <td><code>Height</code>: <code>CountRows(ThisItem.GroupedItems)*300</code> &rarr; <strong><code>CountRows(ThisItem.GroupedItems)*130</code></strong><br><code>Width</code>=1294 &mdash; fixed pixel value, not <code>Parent.Width</code>. This app is not responsive/fluid anywhere, every screen uses fixed pixel widths like this one throughout &mdash; that's the existing design, not something to fix here.</td></tr>
+    <tr><td><code>ReleaseGallery</code></td><td>Direct child of <code>Container1</code>. One row per card within that date group. <code>Gallery@2.15.0</code>, <code>Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0</code>.</td>
+      <td><code>TemplateSize</code>: <span class="del">260</span> &rarr; <strong>110</strong> (card height + a small gap)<br><code>Height</code>: <code>CountRows(ThisItem.GroupedItems)*260</code> &rarr; <strong><code>CountRows(ThisItem.GroupedItems)*110</code></strong></td></tr>
+    <tr><td><code>Container6</code></td><td>The card itself &mdash; direct child of the <code>ReleaseGallery</code> template.</td>
+      <td><code>Height</code>: <span class="del">250</span> &rarr; <strong>100</strong></td></tr>
+    <tr><td><code>Selector</code></td><td>Sibling of <code>Container6</code> (both children of the <code>ReleaseGallery</code> template) &mdash; the invisible full-card click overlay.</td>
+      <td><code>Height</code>: <span class="del">250</span> &rarr; <strong>100</strong> &mdash; must match <code>Container6</code> exactly or the click target and the visible card disagree.</td></tr>
   </table>
+  </div>
 
   <div class="changed"><span class="changed-tag">Revised 2026-07-06 &mdash; shrink, don't delete</span>
   <h3>Step 2 &mdash; shrink two controls instead of deleting them</h3>
