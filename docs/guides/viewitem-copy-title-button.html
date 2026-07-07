@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ViewItem: Copy Title into Newsletter Title</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 900px; margin: 0 auto; padding: 34px 22px 80px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.7rem; }
+    h3 { margin: 26px 0 10px; color: #f2f4f8; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .9rem; }
+    th, td { border: 1px solid #2b3546; padding: 8px 10px; vertical-align: top; }
+    th { background: #182131; color: #b7e4c7; text-align: left; }
+    tr:nth-child(even) td { background: #121926; }
+    .note, .warn { border-radius: 8px; padding: 12px 14px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .84rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>ViewItem &mdash; "Copy Title" button next to Newsletter Title</h1>
+  <p>A small button that copies whatever's currently in <code>txtTitle1</code> (the main Title field) into <code>txtNewsletterTitle1</code> (Title for Newsletter), one click.</p>
+
+  <div class="warn"><code>conNewsletterCard1</code> (the card holding this field) is a <strong>Vertical AutoLayout</strong> container &mdash; its children get positioned by stacking order, not by <code>X</code>/<code>Y</code>. That means the button can't just be dropped next to the field with coordinates the way it could in a <code>ManualLayout</code> card. It needs its own small horizontal row wrapping both controls together.</div>
+
+  <h3>Step 1 &mdash; new variable</h3>
+  <p>In <code>ViewItem</code>'s <code>OnVisible</code>, add this line near the other <code>Set()</code> calls at the top:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varNewsletterTitleOverride, "");</pre></div>
+
+  <h3>Step 2 &mdash; wrap the field in a horizontal row</h3>
+  <p>In the Tree view, find <code>txtNewsletterTitle1</code> inside <code>conNewsletterCard1</code>. Insert a new <strong>Horizontal container</strong> in that same spot, name it <code>conNewsletterTitleRow1</code>, then drag <code>txtNewsletterTitle1</code> to become its first child.</p>
+  <table>
+    <tr><th>Control</th><th>Properties</th></tr>
+    <tr><td><code>conNewsletterTitleRow1</code></td><td><code>Width=Parent.Width - 36</code> (takes over the card's existing right-margin convention &mdash; every other field in this card already uses that same <code>-36</code>)<br>Set <strong>Gap</strong> to <code>8</code> via the properties pane (not a formula &mdash; same insert-time-only property as other Horizontal containers this session)</td></tr>
+  </table>
+
+  <h3>Step 3 &mdash; shrink the field, it's now in a narrower row</h3>
+  <table>
+    <tr><th>Control</th><th>Property</th><th>Change</th></tr>
+    <tr><td><code>txtNewsletterTitle1</code></td><td><code>Width</code></td><td>Was <code>Parent.Width - 36</code> (when <code>Parent</code> meant the card) &mdash; now that its parent is <code>conNewsletterTitleRow1</code>, change to <strong><code>Parent.Width - 40</code></strong> (leaves room for the button)</td></tr>
+  </table>
+
+  <h3>Step 4 &mdash; the copy button, second child of the same row</h3>
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td><code>Width</code></td><td><code>32</code></td></tr>
+    <tr><td><code>Height</code></td><td><code>36</code> (match <code>txtNewsletterTitle1</code>'s actual rendered height if it looks different live)</td></tr>
+    <tr><td><code>Fill</code></td><td><code>RGBA(255, 255, 255, 1)</code></td></tr>
+    <tr><td><code>Color</code></td><td><code>RGBA(91, 105, 97, 1)</code></td></tr>
+    <tr><td><code>BorderColor</code></td><td><code>RGBA(214, 221, 224, 1)</code></td></tr>
+    <tr><td><code>BorderThickness</code></td><td><code>1</code></td></tr>
+    <tr><td><code>HoverFill</code></td><td><code>RGBA(227, 239, 232, 1)</code></td></tr>
+    <tr><td><code>Text</code></td><td><code>&#8942;&#8942;</code> or just <code>"Copy"</code> &mdash; whatever reads clearly at 32px wide, your call</td></tr>
+    <tr><td><code>Tooltip</code></td><td><code>"Copy Title into Newsletter Title"</code></td></tr>
+  </table>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// btnCopyTitleToNewsletter1.OnSelect
+Set(varNewsletterTitleOverride, txtTitle1.Text);
+Reset(txtNewsletterTitle1);
+Set(varNewsletterTitleOverride, "");
+Set(varUnsavedChanges, true)</pre></div>
+
+  <h3>Step 5 &mdash; the one formula that actually makes the copy stick</h3>
+  <p>Replace <code>txtNewsletterTitle1.Default</code> so it checks the override variable first, falling back to the real saved value exactly like before:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// txtNewsletterTitle1.Default — full replacement
+Coalesce(varNewsletterTitleOverride, varSelectedRelease.'Title for Newsletter', "")</pre></div>
+
+  <div class="note">Why this shape: <code>Default</code> only gets read once, at the moment the control is created or <code>Reset()</code> is called on it &mdash; it isn't reactive on its own. The button sets the override, calls <code>Reset()</code> to force <code>Default</code> to re-read (picking up the override), then immediately clears the override back to <code>""</code> so it doesn't linger and overwrite your typing the next time this screen's own <code>OnVisible</code> resets the field for a different item. <code>Coalesce</code> treats <code>""</code> as blank and skips straight to the real saved value once the override's been cleared.</div>
+</main>
+<script>
+function copyBlock(btn) {
+  const text = btn.nextElementSibling.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('ok');
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.classList.remove('ok'); btn.textContent = 'Copy'; }, 1400);
+  });
+}
+</script>
+</body>
+</html>
