@@ -24,7 +24,7 @@ Screens:
                 Properties:
                   Fill: =RGBA(255, 255, 255, 1)
                   FillPortions: =0
-                  Height: =100
+                  Height: =50
                   LayoutAlignItems: =LayoutAlignItems.Center
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =20
@@ -96,19 +96,26 @@ Screens:
                         PaddingTop: =8
                       Children:
                         - TextCanvas4:
-                            Control: Text@0.0.51
+                            Control: ModernText@1.0.0
                             Properties:
                               FillPortions: =1
                               Font: =Font.'Lato Black'
                               Height: =Parent.Height
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
+                              PaddingBottom: =0
                               PaddingLeft: =10
-                              PaddingTop: =25
-                              Size: =22
+                              PaddingRight: =0
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Size: =13
                               Text: |-
                                 ="Summary of all planned release over the next 4 weeks.
                                 Click item to view release."
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =96
                   - OverviewBTN:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -194,113 +201,183 @@ Screens:
                                           SortOrder.Ascending
                                       )
                                     TemplatePadding: =10
-                                    TemplateSize: =30
+                                    TemplateSize: =100
                                     Width: =Parent.TemplateWidth - Self.BorderThickness
                                   Children:
-                                    - Title3:
-                                        Control: Label@2.5.1
+                                    - Container3:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
                                         Properties:
-                                          BorderColor: =RGBA(0, 0, 0, 1)
-                                          Color: =RGBA(50, 49, 48, 1)
-                                          Font: =Font.'Open Sans'
-                                          FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                                          Height: =30
-                                          OnSelect: =
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =14
-                                          Text: =ThisItem.'Document Type'.Value
-                                          VerticalAlign: =VerticalAlign.Top
-                                          Visible: =false
-                                          Width: =Parent.Width
-                                          X: =10
-                                          Y: =65
-                                    - Button3:
-                                        Control: Classic/Button@2.2.0
-                                        Properties:
-                                          Align: =Align.Left
-                                          BorderColor: =ColorFade(Self.Fill, -15%)
-                                          Color: |+
-                                            =
-                                            // Button.Color
-                                            Switch(
-                                                ThisItem.'Document Type'.Value,
-                                                "📜 Newsletter Item",   Color.Black,
-                                                "📑 Internal Document", Color.Black,
-                                                Color.White
-                                            )
-                                          DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                                          Fill: |+
-                                            =
-                                            // Button.Fill
-                                            Switch(
-                                                ThisItem.'Document Type'.Value,
-                                                "📖 Regulation",        RGBA(62,142,222,1),   /* #3E8EDE */
-                                                "📄 ACSO",              RGBA(46,204,113,1),   /* #2ECC71 */
-                                                "📄 CFSO",              RGBA(26,188,156,1),   /* #1ABC9C */
-                                                "📄 CFI",               RGBA(155,89,182,1),   /* #9B59B6 */
-                                                "📄 CBN",               RGBA(230,126,34,1),   /* #E67E22 */
-                                                "📕 SOI",               RGBA(211,84,0,1),     /* #D35400 */
-                                                "📑 Internal Document", RGBA(189,195,199,1),  /* #BDC3C7 */
-                                                "📗 Manual",            RGBA(39,174,96,1),    /* #27AE60 */
-                                                "📜 Newsletter Item",   RGBA(241,196,15,1),   /* #F1C40F */
-                                                RGBA(102,102,102,1)                         /* fallback */
-                                            )
-                                          Font: =Font.Lato
-                                          FontWeight: =FontWeight.Normal
-                                          Height: =30
-                                          HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
-                                          HoverColor: =RGBA(255, 255, 255, 1)
-                                          HoverFill: |+
-                                            =
-                                            // Button.HoverFill
-                                            ColorFade( Self.Fill, -10% )
-                                          OnSelect: |-
-                                            =
-                                            // Overview.HtmlText2.OnSelect  → go straight to the detail screen
-                                            // 1) Resolve and store the record
-                                            Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
-                                            Set(varSelectedItem, varSelectedRelease);
+                                          Height: =100
+                                          Width: =229
+                                          Y: =50
+                                        Children:
+                                          - Type:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                BorderColor: =RGBA(0, 0, 0, 1)
+                                                Color: =RGBA(50, 49, 48, 1)
+                                                Font: =Font.'Open Sans'
+                                                FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                                                Height: =30
+                                                OnSelect: =
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: =ThisItem.'Document Type'.Value
+                                                VerticalAlign: =VerticalAlign.Top
+                                                Width: =Parent.Width
+                                                Y: =5
+                                          - SumTitle:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                BorderColor: =RGBA(0, 18, 107, 1)
+                                                Font: =Font.'Open Sans'
+                                                Height: =70
+                                                OnSelect: =
+                                                Size: =9
+                                                Text: =ThisItem.Title
+                                                VerticalAlign: =VerticalAlign.Top
+                                                Width: =Parent.Width
+                                                Y: =30
+                                          - Button3:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                Align: =Align.Left
+                                                BorderColor: |-
+                                                  =Switch(
+                                                      ThisItem.'Document Type'.Value,
+                                                      "📄 MoD Policy",        RGBA(44,62,80,1),     /* #2C3E50 */
+                                                      "📖 Regulation",        RGBA(62,142,222,1),   /* #3E8EDE */
+                                                      "📄 ACSO",              RGBA(46,204,113,1),   /* #2ECC71 */
+                                                      "📄 CFSO",              RGBA(26,188,156,1),   /* #1ABC9C */
+                                                      "📄 CFI",               RGBA(155,89,182,1),   /* #9B59B6 */
+                                                      "📄 CBN",               RGBA(230,126,34,1),   /* #E67E22 */
+                                                      "📕 SOI",               RGBA(211,84,0,1),     /* #D35400 */
+                                                      "📑 Internal Document", RGBA(189,195,199,1),  /* #BDC3C7 */
+                                                      "📗 Manual",            RGBA(39,174,96,1),    /* #27AE60 */
+                                                      "📜 Newsletter Item",   RGBA(241,196,15,1),   /* #F1C40F */
+                                                      RGBA(102,102,102,1)                         /* fallback */
+                                                  )
+                                                Color: |
+                                                  =
+                                                  // Button.Color
+                                                  Switch(
+                                                      ThisItem.'Document Type'.Value,
+                                                      "📜 Newsletter Item",   Color.Black,
+                                                      "📑 Internal Document", Color.Black,
+                                                      Color.White
+                                                  )
+                                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                                Fill: =RGBA(0, 0, 0, 0)
+                                                Font: =Font.Lato
+                                                FontWeight: =FontWeight.Normal
+                                                Height: =Parent.Height
+                                                HoverBorderColor: |-
+                                                  =
+                                                  // Button.PressedFill
+                                                  Switch(
+                                                      ThisItem.'Document Type'.Value,
+                                                      "📄 MoD Policy",        RGBA(44,62,80,1),     /* #2C3E50 */
+                                                      "📖 Regulation",        RGBA(62,142,222,1),   /* #3E8EDE */
+                                                      "📄 ACSO",              RGBA(46,204,113,1),   /* #2ECC71 */
+                                                      "📄 CFSO",              RGBA(26,188,156,1),   /* #1ABC9C */
+                                                      "📄 CFI",               RGBA(155,89,182,1),   /* #9B59B6 */
+                                                      "📄 CBN",               RGBA(230,126,34,1),   /* #E67E22 */
+                                                      "📕 SOI",               RGBA(211,84,0,1),     /* #D35400 */
+                                                      "📑 Internal Document", RGBA(189,195,199,1),  /* #BDC3C7 */
+                                                      "📗 Manual",            RGBA(39,174,96,1),    /* #27AE60 */
+                                                      "📜 Newsletter Item",   RGBA(241,196,15,1),   /* #F1C40F */
+                                                      RGBA(102,102,102,1)                         /* fallback */
+                                                  )
+                                                HoverColor: =RGBA(255, 255, 255, 1)
+                                                HoverFill: |-
+                                                  =Switch(
+                                                      ThisItem.'Document Type'.Value,
+                                                      "📄 MoD Policy",        RGBA(44,62,80,0.1),     /* #2C3E50 */
+                                                      "📖 Regulation",        RGBA(62,142,222,0.1),   /* #3E8EDE */
+                                                      "📄 ACSO",              RGBA(46,204,113,0.1),   /* #2ECC71 */
+                                                      "📄 CFSO",              RGBA(26,188,156,0.1),   /* #1ABC9C */
+                                                      "📄 CFI",               RGBA(155,89,182,0.1),   /* #9B59B6 */
+                                                      "📄 CBN",               RGBA(230,126,34,0.1),   /* #E67E22 */
+                                                      "📕 SOI",               RGBA(211,84,0,0.1),     /* #D35400 */
+                                                      "📑 Internal Document", RGBA(189,195,199,0.1),  /* #BDC3C7 */
+                                                      "📗 Manual",            RGBA(39,174,96,0.1),    /* #27AE60 */
+                                                      "📜 Newsletter Item",   RGBA(241,196,15,0.1),   /* #F1C40F */
+                                                      RGBA(102,102,102,1)                         /* fallback */
+                                                  )
+                                                OnSelect: |-
+                                                  =
+                                                  // Overview.HtmlText2.OnSelect  → go straight to the detail screen
+                                                  // 1) Resolve and store the record
+                                                  Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
+                                                  Set(varSelectedItem, varSelectedRelease);
 
-                                            // 2) (Optional but consistent with your app state)
-                                            Set(varSourceScreen, "Overview");
-                                            Set(varSelectPolicy, "Filled");
-                                            Set(varParentSaved, true);
-                                            Set(varSelectedPerson, varSelectedRelease.Owner);
+                                                  // 2) (Optional but consistent with your app state)
+                                                  Set(varSourceScreen, "Overview");
+                                                  Set(varSelectPolicy, "Filled");
+                                                  Set(varParentSaved, true);
+                                                  Set(varSelectedPerson, varSelectedRelease.Owner);
 
-                                            // 3) Preload links used by ViewItem
-                                            Set(varLoadingLinks, true);
-                                            ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
-                                            Set(varLoadingLinks, false);
+                                                  // 3) Preload links used by ViewItem
+                                                  Set(varLoadingLinks, true);
+                                                  ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
+                                                  Set(varLoadingLinks, false);
 
-                                            // 4) Open the form in edit/view mode as needed, then navigate
-                                            Navigate(ViewItem, ScreenTransition.Fade)
-                                          PressedBorderColor: =Self.Fill
-                                          PressedColor: =Self.Fill
-                                          PressedFill: |+
-                                            =
-                                            // Button.PressedFill
-                                            ColorFade( Self.Fill, -20% )
-                                          RadiusBottomLeft: =6
-                                          RadiusBottomRight: =6
-                                          RadiusTopLeft: =6
-                                          RadiusTopRight: =6
-                                          Size: =12
-                                          Text: =ThisItem.'Document Type'.Value
-                                          Tooltip: |+
-                                            =
-                                            // Button.Tooltip
-                                            "This is " & ThisItem.Title & ". Click to open."
-                                          Width: =200
-                                          X: =13
-                                          Y: =60
+                                                  // 4) Open the form in edit/view mode as needed, then navigate
+                                                  Navigate(ViewItem, ScreenTransition.Fade)
+                                                PressedBorderColor: |-
+                                                  =Switch(
+                                                      ThisItem.'Document Type'.Value,
+                                                      "📄 MoD Policy",        RGBA(44,62,80,1),     /* #2C3E50 */
+                                                      "📖 Regulation",        RGBA(62,142,222,1),   /* #3E8EDE */
+                                                      "📄 ACSO",              RGBA(46,204,113,1),   /* #2ECC71 */
+                                                      "📄 CFSO",              RGBA(26,188,156,1),   /* #1ABC9C */
+                                                      "📄 CFI",               RGBA(155,89,182,1),   /* #9B59B6 */
+                                                      "📄 CBN",               RGBA(230,126,34,1),   /* #E67E22 */
+                                                      "📕 SOI",               RGBA(211,84,0,1),     /* #D35400 */
+                                                      "📑 Internal Document", RGBA(189,195,199,1),  /* #BDC3C7 */
+                                                      "📗 Manual",            RGBA(39,174,96,1),    /* #27AE60 */
+                                                      "📜 Newsletter Item",   RGBA(241,196,15,1),   /* #F1C40F */
+                                                      RGBA(102,102,102,1)                         /* fallback */
+                                                  )
+                                                PressedColor: =Self.Fill
+                                                PressedFill: |-
+                                                  =
+                                                  // Button.PressedFill
+                                                  Switch(
+                                                      ThisItem.'Document Type'.Value,
+                                                      "📄 MoD Policy",        RGBA(44,62,80,1),     /* #2C3E50 */
+                                                      "📖 Regulation",        RGBA(62,142,222,1),   /* #3E8EDE */
+                                                      "📄 ACSO",              RGBA(46,204,113,1),   /* #2ECC71 */
+                                                      "📄 CFSO",              RGBA(26,188,156,1),   /* #1ABC9C */
+                                                      "📄 CFI",               RGBA(155,89,182,1),   /* #9B59B6 */
+                                                      "📄 CBN",               RGBA(230,126,34,1),   /* #E67E22 */
+                                                      "📕 SOI",               RGBA(211,84,0,1),     /* #D35400 */
+                                                      "📑 Internal Document", RGBA(189,195,199,1),  /* #BDC3C7 */
+                                                      "📗 Manual",            RGBA(39,174,96,1),    /* #27AE60 */
+                                                      "📜 Newsletter Item",   RGBA(241,196,15,1),   /* #F1C40F */
+                                                      RGBA(102,102,102,1)                         /* fallback */
+                                                  )
+                                                RadiusBottomLeft: =6
+                                                RadiusBottomRight: =6
+                                                RadiusTopLeft: =6
+                                                RadiusTopRight: =6
+                                                Size: =12
+                                                Text: =
+                                                Tooltip: |
+                                                  =
+                                                  // Button.Tooltip
+                                                  "This is " & ThisItem.Title & ". Click to open."
+                                                Width: =Parent.Width
                               - DueNextWeek_2:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
                                     BorderColor: =RGBA(200,200,200,1)   // light grey
+                                    DropShadow: =DropShadow.None
                                     Height: =60
                                     Width: =250
                                   Children:
@@ -308,9 +385,11 @@ Screens:
                                         Control: Image@2.2.3
                                         Properties:
                                           BorderColor: =RGBA(0, 0, 0, 1)
-                                          Height: =65
+                                          Height: =32
                                           Image: ="data:image/svg+xml;utf8, "&EncodeUrl("<svg fill='#000000' aria-hidden='true' width='40px' height='40px' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 17A2.5 2.5 0 0 1 3 14.5v-4a.5.5 0 0 1 1 0v4c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5V7H6.5c0-.36-.14-.72-.4-1H16v-.5c0-.83-.67-1.5-1.5-1.5h-9C4.67 4 4 4.67 4 5.5v1.8l.65-.65a.5.5 0 1 1 .7.7l-1.5 1.5a.5.5 0 0 1-.7 0l-1.5-1.5a.5.5 0 1 1 .7-.7l.65.64V5.5A2.5 2.5 0 0 1 5.5 3h9A2.5 2.5 0 0 1 17 5.5v9a2.5 2.5 0 0 1-2.5 2.5h-9ZM8 10a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-1 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm4-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-1 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm4-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z' fill='#000000'/></svg>")
-                                          Width: =65
+                                          Width: =32
+                                          X: =43
+                                          Y: =14
                                     - Label2_14:
                                         Control: Label@2.5.1
                                         Properties:

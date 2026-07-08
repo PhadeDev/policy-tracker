@@ -215,10 +215,12 @@ Screens:
                       Control: ModernButton@1.0.0
                       Properties:
                         AlignInContainer: =AlignInContainer.Center
+                        BasePaletteColor: =RGBA(0, 64, 47, 1)
                         Font: =Font.'Lato Black'
                         FontWeight: =FontWeight.Bold
                         Height: =38
                         Icon: ="Search"
+                        IconStyle: =IconStyle.Filled
                         Layout: =ButtonLayout.IconOnly
                         LayoutMinHeight: =16
                         LayoutMinWidth: =16
@@ -698,7 +700,7 @@ Screens:
                                     - ChipBg:
                                         Control: Classic/Button@2.2.0
                                         Properties:
-                                          BorderColor: =RGBA(166, 215, 153, 1)
+                                          BorderColor: =RGBA(240, 98, 15, 1)
                                           BorderThickness: =0
                                           Color: =RGBA(255, 255, 255, 1)
                                           DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -769,8 +771,8 @@ Screens:
                                     - ChipButton:
                                         Control: Classic/Button@2.2.0
                                         Properties:
-                                          BorderColor: =ColorFade(Self.Fill, -15%)
-                                          BorderThickness: =0
+                                          BorderColor: =RGBA(214, 221, 224, 1)
+                                          BorderThickness: =1
                                           Color: =RGBA(255, 255, 255, 1)
                                           DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                           Fill: =RGBA(0,0,0,0)
@@ -1221,32 +1223,29 @@ Screens:
                                                             Width: =Parent.Width
                                                             X: =15
                                                             Y: =50
-                                                          Children:
-                                                            - ExtConsult:
-                                                                Control: ModernText@1.0.0
-                                                                Properties:
-                                                                  Align: =Align.Center
-                                                                  AlignInContainer: =AlignInContainer.Start
-                                                                  Color: =RGBA(0, 0, 0, 1)
-                                                                  Fill: =RGBA(180, 214, 250, 1)
-                                                                  Font: =Font.Lato
-                                                                  FontWeight: =FontWeight.Bold
-                                                                  Height: =28
-                                                                  LayoutMinWidth: =96
-                                                                  PaddingBottom: =0
-                                                                  PaddingTop: =2
-                                                                  RadiusBottomLeft: =4
-                                                                  RadiusBottomRight: =4
-                                                                  RadiusTopLeft: =4
-                                                                  RadiusTopRight: =4
-                                                                  Size: =16
-                                                                  Text: |
-                                                                    ="💬 Requires external consultation"
-                                                                  Visible: =ThisItem.'External consultation required'
-                                                                  Width: =300
-                                                                  Wrap: =false
-                                                                  X: =300
-                                                                  Y: =6
+                                                      - ExtConsult:
+                                                          Control: ModernText@1.0.0
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            Color: =RGBA(0, 0, 0, 1)
+                                                            Fill: =RGBA(180, 214, 250, 1)
+                                                            Font: =Font.Lato
+                                                            FontWeight: =FontWeight.Bold
+                                                            Height: =28
+                                                            PaddingBottom: =0
+                                                            PaddingTop: =2
+                                                            RadiusBottomLeft: =10
+                                                            RadiusBottomRight: =10
+                                                            RadiusTopLeft: =10
+                                                            RadiusTopRight: =10
+                                                            Size: =16
+                                                            Text: |-
+                                                              ="Not for release: 💬 Requires consultation"
+                                                            Visible: =ThisItem.'External consultation required'
+                                                            Width: =320
+                                                            Wrap: =false
+                                                            X: =350
+                                                            Y: =70
                                                       - LinkCount:
                                                           Control: ModernText@1.0.0
                                                           Properties:
@@ -1509,7 +1508,7 @@ Screens:
                                                       OnSelect: |-
                                                         =Set(
                                                             varQuickPublishDate,
-                                                            DateAdd(Today(), -Mod(Weekday(Today(), StartOfWeek.Sunday) - 5 + 7, 7), "Days")
+                                                            Coalesce(ThisItem.'Planned Publish Date', Today())
                                                         );
                                                         Patch(
                                                             'Policy Proof Tracker',
@@ -1534,7 +1533,8 @@ Screens:
                                                       Text: ="⚡ Publish"
                                                       Visible: |-
                                                         =!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &&
-                                                        ThisItem.'Planned Publish Date' <= Today()
+                                                        ThisItem.'Planned Publish Date' <= Today() &&
+                                                        ThisItem.Published = false
                                                       Width: =110
                                                       X: =740
                                                       Y: =6
@@ -1599,6 +1599,8 @@ Screens:
                                         Control: GroupContainer@1.5.0
                                         Variant: ManualLayout
                                         Properties:
+                                          BorderColor: =RGBA(214, 221, 224, 1)
+                                          BorderThickness: =1
                                           Fill: =RGBA(214, 221, 224, 0.4)
                                           Height: =38
                                           Width: =1275

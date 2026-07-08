@@ -58,6 +58,7 @@ ClearCollect(
             ChoiceValue: Value,
             ColorCode: Switch(
                 Value,
+                "📄 MoD Policy", RGBA(28, 32, 48, 1),
                 "📗 Manual", RGBA(0, 130, 60, 1),
                 "📄 CFI", RGBA(0, 100, 200, 1),
                 "📄 CFSO", RGBA(130, 0, 180, 1),
