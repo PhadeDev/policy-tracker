@@ -247,7 +247,7 @@ Screens:
                                     - recAccent1:
                                         Control: Rectangle@2.3.0
                                         Properties:
-                                          BorderThickness: =0
+                                          BorderColor: =RGBA(0, 18, 107, 1)
                                           Fill: =Coalesce(LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode), RGBA(150,150,150,1))
                                           Height: =Parent.Height
                                           Width: =4
