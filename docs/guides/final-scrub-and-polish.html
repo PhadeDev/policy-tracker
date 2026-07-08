@@ -184,9 +184,9 @@ UpdateContext({locDisplayAttDeletePopUp: true})</pre></div>
   </div>
 
   <div class="finding">
-    <h3>3. Quick-publish stamps the wrong Published Date <span class="sev sev-bug">BUG</span></h3>
-    <p><strong>Screen:</strong> <code>Main</code> &mdash; the per-item "⚡ Publish" button (<code>BossPublishBtn</code>, staff-only).</p>
-    <p><strong>What's wrong:</strong> when a staff member quick-publishes a single item, it computes "the most recent Thursday on or before today" and writes <em>that</em> as <code>Published Date</code> &mdash; not the item's own <code>Planned Publish Date</code>. Compare the bulk "Mark all as Published" button (<code>PublishAllBtn</code>) on the same screen, which correctly uses <code>ThisItem.PlannedDate</code> (the group's actual release date) for the same field.</p>
+    <h3>3. Quick-publish: wrong Published Date, and stays visible after publishing <span class="sev sev-bug">BUG</span></h3>
+    <p><strong>Screen:</strong> <code>Main</code> &mdash; the per-item "⚡ Publish" button (<code>BossPublishBtn</code>, staff-only). Two separate bugs on the same control.</p>
+    <p><strong>3a &mdash; wrong Published Date.</strong> When a staff member quick-publishes a single item, it computes "the most recent Thursday on or before today" and writes <em>that</em> as <code>Published Date</code> &mdash; not the item's own <code>Planned Publish Date</code>. Compare the bulk "Mark all as Published" button (<code>PublishAllBtn</code>) on the same screen, which correctly uses <code>ThisItem.PlannedDate</code> (the group's actual release date) for the same field.</p>
     <p><strong>Concrete failure:</strong> an item that's overdue by three weeks, quick-published today, gets stamped with <em>today's</em> nearest Thursday instead of the Thursday it was actually supposed to release on. Anything downstream that reads Published Date (Historic's archive view, <code>ViewItem</code>'s own published-date field) shows the wrong date for any item that was caught up late via the single-item button specifically.</p>
     <p><strong>Fix</strong> &mdash; <code>BossPublishBtn.OnSelect</code>, full replacement (only the <code>Set(varQuickPublishDate, ...)</code> computation changes, everything else is identical to what you have):</p>
     <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(
@@ -206,6 +206,12 @@ Notify(
     "Marked as published - " & Text(varQuickPublishDate, "d mmm yyyy"),
     NotificationType.Success
 )</pre></div>
+    <p><strong>3b &mdash; button never disappears once an item is published (found 2026-07-08, reported directly by user testing).</strong> <code>PublishAllBtn</code>'s <code>Visible</code> checks three things: staff membership, the group's date has arrived, <em>and</em> the group still has unpublished items (<code>CountRows(Filter(ThisItem.GroupedItems, Published = false)) &gt; 0</code>). <code>BossPublishBtn.Visible</code> only checks the first two &mdash; it never checks whether the item itself is already published, so it keeps showing forever on anything that's been marked done, on every tab where that item still renders (e.g. Previously Published).</p>
+    <p><strong>Fix</strong> &mdash; <code>BossPublishBtn.Visible</code>, full replacement (only the third line is new):</p>
+    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &&
+ThisItem.'Planned Publish Date' <= Today() &&
+ThisItem.Published = false</pre></div>
+    <p>Items are grouped by their own <code>Planned Publish Date</code>, so a per-item card's date already matches whichever Thursday group it's rendered under &mdash; the missing <code>Published = false</code> check was the entire gap, this now mirrors <code>PublishAllBtn</code>'s scoping exactly, just at item granularity instead of group granularity.</p>
   </div>
 
   <div class="finding">
