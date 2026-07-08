@@ -27,6 +27,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
                   Height: =64
                   RadiusBottomLeft: =14
                   RadiusBottomRight: =14
@@ -118,6 +119,7 @@ Screens:
                             Control: ModernText@1.0.0
                             Properties:
                               Align: =Align.Center
+                              AutoHeight: =true
                               Color: =If(ThisItem.PublishDate >= Today() && ThisItem.PublishDate < DateAdd(Today(), 7, "Days"), RGBA(11,74,54,1), RGBA(255,255,255,1))
                               Fill: =If(ThisItem.PublishDate >= Today() && ThisItem.PublishDate < DateAdd(Today(), 7, "Days"), RGBA(255,255,255,1), RGBA(11,74,54,1))
                               Font: =Font.'Open Sans'
@@ -174,6 +176,7 @@ Screens:
                                   Control: ModernText@1.0.0
                                   Properties:
                                     Align: =Align.Center
+                                    AutoHeight: =true
                                     BorderColor: =Coalesce(LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode), RGBA(150,150,150,1))
                                     BorderStyle: =BorderStyle.Solid
                                     BorderThickness: =1
@@ -279,6 +282,7 @@ Screens:
                       Variant: ManualLayout
                       Properties:
                         Fill: =Coalesce(LookUp(colChoiceColors, ChoiceValue = varOverviewLightboxItem.'Document Type'.Value, ColorCode), RGBA(150,150,150,1))
+                        FillPortions: =0
                         Height: =90
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
@@ -360,6 +364,7 @@ Screens:
                             Control: GroupContainer@1.5.0
                             Variant: ManualLayout
                             Properties:
+                              FillPortions: =0
                               Height: =40
                               Width: =Parent.Width - 48
                               X: =24
@@ -424,6 +429,7 @@ Screens:
                             Control: GroupContainer@1.5.0
                             Variant: ManualLayout
                             Properties:
+                              FillPortions: =0
                               Height: =24
                               Width: =Parent.Width - 48
                               X: =24
@@ -595,6 +601,7 @@ Screens:
                             Control: GroupContainer@1.5.0
                             Variant: ManualLayout
                             Properties:
+                              FillPortions: =0
                               Height: =44
                               Width: =Parent.Width - 48
                               X: =24

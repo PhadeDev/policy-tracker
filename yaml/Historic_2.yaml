@@ -26,6 +26,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
                   Height: =64
                   RadiusBottomLeft: =14
                   RadiusBottomRight: =14
@@ -255,6 +256,7 @@ Screens:
                                         Control: ModernText@1.0.0
                                         Properties:
                                           Align: =Align.Center
+                                          AutoHeight: =true
                                           BorderColor: =Coalesce(LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode), RGBA(150, 150, 150, 1))
                                           BorderStyle: =BorderStyle.Solid
                                           BorderThickness: =1
