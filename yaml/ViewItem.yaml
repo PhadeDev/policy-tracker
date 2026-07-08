@@ -4,7 +4,8 @@ Screens:
       Fill: =RGBA(244, 246, 243, 1)
       LoadingSpinnerColor: =RGBA(11, 74, 54, 1)
       OnVisible: |-
-        =Set(varSaving, false);
+        =Set(varLoadingLinks, true);
+        Set(varSaving, false);
         Set(varShowLinkModal, false);
         Set(varSelectedLink, Blank());
         Set(varErrTitle, false);
@@ -107,8 +108,10 @@ Screens:
                         )
                     )
                 )
-            ),
-            Clear(colLinks)
+            );
+            Set(varLoadingLinks, false),
+            Clear(colLinks);
+            Set(varLoadingLinks, false)
         );
 
         Reset(txtTitle1);
@@ -155,7 +158,13 @@ Screens:
                   RadiusBottomRight: =14
                   RadiusTopLeft: =14
                   RadiusTopRight: =14
-                  Visible: =!(DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 && DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 && !ckbHighPriority1.Value)
+                  Visible: |-
+                    =!(
+                        varSelectPolicy <> "Filled" &&
+                        DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
+                        DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
+                        !ckbHighPriority1.Value
+                    )
                 Children:
                   - lblAppTitle1:
                       Control: Label@2.5.1
@@ -295,7 +304,7 @@ Screens:
                           =Set(varErrTitle, IsBlank(Trim(txtTitle1.Text)));
                           Set(varErrOwner, IsBlank(cmb_Owner1.Selected.Mail));
                           Set(varErrDocType, IsBlank(drpDocType1.Selected.Value));
-                          Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate));
+                          Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPublishDate1.SelectedDate, StartOfWeek.Monday) <> 4);
                           If(
                               varErrTitle || varErrOwner || varErrDocType || varErrPublishDate,
                               false,
@@ -389,7 +398,7 @@ Screens:
                           =Set(varErrTitle, IsBlank(Trim(txtTitle1.Text)));
                           Set(varErrOwner, IsBlank(cmb_Owner1.Selected.Mail));
                           Set(varErrDocType, IsBlank(drpDocType1.Selected.Value));
-                          Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate));
+                          Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate) || Weekday(dpkPublishDate1.SelectedDate, StartOfWeek.Monday) <> 4);
                           If(
                               varErrTitle || varErrOwner || varErrDocType || varErrPublishDate,
                               false,
@@ -514,7 +523,11 @@ Screens:
                   RadiusBottomRight: =14
                   RadiusTopLeft: =14
                   RadiusTopRight: =14
-                  Visible: =DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 && DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 && !ckbHighPriority1.Value
+                  Visible: |-
+                    =varSelectPolicy <> "Filled" &&
+                    DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
+                    DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
+                    !ckbHighPriority1.Value
                 Children:
                   - lblWarningTitle1:
                       Control: Label@2.5.1
@@ -964,26 +977,26 @@ Screens:
                                                 Width: =298
                                                 Y: =22
                                           - dpkPublishDate1:
-                                              Control: DatePicker@0.0.46
+                                              Control: ModernDatePicker@1.0.1
                                               Properties:
                                                 BorderColor: =If(!IsBlank(Self.SelectedDate) && Weekday(Self.SelectedDate, StartOfWeek.Monday) <> 4, Color.Red, RGBA(223, 229, 224, 1))
                                                 BorderStyle: =BorderStyle.Solid
                                                 BorderThickness: =1
+                                                DefaultDate: =varSelectedRelease.'Planned Publish Date'
                                                 Fill: =RGBA(255, 255, 255, 1)
                                                 Font: =Font.'Open Sans'
-                                                FontSize: =14
-                                                Format: =Text(Self.SelectedDate, "d mmmm yyyy")
+                                                FontWeight: =""
+                                                Format: =Text(Self.SelectedDate, "d mmm yyy ")
                                                 Height: =40
                                                 OnChange: |-
                                                   =If(
-                                                      Weekday(Self.SelectedDate, StartOfWeek.Monday) <> 4,
-                                                      Notify("Only Thursdays are allowed!", NotificationType.Error);
-                                                      Reset(Self)
+                                                  Weekday(Self.SelectedDate, StartOfWeek.Monday) <> 4,
+                                                  Notify("Only Thursdays are allowed - pick a different date before saving.", NotificationType.Error)
                                                   );
                                                   Set(varUnsavedChanges, true);
                                                   Set(varErrPublishDate, false)
-                                                SelectedDate: =varSelectedRelease.'Planned Publish Date'
-                                                StartOfWeek: ="Monday"
+                                                Placeholder: ="Select a date..."
+                                                StartOfWeek: =StartOfWeek.Monday
                                                 Width: =Parent.Width
                                                 Y: =22
                                           - lblThursdayNote1:
@@ -1492,19 +1505,20 @@ Screens:
                                           Visible: =ckbPublished1.Value
                                           Width: =Parent.Width
                                     - dpkPublishedDate1:
-                                        Control: DatePicker@0.0.46
+                                        Control: ModernDatePicker@1.0.1
                                         Properties:
                                           BorderColor: =RGBA(223, 229, 224, 1)
                                           BorderStyle: =BorderStyle.Solid
                                           BorderThickness: =1
+                                          DefaultDate: =varSelectedRelease.'Published Date'
                                           Fill: =RGBA(255, 255, 255, 1)
                                           Font: =Font.'Open Sans'
-                                          FontSize: =14
-                                          Format: =Text(Self.SelectedDate, "d mmmm yyyy")
+                                          FontWeight: =""
+                                          Format: =Text(Self.SelectedDate, "d mmm yyyy")
                                           Height: =40
                                           IsEditable: =true
                                           OnChange: =Set(varUnsavedChanges, true)
-                                          SelectedDate: =varSelectedRelease.'Published Date'
+                                          Placeholder: ="Select a date..."
                                           Visible: =ckbPublished1.Value
                                           Width: =Parent.Width -12
                                           Y: =22
@@ -1553,7 +1567,7 @@ Screens:
                                           RadiusBottomRight: =10
                                           RadiusTopLeft: =10
                                           RadiusTopRight: =10
-                                          Width: =584
+                                          Width: =578
                                           X: =6
                                         Children:
                                           - TypeIcon_2:
@@ -1704,8 +1718,16 @@ Screens:
                                     IconStyle: =IconStyle.Filled
                                     Layout: =ButtonLayout.IconOnly
                                     OnSelect: |-
-                                      =Set(varSelectedLink, Defaults(PolicyLinks));
-                                      Set(varShowLinkModal, true)
+                                      =Set(varErrTitle, IsBlank(Trim(txtTitle1.Text)));
+                                      Set(varErrOwner, IsBlank(cmb_Owner1.Selected.Mail));
+                                      Set(varErrDocType, IsBlank(drpDocType1.Selected.Value));
+                                      Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate));
+                                      If(
+                                          varErrTitle || varErrOwner || varErrDocType || varErrPublishDate,
+                                          Notify("Fill in Title, Document Type and Planned Publish Date before adding a link.", NotificationType.Warning),
+                                          Set(varSelectedLink, Defaults(PolicyLinks));
+                                          Set(varShowLinkModal, true)
+                                      )
                                     PaddingBottom: =5
                                     PaddingLeft: =12
                                     PaddingRight: =12
@@ -1723,18 +1745,6 @@ Screens:
                                     Width: =75
                                     X: =492
                                     Y: =464
-                        - TextCanvas1_1:
-                            Control: Text@0.0.51
-                            Properties:
-                              Align: ='TextCanvas.Align'.Center
-                              Font: =Font.'Lato Black'
-                              Height: =89
-                              Size: =28
-                              Text: ="You must save this form before you can add links to documents."
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =!varParentSaved
-                              Width: =600
-                              Y: =236
                         - Activator_1:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -1745,7 +1755,7 @@ Screens:
                               LayoutDirection: =LayoutDirection.Vertical
                               LayoutGap: =20
                               LayoutJustifyContent: =LayoutJustifyContent.Center
-                              Visible: =!IsBlank(varSelectedRelease) && CountRows(colLinks) = 0
+                              Visible: =!varLoadingLinks && CountRows(colLinks) = 0
                               Width: =Parent.Width
                               Y: =37
                             Children:
@@ -1754,46 +1764,154 @@ Screens:
                                   Properties:
                                     Align: =Align.Center
                                     BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =RGBA(91, 105, 97, 1)
                                     Font: =Font.'Lato Black'
                                     Height: =33
                                     LayoutMaxHeight: =
                                     LayoutMaxWidth: =
-                                    Size: =16
-                                    Text: ="Associated document links"
+                                    Text: ="No document links yet"
                                     Width: =340
                                     X: =82
                                     Y: =20
-                              - ButtonCanvas2_2:
-                                  Control: Button@0.0.45
+                              - lblLinkFieldsHint1:
+                                  Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    Appearance: ='ButtonCanvas.Appearance'.Primary
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =RGBA(163, 45, 45, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =18
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Size: =10
+                                    Text: |-
+                                      ="Fill in " &
+                                      Concat(
+                                          Filter(
+                                              Table(
+                                                  {n: "Title", ok: !IsBlank(Trim(txtTitle1.Text))},
+                                                  {n: "Document Type", ok: !IsBlank(drpDocType1.Selected.Value)},
+                                                  {n: "Planned Publish Date", ok: !IsBlank(dpkPublishDate1.SelectedDate)}
+                                              ),
+                                              !ok
+                                          ),
+                                          n,
+                                          ", "
+                                      ) &
+                                      " to add document links."
+                                    Visible: |-
+                                      =IsBlank(Trim(txtTitle1.Text)) ||
+                                      IsBlank(drpDocType1.Selected.Value) ||
+                                      IsBlank(dpkPublishDate1.SelectedDate)
+                                    Width: =520
+                              - btnAddLinkEmpty1:
+                                  Control: ModernButton@1.0.0
+                                  Properties:
+                                    Align: =Align.Center
                                     BasePaletteColor: =AppTheme.palette.themePrimary
                                     BorderColor: =RGBA(122, 138, 143, 1)
                                     BorderStyle: =BorderStyle.Solid
                                     BorderThickness: =1
                                     Font: =Font.Lato
-                                    FontSize: =18
+                                    FontWeight: =""
                                     Height: =39
                                     Icon: ="Add"
-                                    LayoutMaxHeight: =
-                                    LayoutMaxWidth: =
                                     OnSelect: |-
-                                      =Set(varSelectedLink, Defaults(PolicyLinks));
-                                      Set(varShowLinkModal, true)
+                                      =// btnAddLinkEmpty1.OnSelect
+                                      Set(varErrTitle, IsBlank(Trim(txtTitle1.Text)));
+                                      Set(varErrOwner, IsBlank(cmb_Owner1.Selected.Mail));
+                                      Set(varErrDocType, IsBlank(drpDocType1.Selected.Value));
+                                      Set(varErrPublishDate, IsBlank(dpkPublishDate1.SelectedDate));
+                                      If(
+                                          varErrTitle || varErrOwner || varErrDocType || varErrPublishDate,
+                                          Notify("Fill in Title, Document Type and Planned Publish Date before adding a link.", NotificationType.Warning),
+                                          If(
+                                              varParentSaved,
+                                              Set(varSelectedLink, Defaults(PolicyLinks));
+                                              Set(varShowLinkModal, true),
+                                              If(
+                                                  !IsBlank(dpkPublishDate1.SelectedDate) &&
+                                                  DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
+                                                  DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
+                                                  !ckbHighPriority1.Value,
+                                                  Notify("Release date is within 10 days. Tick High Priority to override, or pick a later date, before adding links.", NotificationType.Warning),
+                                                  Set(varSaving, true);
+                                                  Set(
+                                                      varSavedRecord,
+                                                      Patch(
+                                                          'Policy Proof Tracker',
+                                                          If(IsBlank(varSelectedRelease.ID), Defaults('Policy Proof Tracker'), varSelectedRelease),
+                                                          {
+                                                              Title: Trim(txtTitle1.Text),
+                                                              'Document Type': {Value: drpDocType1.Selected.Value},
+                                                              Owner: {
+                                                                  Claims: "i:0#.f|membership|" & cmb_Owner1.Selected.Mail,
+                                                                  Department: "",
+                                                                  DisplayName: cmb_Owner1.Selected.DisplayName,
+                                                                  Email: cmb_Owner1.Selected.Mail,
+                                                                  JobTitle: "",
+                                                                  Picture: ""
+                                                              },
+                                                              'Planned Publish Date': dpkPublishDate1.SelectedDate,
+                                                              'High Priority': ckbHighPriority1.Value,
+                                                              'Reason for High Priority': txtReasonHighPri1.Text,
+                                                              'External consultation required': ckbExtConsult1.Value,
+                                                              'External consultation details': txtExtConsultDetails1.Text,
+                                                              'Top Item': ckbTopItem1.Value,
+                                                              'Title for Newsletter': txtNewsletterTitle1.Text,
+                                                              Audience: txtAudience1.Text,
+                                                              'Item summary': txtSummary1.Text,
+                                                              Remarks: txtRemarks1.Text,
+                                                              'Approved by Pillar Lead (Ready to Release)': ckbPillarLead1.Value,
+                                                              'Approved For Release By': {Value: Coalesce(radApproval1.Selected.Value, "Not Yet Approved")},
+                                                              Published: ckbPublished1.Value,
+                                                              'Published Date': If(ckbPublished1.Value, Coalesce(dpkPublishedDate1.SelectedDate, Today()), Blank())
+                                                          }
+                                                      )
+                                                  );
+                                                  If(
+                                                      IsEmpty(Errors('Policy Proof Tracker')),
+                                                      Set(varSelectedRelease, varSavedRecord);
+                                                      Set(varSelectedItem, varSavedRecord);
+                                                      Set(varSelectPolicy, "Filled");
+                                                      Set(varOwnerDefault, Table({DisplayName: cmb_Owner1.Selected.DisplayName, Mail: cmb_Owner1.Selected.Mail}));
+                                                      Set(varParentSaved, true);
+                                                      Set(varUnsavedChanges, false);
+                                                      ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+                                                      ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID));
+                                                      Set(varSaving, false);
+                                                      Notify("Saved - you can now add links.", NotificationType.Success);
+                                                      Set(varSelectedLink, Defaults(PolicyLinks));
+                                                      Set(varShowLinkModal, true),
+                                                      Set(varSaving, false);
+                                                      Notify("Save failed. Please check your connection and try again.", NotificationType.Error)
+                                                  )
+                                              )
+                                          )
+                                      )
+                                    PaddingBottom: =5
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =5
+                                    RadiusBottomLeft: =100
+                                    RadiusBottomRight: =100
+                                    RadiusTopLeft: =100
+                                    RadiusTopRight: =100
+                                    Size: =18
                                     Text: ="Add Document Link"
-                                    Width: =474
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =240
                                     X: =26
                                     Y: =45
                               - SVG_13:
                                   Control: Image@2.2.3
                                   Properties:
                                     BorderColor: =RGBA(0, 0, 0, 1)
-                                    Height: =50
-                                    Image: ="data:image/svg+xml;utf8, "&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='0 0 24 24' fill='none' stroke='#000000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>")
+                                    Height: =36
+                                    Image: ="data:image/svg+xml;utf8, "&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='0 0 24 24' fill='none' stroke='#0B4A36' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>")
                                     LayoutMaxHeight: =
                                     LayoutMaxWidth: =
-                                    Width: =50
+                                    Width: =36
                                     X: =212
                                     Y: |
                                       =75
@@ -2229,26 +2347,6 @@ Screens:
                                           Text: ="Cancel"
                                           X: =270
                                           Y: =240
-                        - SVG_16:
-                            Control: Image@2.2.3
-                            Properties:
-                              BorderColor: =RGBA(0, 0, 0, 1)
-                              Height: =150
-                              Image: ="data:image/svg+xml;utf8, "&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='0 0 24 24' fill='none' stroke='#000000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='m17 11-5-5-5 5'/><path d='m17 18-5-5-5 5'/></svg>")
-                              Visible: =!varParentSaved
-                              Width: =150
-                              X: =352
-                              Y: =8
-                        - SVG_19:
-                            Control: Image@2.2.3
-                            Properties:
-                              BorderColor: =RGBA(0, 0, 0, 1)
-                              Height: =150
-                              Image: ="data:image/svg+xml;utf8, "&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='0 0 24 24' fill='none' stroke='#000000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='m17 11-5-5-5 5'/><path d='m17 18-5-5-5 5'/></svg>")
-                              Visible: =!varParentSaved
-                              Width: =150
-                              X: =352
-                              Y: =98
       - DuplicateModal1:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
