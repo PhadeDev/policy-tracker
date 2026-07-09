@@ -420,68 +420,38 @@ Set(
     <div class="screen-cta purple">Open and copy &rarr;</div>
   </a>
 
+  <a class="screen-card test-version" href="screens/NewsletterPack_2.html" target="_blank">
+    <div>
+      <div class="status-pill pill-test">Test — paste as new screen</div>
+      <div class="screen-number">NewsletterPack_2</div>
+      <div class="screen-name">Newsletter Pack (V2 restyle)</div>
+      <div class="screen-desc">Same dual-panel plain-text/email-preview layout, restyled to match the V2 card language: document-type accent bar + pill on every row via colChoiceColors, forest-green primary actions. Also removes the hand-duplicated sort-order Switch flagged in issue #15 — both OnVisible and Refresh now share one LookUp(colChoiceColors, ...) instead of two copies of the same 65-line formula.</div>
+    </div>
+    <div class="screen-cta purple">Open and copy &rarr;</div>
+  </a>
+
 </div>
 
 <h2>In-Place Rebuild Guides</h2>
 <p>Targeted build guides for changing the existing screens section by section instead of pasting a whole replacement screen.</p>
 <div class="screen-grid">
 
-  <a class="screen-card done" href="guides/consultation-only.html" target="_blank">
-    <div>
-      <div class="status-pill pill-done">Feature — Main + ViewItem + NewsletterPack</div>
-      <div class="screen-number">Consultation Only</div>
-      <div class="screen-name">Reversible field-hiding + release exclusion</div>
-      <div class="screen-desc">Repurposes External Consultation Required into a "never releasing, discussion only" flag: dashed-border card + banner (replaces the approval stepper), hides Newsletter/Approval fields reversibly, excludes from both Publish buttons, the Issues tab, and Newsletter Pack.</div>
-    </div>
-    <div class="screen-cta green">Open guide &rarr;</div>
-  </a>
-
-  <a class="screen-card done" href="guides/centralize-doc-type-colours.html" target="_blank">
-    <div>
-      <div class="status-pill pill-done">Architecture — OnStart + Overview + Main + NewsletterPack + Historic</div>
-      <div class="screen-number">Colours + Sort Order</div>
-      <div class="screen-name">Centralize Document Type Colours</div>
-      <div class="screen-desc">Collapses 6 hand-duplicated colour/sort Switch blocks down to one definition in OnStart (colChoiceColors, extended with a faded variant and sort rank), referenced everywhere via LookUp. Also replaces Historic's badge (7-colour enum ceiling) with a proper pill matching Main's colour set.</div>
-    </div>
-    <div class="screen-cta green">Open guide &rarr;</div>
-  </a>
-
   <a class="screen-card done" href="guides/final-scrub-and-polish.html" target="_blank">
     <div>
       <div class="status-pill pill-done">Pre-launch audit — all screens</div>
       <div class="screen-number">All screens + OnStart</div>
       <div class="screen-name">Final Scrub &amp; Polish</div>
-      <div class="screen-desc">Full correctness/dead-code/performance/consistency pass across every screen ahead of publishing: broken document-link delete, missing MoD Policy colour, wrong quick-publish date, Overview row-clipping, dead variables, and more. Tiered by urgency.</div>
+      <div class="screen-desc">Full correctness/consistency/performance pass across every screen against the 2026-07-09 export: unresolved date-format regression on Planned Publish Date, an owner-avatar fallback colour mismatch, a duplicate-modal variable naming drift, and three maintenance/performance notes. Tiered by urgency. Includes the Newsletter Pack V2 restyle delivered this same pass.</div>
     </div>
     <div class="screen-cta green">Open guide &rarr;</div>
   </a>
 
-  <a class="screen-card test-version" href="guides/viewitem-in-place.html?v=1.0" target="_blank">
+  <a class="screen-card test-version" href="guides/viewitem-copy-title-button.html" target="_blank">
     <div>
       <div class="status-pill pill-test">Guide — edit existing screen</div>
       <div class="screen-number">ViewItem</div>
-      <div class="screen-name">ViewItem in-place redesign</div>
-      <div class="screen-desc">Step-by-step guide for changing the live ViewItem screen into the new card layout with top-bar warning swap, standalone field controls, approval steppers, mint/amber state logic, gold priority borders, Patch save, and link cards.</div>
-    </div>
-    <div class="screen-cta purple">Open guide &rarr;</div>
-  </a>
-
-  <a class="screen-card test-version" href="guides/main-in-place.html?v=1.0" target="_blank">
-    <div>
-      <div class="status-pill pill-test">Guide — edit existing screen</div>
-      <div class="screen-number">Main</div>
-      <div class="screen-name">Main in-place redesign</div>
-      <div class="screen-desc">Step-by-step guide for changing the live Main screen into the new Main_1 design: top bar, hero release band, segmented tabs, release cards, approval stepper, progress bars, pipeline sidebar, and copy-link action.</div>
-    </div>
-    <div class="screen-cta purple">Open guide &rarr;</div>
-  </a>
-
-  <a class="screen-card test-version" href="guides/viewitem-add-link-flow.html" target="_blank">
-    <div>
-      <div class="status-pill pill-test">Guide — edit existing screen</div>
-      <div class="screen-number">ViewItem</div>
-      <div class="screen-name">Add Document Link: validation + auto-save</div>
-      <div class="screen-desc">Replaces the "you must save first" blocking message with one restyled empty state that covers new and existing items alike, gates link-adding on Title/Document Type/Planned Publish Date, and auto-saves in the background instead of a separate manual save step.</div>
+      <div class="screen-name">"Copy Title" button next to Newsletter Title</div>
+      <div class="screen-desc">Adds a small button that copies whatever's currently in the main Title field into Title for Newsletter, one click, with an override so the copied value can still be edited afterwards.</div>
     </div>
     <div class="screen-cta purple">Open guide &rarr;</div>
   </a>

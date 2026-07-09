@@ -163,7 +163,8 @@ Screens:
                         varSelectPolicy <> "Filled" &&
                         DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
                         DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
-                        !ckbHighPriority1.Value
+                        !ckbHighPriority1.Value &&
+                        !ckbExtConsult1.Value
                     )
                 Children:
                   - lblAppTitle1:
@@ -517,7 +518,8 @@ Screens:
                     =varSelectPolicy <> "Filled" &&
                     DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
                     DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
-                    !ckbHighPriority1.Value
+                    !ckbHighPriority1.Value &&
+                    !ckbExtConsult1.Value
                 Children:
                   - lblWarningTitle1:
                       Control: Label@2.5.1
@@ -573,6 +575,7 @@ Screens:
                   RadiusBottomRight: =12
                   RadiusTopLeft: =12
                   RadiusTopRight: =12
+                  Visible: =!ckbExtConsult1.Value
                 Children:
                   - compactLine1:
                       Control: Rectangle@2.3.0
@@ -653,6 +656,31 @@ Screens:
                         Text: =If(ckbPillarLead1.Value && radApproval1.Selected.Value <> "Not Yet Approved" && !IsBlank(radApproval1.Selected.Value) && ckbPublished1.Value, "Complete", If(ckbPublished1.Value || radApproval1.Selected.Value <> "Not Yet Approved" && !IsBlank(radApproval1.Selected.Value) || ckbPillarLead1.Value, "In progress", "Not started"))
                         Width: =180
                         X: =Parent.Width - 200
+            - conConsultationBanner1:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Height: =44
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Visible: =ckbExtConsult1.Value
+                Children:
+                  - lblConsultationBanner1:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Color: =RGBA(110, 76, 126, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Height: =Parent.Height
+                        Size: =11
+                        Text: ="CONSULTATION ONLY — NOT FOR RELEASE"
+                        Width: =Parent.Width
             - conBody1:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -679,12 +707,18 @@ Screens:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
                             Properties:
-                              BorderColor: =If(ckbPillarLead1.Value && radApproval1.Selected.Value <> "Not Yet Approved" && !IsBlank(radApproval1.Selected.Value) && ckbPublished1.Value, RGBA(159, 224, 189, 1), If(ckbHighPriority1.Value, RGBA(212, 175, 55, 1), RGBA(223, 229, 224, 1)))
-                              BorderThickness: =If(ckbHighPriority1.Value || ckbPillarLead1.Value && radApproval1.Selected.Value <> "Not Yet Approved" && !IsBlank(radApproval1.Selected.Value) && ckbPublished1.Value, 2, 1)
+                              BorderColor: |-
+                                =If(
+                                    ckbExtConsult1.Value,
+                                    RGBA(110, 76, 126, 1),
+                                    If(ckbPillarLead1.Value && radApproval1.Selected.Value <> "Not Yet Approved" && !IsBlank(radApproval1.Selected.Value) && ckbPublished1.Value, RGBA(159, 224, 189, 1), If(ckbHighPriority1.Value, RGBA(212, 175, 55, 1), RGBA(223, 229, 224, 1)))
+                                )
+                              BorderStyle: =If(ckbExtConsult1.Value, BorderStyle.Dashed, BorderStyle.Solid)
+                              BorderThickness: =If(ckbExtConsult1.Value, 2, If(ckbHighPriority1.Value || ckbPillarLead1.Value && radApproval1.Selected.Value <> "Not Yet Approved" && !IsBlank(radApproval1.Selected.Value) && ckbPublished1.Value, 2, 1))
                               DropShadow: =DropShadow.None
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
-                              Height: =490 + If(ckbHighPriority1.Value, 100, 0) + If(ckbExtConsult1.Value, 132, 0)
+                              Height: =490 + If(ckbHighPriority1.Value && !ckbExtConsult1.Value, 100, 0) + If(ckbExtConsult1.Value, 132, 0)
                               LayoutDirection: =LayoutDirection.Vertical
                               LayoutGap: =10
                               PaddingBottom: =18
@@ -1006,6 +1040,7 @@ Screens:
                                         Properties:
                                           DropShadow: =DropShadow.None
                                           Height: =84
+                                          Visible: =!ckbExtConsult1.Value
                                           Width: =(Parent.Width - 16) / 2
                                           X: =(Parent.Width - 16) / 2 + 16
                                         Children:
@@ -1161,6 +1196,7 @@ Screens:
                               RadiusBottomRight: =14
                               RadiusTopLeft: =14
                               RadiusTopRight: =14
+                              Visible: =!ckbExtConsult1.Value
                             Children:
                               - lblNewsletterCardTitle1:
                                   Control: Label@2.5.1
@@ -1262,6 +1298,7 @@ Screens:
                               RadiusBottomRight: =14
                               RadiusTopLeft: =14
                               RadiusTopRight: =14
+                              Visible: =!ckbExtConsult1.Value
                             Children:
                               - lblApprovalCardTitle1:
                                   Control: Label@2.5.1

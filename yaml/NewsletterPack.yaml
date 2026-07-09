@@ -22,7 +22,8 @@ Screens:
                             'Approved For Release By'.Value = "DCOMD" ||
                             'Approved For Release By'.Value = "D Commander"
                         ) &&
-                        Published = false
+                        Published = false &&
+                        'External consultation required' = false
                     ),
                     SortKey,
                     Switch(
@@ -143,7 +144,8 @@ Screens:
                                               'Approved For Release By'.Value = "DCOMD" ||
                                               'Approved For Release By'.Value = "D Commander"
                                           ) &&
-                                          Published = false
+                                          Published = false &&
+                                          'External consultation required' = false
                                       ),
                                       SortKey,
                                       Switch(

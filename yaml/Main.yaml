@@ -480,7 +480,8 @@ Screens:
                                           Filter(
                                               'Policy Proof Tracker',
                                               'Planned Publish Date' < Today() &&
-                                              Published = false
+                                              Published = false &&
+                                              'External consultation required' = false
                                           )
                                       )
                                     Font: =Font.'Lato Black'
@@ -895,6 +896,7 @@ Screens:
                                                               'Policy Proof Tracker',
                                                               'Planned Publish Date' < Today() &&
                                                               Published = false &&
+                                                              'External consultation required' = false &&
                                                               (varFilterOwner = false || Owner.Email = User().Email) &&
                                                               (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
                                                           ),
@@ -933,30 +935,7 @@ Screens:
                                                 Items: |-
                                                   =Sort(
                                                       ThisItem.GroupedItems,
-                                                      Switch(
-                                                          'Document Type'.Value,
-                                                          "📄 MoD Policy",        1,
-                                                          "MoD Policy",           1,
-                                                          "📄 ACSO",              2,
-                                                          "ACSO",                 2,
-                                                          "📖 Regulation",        3,
-                                                          "Regulation",           3,
-                                                          "📄 CFSO",              4,
-                                                          "CFSO",                 4,
-                                                          "📄 CFI",               5,
-                                                          "CFI",                  5,
-                                                          "📄 CBN",               6,
-                                                          "CBN",                  6,
-                                                          "📗 Manual",            7,
-                                                          "Manual",               7,
-                                                          "📜 Newsletter Item",   8,
-                                                          "Newsletter Item",      8,
-                                                          "📕 SOI",               9,
-                                                          "SOI",                  9,
-                                                          "📑 Internal Document", 10,
-                                                          "Internal Document",    10,
-                                                          99
-                                                      ),
+                                                      LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder),
                                                       SortOrder.Ascending
                                                   )
                                                 OnSelect: |+
@@ -970,9 +949,9 @@ Screens:
                                                     Control: GroupContainer@1.5.0
                                                     Variant: ManualLayout
                                                     Properties:
-                                                      BorderColor: |+
-                                                        =If(ThisItem.Published, Color.Green, RGBA(0,0,0,1))
-                                                      BorderThickness: =1
+                                                      BorderColor: =If(ThisItem.'External consultation required', RGBA(110, 76, 126, 1), If(ThisItem.Published, Color.Green, RGBA(0,0,0,1)))
+                                                      BorderStyle: =If(ThisItem.'External consultation required', BorderStyle.Dashed, BorderStyle.Solid)
+                                                      BorderThickness: =If(ThisItem.'External consultation required', 2, 1)
                                                       DropShadow: =DropShadow.Regular
                                                       Fill: |-
                                                         =If(
@@ -1058,7 +1037,7 @@ Screens:
                                                                         HoverBorderColor: =RGBA(0, 0, 0, 0)
                                                                         HoverColor: =RGBA(80, 50, 0, 1)
                                                                         HoverFill: =RGBA(255, 186, 8, 1)
-                                                                        OnSelect: =Select(Parent)
+                                                                        OnSelect: =
                                                                         PressedBorderColor: =RGBA(0, 0, 0, 0)
                                                                         PressedColor: =RGBA(80, 50, 0, 1)
                                                                         PressedFill: =RGBA(255, 186, 8, 1)
@@ -1227,22 +1206,21 @@ Screens:
                                                           Control: ModernText@1.0.0
                                                           Properties:
                                                             Align: =Align.Center
-                                                            Color: =RGBA(0, 0, 0, 1)
-                                                            Fill: =RGBA(180, 214, 250, 1)
+                                                            Color: =RGBA(110, 76, 126, 1)
+                                                            Fill: =RGBA(241, 234, 245, 1)
                                                             Font: =Font.Lato
                                                             FontWeight: =FontWeight.Bold
                                                             Height: =28
                                                             PaddingBottom: =0
                                                             PaddingTop: =2
-                                                            RadiusBottomLeft: =10
-                                                            RadiusBottomRight: =10
-                                                            RadiusTopLeft: =10
-                                                            RadiusTopRight: =10
+                                                            RadiusBottomLeft: =8
+                                                            RadiusBottomRight: =8
+                                                            RadiusTopLeft: =8
+                                                            RadiusTopRight: =8
                                                             Size: =16
-                                                            Text: |-
-                                                              ="Not for release: 💬 Requires consultation"
+                                                            Text: ="CONSULTATION ONLY — NOT FOR RELEASE"
                                                             Visible: =ThisItem.'External consultation required'
-                                                            Width: =320
+                                                            Width: =765
                                                             Wrap: =false
                                                             X: =350
                                                             Y: =70
@@ -1289,6 +1267,7 @@ Screens:
                                                             DropShadow: =DropShadow.None
                                                             Fill: =RGBA(0,0,0,0)
                                                             Height: =24
+                                                            Visible: =!ThisItem.'External consultation required'
                                                             Width: =340
                                                             X: =775
                                                             Y: =70
@@ -1534,7 +1513,8 @@ Screens:
                                                       Visible: |-
                                                         =!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &&
                                                         ThisItem.'Planned Publish Date' <= Today() &&
-                                                        ThisItem.Published = false
+                                                        ThisItem.Published = false &&
+                                                        ThisItem.'External consultation required' = false
                                                       Width: =110
                                                       X: =740
                                                       Y: =6
@@ -1704,9 +1684,9 @@ Screens:
                                           OnSelect: |-
                                             =// PublishAllBtn.OnSelect
                                             Set(varPublishGroupDate, ThisItem.PlannedDate);
-                                            Set(varPublishGroupCount, ThisItem.ItemCount);
+                                            Set(varPublishGroupCount, CountRows(Filter(ThisItem.GroupedItems, 'External consultation required' = false)));
                                             ForAll(
-                                                ThisItem.GroupedItems,
+                                                Filter(ThisItem.GroupedItems, 'External consultation required' = false),
                                                 Patch(
                                                     'Policy Proof Tracker',
                                                     LookUp('Policy Proof Tracker', ID = ID),
@@ -1729,12 +1709,11 @@ Screens:
                                           RadiusTopLeft: =6
                                           RadiusTopRight: =6
                                           Size: =11
-                                          Text: |+
-                                            ="Publish All (" & CountRows(Filter(ThisItem.GroupedItems, Published = false)) & ")"
+                                          Text: ="Publish All (" & CountRows(Filter(ThisItem.GroupedItems, Published = false && 'External consultation required' = false)) & ")"
                                           Visible: |-
                                             =!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &&
                                             ThisItem.PlannedDate <= Today() &&
-                                            CountRows(Filter(ThisItem.GroupedItems, Published = false)) > 0
+                                            CountRows(Filter(ThisItem.GroupedItems, Published = false && 'External consultation required' = false)) > 0
                                           Width: =150
                                           X: =950
                                           Y: =12

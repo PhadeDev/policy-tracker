@@ -18,7 +18,7 @@
     th, td { border: 1px solid #2b3546; padding: 8px 10px; vertical-align: top; }
     th { background: #182131; color: #b7e4c7; text-align: left; }
     tr:nth-child(even) td { background: #121926; }
-    .note, .warn, .tier-intro { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note, .warn, .ask { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
     .note { background: #11291e; border-left: 4px solid #52b788; }
     .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
     .ask { background: #211129; border-left: 4px solid #a874e6; }
@@ -26,6 +26,7 @@
     pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
     button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
     button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
     .finding { border: 1px solid #2b3546; border-radius: 10px; padding: 18px 20px; margin: 18px 0; background: #141a26; }
     .finding h3 { margin-top: 0; }
     .sev { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
@@ -33,6 +34,7 @@
     .sev-polish { background: #1a2a3a; color: #8dc3ff; border: 1px solid #2a4a6a; }
     .sev-dead { background: #241a3a; color: #c8a8ff; border: 1px solid #4a2a6a; }
     .sev-perf { background: #2a2a14; color: #e0d888; border: 1px solid #5a5a24; }
+    .sev-done { background: #11291e; color: #7fd8a4; border: 1px solid #234a34; }
     .tier-summary { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 30px; }
     .tier-card { flex: 1; min-width: 180px; background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 14px 16px; }
     .tier-card .count { font-size: 1.6rem; font-weight: 700; color: #b7e4c7; }
@@ -46,510 +48,155 @@
 <main>
   <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
   <h1>Final Scrub &amp; Polish — Pre-Launch Audit</h1>
-  <p>Full pass across every screen (<code>Main</code>, <code>ViewItem</code>, <code>Historic</code>, <code>Overview</code>, <code>NewsletterPack</code>, <code>StartScreen</code>) plus <code>App.OnStart</code>, against the export attached to issue #12 on 2026-07-08. Every finding below was independently re-checked against the actual source after the initial review, not just reported and trusted — the exact current formula is quoted for each so there's no guessing about what state your app is actually in.</p>
+  <p>Full pass across every screen (<code>Main</code>, <code>ViewItem</code>, <code>Historic</code>, <code>Overview</code>, <code>NewsletterPack</code>) plus <code>App.OnStart</code>, against the fresh export attached to issue #15 on 2026-07-09 — the same batch that confirmed the document-type colour centralization is live. This replaces the previous version of this guide (2026-07-08, issue #12 export): everything in that version has since been fixed, superseded, or re-checked and found clean against the current app. Every finding below is quoted against the exact current formula, not a guess about what state the app is in.</p>
 
   <div class="tier-summary">
-    <div class="tier-card"><div class="count">6</div><div class="label">Tier 1 — fix before publishing</div></div>
-    <div class="tier-card"><div class="count">5</div><div class="label">Tier 2 — recommended polish</div></div>
-    <div class="tier-card"><div class="count">9</div><div class="label">Tier 3 — dead code cleanup</div></div>
+    <div class="tier-card"><div class="count">1</div><div class="label">Tier 1 — fix before publishing</div></div>
+    <div class="tier-card"><div class="count">2</div><div class="label">Tier 2 — consistency polish</div></div>
+    <div class="tier-card"><div class="count">1</div><div class="label">Tier 3 — naming drift</div></div>
     <div class="tier-card"><div class="count">3</div><div class="label">Tier 4 — performance, not urgent</div></div>
   </div>
 
-  <div class="note">Everything is graded by real risk, not treated as one flat list — Tier 1 is stuff a user will actually notice or hit; Tier 4 is real but won't break anything for a launch tomorrow, safe to schedule as a fast-follow. Do Tier 1 first, then triage the rest by however much time you've got left.</div>
+  <div class="note">Graded by real risk, not one flat list — Tier 1 is something a user will actually see today. Tier 4 is real but won't break anything for a launch tomorrow, safe to schedule as a fast-follow.</div>
 
   <div class="toc">
     <strong>Jump to:</strong>
-    <a href="#tier1">Tier 1 — Fix before publishing (6)</a>
-    <a href="#tier2">Tier 2 — Recommended polish (5)</a>
-    <a href="#tier3">Tier 3 — Dead code cleanup (9)</a>
+    <a href="#delivered">Delivered this pass — Newsletter Pack V2</a>
+    <a href="#tier1">Tier 1 — Fix before publishing (1)</a>
+    <a href="#tier2">Tier 2 — Consistency polish (2)</a>
+    <a href="#tier3">Tier 3 — Naming drift (1)</a>
     <a href="#tier4">Tier 4 — Performance, not urgent (3)</a>
     <a href="#clean">Checked and found clean</a>
   </div>
 
+  <h2 id="delivered">Delivered this pass — Newsletter Pack V2</h2>
+  <div class="finding">
+    <h3>Newsletter Pack restyled to match Main/Overview/Historic's V2 language <span class="sev sev-done">DONE</span></h3>
+    <p><strong>Screen:</strong> <code>NewsletterPack</code>. Full restyle: light V2 background (<code>RGBA(244, 246, 243, 1)</code>), white rounded top bar and panels, muted-grey body text (<code>RGBA(91, 105, 97, 1)</code>), forest-green primary actions (<code>RGBA(11, 74, 54, 1)</code>) — same palette as <code>Overview</code>/<code>Historic</code>. Each plain-text row and email-preview row now carries a document-type accent bar and pill sourced from <code>colChoiceColors</code> (<code>LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode/ColorCodeFaded)</code>), matching the pattern already proven on <code>Overview</code>'s cards.</p>
+    <p><strong>Also fixes the exact gap flagged in issue #15:</strong> the ~65-line <code>ClearCollect(colNewsletterPack, ...)</code> formula previously hand-duplicated its own <code>SortKey</code> <code>Switch</code> block in both <code>OnVisible</code> <em>and</em> <code>btnRefresh.OnSelect</code> — any future change to the sort logic had to be made in two places by hand. Both now use the single centralized <code>LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder)</code>, the same pattern <code>Main</code>'s <code>ReleaseGallery.Items</code> already uses. <strong>One behaviour note:</strong> the old local <code>Switch</code> matched both emoji-prefixed and bare document-type text ("📄 MoD Policy" and "MoD Policy" as separate cases); <code>colChoiceColors</code> only matches the emoji-prefixed form, same as <code>Main</code> already does. If any live SharePoint rows still store the bare non-emoji text, they'll silently sort last (fallback rank 99) instead of their real rank — check your data if sort order on Newsletter Pack looks off after pasting this.</p>
+    <p>Paste-ready copy page: <a href="../screens/NewsletterPack_2.html" target="_blank">screens/NewsletterPack_2.html</a> — paste as a <strong>new</strong> screen, does not touch your live <code>NewsletterPack</code>. Validated clean against <code>payaml-validate</code> (syntax, property-per-control-type, and layout layers) before publishing.</p>
+  </div>
+
   <h2 id="tier1">Tier 1 — Fix before publishing</h2>
-  <p>These are things a real user will hit: broken functionality, wrong data written, or a visibly broken layout.</p>
+  <p>Something a user will actually notice today.</p>
 
   <div class="finding">
-    <h3>1. Deleting a document link does nothing at all <span class="sev sev-bug">SEVERE</span></h3>
-    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; the trash-can icon on each document link card.</p>
-    <p><strong>What's wrong:</strong> <code>DeleteLink_2.OnSelect</code> is currently just:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=UpdateContext({locDisplayAttDeletePopUp: true})</pre></div>
-    <p>That local variable, <code>locDisplayAttDeletePopUp</code>, is never read anywhere else in the whole screen &mdash; no modal checks it, nothing is <code>Visible</code> on it, and there is no <code>Remove(PolicyLinks, ...)</code> call anywhere in <code>ViewItem.yaml</code> at all. Confirmed by searching the whole file: this is the only place that variable appears.</p>
-    <p><strong>Concrete failure:</strong> a user clicks the delete icon on a document link, nothing visibly happens, no confirmation, no error &mdash; the link is still there. There is currently no way to remove a document link from the app once added.</p>
-    <p><strong>Fix, part A</strong> &mdash; capture which link was clicked before opening the confirm step. <code>DeleteLink_2.OnSelect</code>, full replacement:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedLink, LookUp(PolicyLinks, ID = ThisItem.ID));
-UpdateContext({locDisplayAttDeletePopUp: true})</pre></div>
-    <p><strong>Fix, part B</strong> &mdash; add a confirm modal. This app already has exactly this pattern built for deleting the whole parent record (<code>DeleteItemModal1</code>, near the bottom of the Tree view) &mdash; the fastest, lowest-risk way to get a second one is to <strong>duplicate it</strong> rather than rebuild it control-by-control:</p>
-    <table>
-      <tr><th>Step</th><th>What to do</th></tr>
-      <tr><td>1</td><td>In the Tree view, right-click <code>DeleteItemModal1</code> &rarr; <strong>Duplicate</strong>. Studio auto-renames the copy and every control nested inside it (usually a <code>_1</code>/<code>2</code>-style suffix) to avoid name clashes &mdash; note what it actually named things, since the exact suffix depends on the editor and isn't predictable from here. The rest of these steps refer to "the duplicated &lt;control&gt;" for that reason.</td></tr>
-      <tr><td>2</td><td>Select the duplicated top-level container (the one that was <code>DeleteItemModal1</code>). Change its <code>Visible</code> property from <code>=locDisplayDeletePopUp1</code> to <code>=locDisplayAttDeletePopUp</code>.</td></tr>
-      <tr><td>3</td><td>Select the duplicated <strong>Close</strong> button (was <code>btnCloseModal1</code>). Change <code>OnSelect</code> from <code>=UpdateContext({locDisplayDeletePopUp1: false})</code> to <code>=UpdateContext({locDisplayAttDeletePopUp: false})</code>.</td></tr>
-      <tr><td>4</td><td>Select the duplicated <strong>Cancel</strong> button (was <code>btnCancelModal1</code>). Same change as step 3 &mdash; <code>OnSelect</code> to <code>=UpdateContext({locDisplayAttDeletePopUp: false})</code>.</td></tr>
-      <tr><td>5</td><td>Select the duplicated title text (was <code>txtModalTitle1</code>, said "Delete"). Change <code>Text</code> to <code>="Delete link"</code>.</td></tr>
-      <tr><td>6</td><td>Select the duplicated body text (was <code>txtModalText1</code>). Change <code>Text</code> to <code>="Are you sure you want to delete this document link? This action cannot be undone."</code></td></tr>
-      <tr><td>7</td><td>Select the duplicated red confirm button (was <code>btnModalAction1</code>). Leave everything except <code>OnSelect</code> as the duplicate already has it &mdash; replace <code>OnSelect</code> with the formula below.</td></tr>
-    </table>
-    <p>Step 7's <code>OnSelect</code> &mdash; this reuses the exact same <code>colLinks</code>-rebuild formula already used elsewhere on this screen (the file-extension parsing block), so it stays perfectly consistent with how the link list is populated everywhere else, wrapped in the same <code>IfError</code> success/failure pattern the original <code>DeleteItemModal1</code> button already used (that part of the duplicate just needs its target changed from the parent record to the link):</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=IfError(
-    Remove(PolicyLinks, varSelectedLink),
-    UpdateContext({locDisplayAttDeletePopUp: false});
-    Notify("Delete failed. Please check your connection and try again.", NotificationType.Error),
-    Set(varLoadingLinks, true);
-    ClearCollect(
-        colLinks,
-        AddColumns(
-            Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID),
-            FileExt,
-            With(
-                {FileParamStart: Find("file=", LinkUrl, 1)},
-                With(
-                    {
-                        FileNamePart: If(
-                            FileParamStart > 0,
-                            With(
-                                {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
-                                Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                            ),
-                            If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-                        )
-                    },
-                    Switch(
-                        true,
-                        Right(FileNamePart, 5) = ".docx", "docx",
-                        Right(FileNamePart, 4) = ".doc", "doc",
-                        Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                        Right(FileNamePart, 4) = ".xls", "xls",
-                        Right(FileNamePart, 5) = ".pptx", "pptx",
-                        Right(FileNamePart, 4) = ".ppt", "ppt",
-                        Right(FileNamePart, 4) = ".pdf", "pdf",
-                        ""
-                    )
-                )
-            )
-        )
-    );
-    Set(varLoadingLinks, false);
-    UpdateContext({locDisplayAttDeletePopUp: false});
-    Set(varSelectedLink, Blank());
-    Notify("Link deleted.", NotificationType.Success)
-)</pre></div>
+    <h3>1. Planned Publish Date still renders garbled — the year token regressed <span class="sev sev-bug">BUG</span></h3>
+    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>dpkPublishDate1</code> (<code>ModernDatePicker@1.0.1</code>).</p>
+    <p><strong>What's wrong:</strong> the earlier fix for issue #11 ("2 Jul26 2026") correctly dropped <code>Format</code> from four <code>m</code>s (<code>mmmm</code>, unsupported by this control) down to three (<code>mmm</code>) — that part is confirmed live and correct. But somewhere in applying that edit, the year token was also typed wrong: the live <code>Format</code> is now</p>
+    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Text(Self.SelectedDate, "d mmm yyy ")</pre></div>
+    <p>— three <code>y</code>s, plus a trailing space inside the closing quote. Its sibling field <code>dpkPublishedDate1</code> (the actual Published Date, further down the same screen) correctly reads <code>"d mmm yyyy"</code> with four <code>y</code>s and no trailing space — that's the reference to match. This is a one-character-level typo, not a control problem: same control, same property, no swap needed.</p>
+    <p><strong>Fix</strong> &mdash; <code>dpkPublishDate1.Format</code>, full replacement:</p>
+    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Text(Self.SelectedDate, "d mmm yyyy")</pre></div>
   </div>
 
-  <div class="finding">
-    <h3>2. "MoD Policy" items render grey instead of their own colour, everywhere <span class="sev sev-bug">BUG</span></h3>
-    <div class="warn"><strong>Superseded 2026-07-08 &mdash; apply the newer guide instead if you haven't already:</strong> <a href="centralize-doc-type-colours.html">Centralize Document Type Colours + Sort Order</a> replaces this exact <code>ClearCollect(colChoiceColors, ...)</code> block with a fuller version that includes this same MoD Policy fix <em>plus</em> two new fields (<code>ColorCodeFaded</code>, <code>SortOrder</code>) that several later guides and screens (Historic_2, Overview_2, the pill controls) now depend on. If you apply that guide, you get this fix included for free &mdash; the version below is kept only as a historical record of the original finding, don't apply both.</div>
-    <p><strong>Screens affected:</strong> <code>Main</code>, <code>Overview</code>, <code>Historic</code> &mdash; anywhere a document's colour is looked up.</p>
-    <p><strong>What's wrong:</strong> <code>App.OnStart</code> builds <code>colChoiceColors</code>, the colour lookup table every screen uses for type-accent bars, watermarks, badges and chip fills. Its <code>Switch</code> covers 9 of the app's 10 real document types &mdash; it never matches <code>"📄 MoD Policy"</code>, so every MoD Policy item falls through to the generic grey fallback (<code>RGBA(150, 150, 150, 1)</code>) instead of getting its own colour. This is your flagship/most common document type. <code>docs/index.html</code>'s own documented V2 palette confirms the intended colour: <code>RGBA(28, 32, 48, 1)</code> (dark slate) &mdash; it's just never made it into the live <code>OnStart</code>.</p>
-    <p><strong>Fix</strong> &mdash; <code>App &rarr; OnStart</code>, find the <code>ClearCollect(colChoiceColors, ...)</code> block and replace the whole thing with this (only change: the new first branch):</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ClearCollect(
-    colChoiceColors,
-    ForAll(
-        Choices('Policy Proof Tracker'.'Document Type'),
-        {
-            ChoiceValue: Value,
-            ColorCode: Switch(
-                Value,
-                "📄 MoD Policy", RGBA(28, 32, 48, 1),
-                "📗 Manual", RGBA(0, 130, 60, 1),
-                "📄 CFI", RGBA(0, 100, 200, 1),
-                "📄 CFSO", RGBA(130, 0, 180, 1),
-                "📕 SOI", RGBA(190, 30, 30, 1),
-                "📖 Regulation", RGBA(0, 150, 150, 1),
-                "📄 CBN", RGBA(210, 100, 0, 1),
-                "📄 ACSO", RGBA(0, 60, 130, 1),
-                "📑 Internal Document", RGBA(90, 90, 110, 1),
-                "📜 Newsletter Item", RGBA(160, 120, 0, 1),
-                RGBA(150, 150, 150, 1)
-            )
-        }
-    )
-);</pre></div>
-    <p>Two more places have their <em>own separate, hand-copied</em> colour switches (not sourced from <code>colChoiceColors</code>) with the exact same gap &mdash; fix these too:</p>
-    <p><strong><code>Overview</code> &rarr; <code>Button3.Fill</code></strong> (inside the "Document Type" gallery) &mdash; full replacement, uses a different local palette than <code>colChoiceColors</code>/V2 (this screen predates the V2 redesign), so the new branch matches its own existing style rather than importing the V2 hex:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Switch(
-    ThisItem.'Document Type'.Value,
-    "📄 MoD Policy",        RGBA(44,62,80,1),     /* #2C3E50 */
-    "📖 Regulation",        RGBA(62,142,222,1),   /* #3E8EDE */
-    "📄 ACSO",              RGBA(46,204,113,1),   /* #2ECC71 */
-    "📄 CFSO",              RGBA(26,188,156,1),   /* #1ABC9C */
-    "📄 CFI",               RGBA(155,89,182,1),   /* #9B59B6 */
-    "📄 CBN",               RGBA(230,126,34,1),   /* #E67E22 */
-    "📕 SOI",               RGBA(211,84,0,1),     /* #D35400 */
-    "📑 Internal Document", RGBA(189,195,199,1),  /* #BDC3C7 */
-    "📗 Manual",            RGBA(39,174,96,1),    /* #27AE60 */
-    "📜 Newsletter Item",   RGBA(241,196,15,1),   /* #F1C40F */
-    RGBA(102,102,102,1)                         /* fallback */
-)</pre></div>
-    <div class="ask"><strong>Needs your input before I can give you an exact fix:</strong> <code>Historic</code> &rarr; <code>BadgeCanvas1_1.ThemeColor</code> has the same gap, but it uses the <code>Badge</code> control's built-in colour <em>enum</em> (<code>'BadgeCanvas.ThemeColor'.Success</code>/<code>.Informative</code>/<code>.Important</code>/<code>.Danger</code>/<code>.Brand</code>/<code>.Severe</code>/<code>.Warning</code>), not raw RGBA &mdash; and all 7 of those confirmed-working values are already claimed by the other 9 types (some doubled up). I don't know the complete list of enum values this <code>Badge</code> control actually supports without guessing, and this app's own build history has been burned before by guessed enum names that error on paste. Open <code>BadgeCanvas1_1</code>'s <code>ThemeColor</code> property in the editor, check the dropdown for any value not already used above (common extras on this control are things like <code>Subtle</code> or <code>Dark</code>, but confirm what's actually offered), and I'll give you the exact <code>Switch</code> line to add once you tell me what's available.</div>
-  </div>
+  <h2 id="tier2">Tier 2 — Consistency polish</h2>
+  <p>Real, low-risk fixes &mdash; won't break anything if skipped, worth batching in when you're next in these screens.</p>
 
   <div class="finding">
-    <h3>3. Quick-publish: wrong Published Date, and stays visible after publishing <span class="sev sev-bug">BUG</span></h3>
-    <p><strong>Screen:</strong> <code>Main</code> &mdash; the per-item "⚡ Publish" button (<code>BossPublishBtn</code>, staff-only). Two separate bugs on the same control.</p>
-    <p><strong>3a &mdash; wrong Published Date.</strong> When a staff member quick-publishes a single item, it computes "the most recent Thursday on or before today" and writes <em>that</em> as <code>Published Date</code> &mdash; not the item's own <code>Planned Publish Date</code>. Compare the bulk "Mark all as Published" button (<code>PublishAllBtn</code>) on the same screen, which correctly uses <code>ThisItem.PlannedDate</code> (the group's actual release date) for the same field.</p>
-    <p><strong>Concrete failure:</strong> an item that's overdue by three weeks, quick-published today, gets stamped with <em>today's</em> nearest Thursday instead of the Thursday it was actually supposed to release on. Anything downstream that reads Published Date (Historic's archive view, <code>ViewItem</code>'s own published-date field) shows the wrong date for any item that was caught up late via the single-item button specifically.</p>
-    <p><strong>Fix</strong> &mdash; <code>BossPublishBtn.OnSelect</code>, full replacement (only the <code>Set(varQuickPublishDate, ...)</code> computation changes, everything else is identical to what you have):</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(
-    varQuickPublishDate,
-    Coalesce(ThisItem.'Planned Publish Date', Today())
-);
-Patch(
-    'Policy Proof Tracker',
-    LookUp('Policy Proof Tracker', ID = ThisItem.ID),
-    {
-        Published: true,
-        'Published Date': varQuickPublishDate
-    }
-);
-Refresh('Policy Proof Tracker');
-Notify(
-    "Marked as published - " & Text(varQuickPublishDate, "d mmm yyyy"),
-    NotificationType.Success
-)</pre></div>
-    <p><strong>3b &mdash; button never disappears once an item is published (found 2026-07-08, reported directly by user testing).</strong> <code>PublishAllBtn</code>'s <code>Visible</code> checks three things: staff membership, the group's date has arrived, <em>and</em> the group still has unpublished items (<code>CountRows(Filter(ThisItem.GroupedItems, Published = false)) &gt; 0</code>). <code>BossPublishBtn.Visible</code> only checks the first two &mdash; it never checks whether the item itself is already published, so it keeps showing forever on anything that's been marked done, on every tab where that item still renders (e.g. Previously Published).</p>
-    <p><strong>Fix</strong> &mdash; <code>BossPublishBtn.Visible</code>, full replacement (only the third line is new):</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &&
-ThisItem.'Planned Publish Date' <= Today() &&
-ThisItem.Published = false</pre></div>
-    <p>Items are grouped by their own <code>Planned Publish Date</code>, so a per-item card's date already matches whichever Thursday group it's rendered under &mdash; the missing <code>Published = false</code> check was the entire gap, this now mirrors <code>PublishAllBtn</code>'s scoping exactly, just at item granularity instead of group granularity.</p>
-  </div>
-
-  <div class="finding">
-    <h3>4. Overview's Document Type rows are 3x too short for their own content <span class="sev sev-bug">BUG</span></h3>
-    <p><strong>Screen:</strong> <code>Overview</code> &mdash; the inner "Document Type" gallery (nested inside each Thursday's card).</p>
-    <p><strong>What's wrong:</strong> this gallery's <code>TemplateSize: =30</code>, but its own children need far more room than that: <code>DueNextWeek_2</code> (date/icon block) has <code>Height: =60</code> with no <code>Y</code> set (occupies 0&ndash;60px), and <code>Button3</code> (the coloured document-type button) sits at <code>Y: =60, Height: =30</code> (occupies 60&ndash;90px) &mdash; combined, the row's own content spans ~90px against a 30px row height.</p>
-    <p><strong>Concrete failure:</strong> every row in this gallery visibly clips/overlaps into the row below it, since the allocated row height is a third of what the row's own controls need.</p>
-    <p><strong>Fix</strong> &mdash; on the inner <code>Document Type</code> gallery (not the outer date gallery, which is separately sized at <code>TemplateSize: =250</code> and is fine):</p>
+    <h3>2. Owner-initials circle falls back to brand green instead of the app-standard grey <span class="sev sev-polish">POLISH</span></h3>
+    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>lblOwnerInitials1.Fill</code>.</p>
+    <p><strong>What's wrong:</strong> every other <code>Coalesce(LookUp(colChoiceColors, ...), ...)</code> fallback in the app (<code>Main</code>, <code>Historic</code>, <code>Overview</code>, and everywhere else in <code>ViewItem</code>) uses <code>RGBA(150, 150, 150, 1)</code> as the "unrecognised document type" fallback colour. This one control uses <code>RGBA(11, 74, 54, 1)</code> (the app's brand green) instead — so an item whose <code>Document Type</code> doesn't match anything in <code>colChoiceColors</code> renders its owner-initials circle in brand green rather than the neutral grey used everywhere else for the same "unknown" state.</p>
     <table>
       <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>Document Type</code> (gallery)</td><td><code>TemplateSize</code></td><td><code>=30</code></td><td><code>=94</code></td></tr>
+      <tr><td><code>lblOwnerInitials1</code></td><td><code>Fill</code> (fallback branch only)</td><td><code>RGBA(11, 74, 54, 1)</code></td><td><code>RGBA(150, 150, 150, 1)</code></td></tr>
     </table>
   </div>
 
   <div class="finding">
-    <h3>5. Newsletter Pack shows "needs approval" on items already marked ready <span class="sev sev-bug">NEEDS YOUR CALL</span></h3>
-    <p><strong>Screen:</strong> <code>NewsletterPack</code>.</p>
-    <p><strong>What's wrong:</strong> the collection that decides which items appear in the email-ready pack (<code>colNewsletterPack</code>) admits a row if <em>either</em> <code>ReadyForRelease = true</code> <strong>or</strong> the approver is one of XO/ACOS/DCOMD/D&nbsp;Commander:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>(
-    ReadyForRelease = true ||
-    'Approved For Release By'.Value = "XO" ||
-    'Approved For Release By'.Value = "ACOS" ||
-    'Approved For Release By'.Value = "DCOMD" ||
-    'Approved For Release By'.Value = "D Commander"
-) &&
-Published = false</pre></div>
-    <p>But the field that decides whether the pending-approval warning shows on each item (<code>IsFinalApproved</code>) only checks the approver list &mdash; it never looks at <code>ReadyForRelease</code> at all:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>IsFinalApproved,
-Or(
-    'Approved For Release By'.Value = "XO",
-    'Approved For Release By'.Value = "ACOS",
-    'Approved For Release By'.Value = "DCOMD",
-    'Approved For Release By'.Value = "D Commander"
-),</pre></div>
-    <p><strong>Concrete failure:</strong> an item marked <code>ReadyForRelease = true</code> by its owner (but with no named approver set) correctly makes it into the pack &mdash; but <code>lblPendingApproval</code> will permanently show "Needs XO / ACOS / DCOMD approval" on it anyway, since <code>IsFinalApproved</code> can never be true through that path.</p>
-    <div class="ask"><strong>Needs your call before I fix this</strong> &mdash; there are two legitimate readings and only you know which one is intended: (a) <code>ReadyForRelease</code> alone should count as final approval, same as the filter already treats it, or (b) <code>ReadyForRelease</code> is meant to only get an item <em>into</em> the pack, but a named senior approver is still required before it's shown as truly final &mdash; in which case the <em>filter</em> is the one that's too permissive, not <code>IsFinalApproved</code>. Tell me which and I'll give you the one-line fix (either add <code>ReadyForRelease = true</code> into the <code>Or()</code>, or remove it from the filter).</div>
+    <h3>3. Main's own OnVisible is a no-op <span class="sev sev-polish">NEEDS YOUR CALL</span></h3>
+    <p><strong>Screen:</strong> <code>Main.OnVisible</code> is literally <code>=false</code> &mdash; not blank, not missing, an explicit boolean that does nothing. Every other screen in the app (<code>Historic</code>, <code>Overview</code>, <code>NewsletterPack</code>, <code>ViewItem</code>) uses <code>OnVisible</code> to reset filter/search state or refresh data on entry.</p>
+    <div class="ask"><strong>Needs your call:</strong> is this intentional (Main genuinely needs no entry logic, since <code>OnStart</code> already primes everything it needs), or is this vestigial from an older version that used to reset something on re-entry to Main (e.g. <code>varTypeFilter</code>, <code>varSelectedState</code>) and got disabled rather than removed? If nothing resets those filters when you navigate back to Main, that's the tell it should probably be doing something. Tell me which and I'll give you the exact replacement.</div>
   </div>
 
+  <h2 id="tier3">Tier 3 — Naming drift</h2>
+
   <div class="finding">
-    <h3>6. Planned Publish Date shows a stray trailing space <span class="sev sev-bug">MINOR</span></h3>
-    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>dpkPublishDate1</code>.</p>
-    <p><strong>What's wrong:</strong> <code>Format: =Text(Self.SelectedDate, "d mmm yyy ")</code> &mdash; note the trailing space inside the quotes, right before the closing <code>"</code>. Its sibling field <code>dpkPublishedDate1</code> (the actual Published Date, further down the same screen) correctly reads <code>"d mmm yyyy"</code> with no trailing space &mdash; that's the exact fix that closed GitHub issue #11 on this same control family, just not carried over to this one. The extra <code>y</code> is harmless (3 or 4 <code>y</code>s both render a full 4-digit year), but the trailing space is real and renders as e.g. <code>"9 Jul 2026 "</code> with visible extra whitespace.</p>
+    <h3>4. Duplicate-entry modal variable name drift: <code>varShowDuplicateModal</code> vs <code>varShowDuplicateModal1</code> <span class="sev sev-dead">DRIFT</span></h3>
+    <p><strong>Screens:</strong> <code>App.OnStart</code> initializes <code>Set(varShowDuplicateModal, false)</code> (no suffix). <code>ViewItem</code>'s actual duplicate-confirmation modal (<code>DuplicateModal1.Visible</code>, plus the <code>Set()</code> calls that open/close it) all read and write <code>varShowDuplicateModal1</code> &mdash; with a "1" suffix, matching the naming convention nearly every other control on this screen uses (<code>lblOwnerLabel1</code>, <code>conRowDateFlag1</code>, etc.).</p>
+    <p>The two names never intersect: <code>varShowDuplicateModal</code> is set once in <code>OnStart</code> and never read again anywhere in the app; <code>varShowDuplicateModal1</code> is read/written throughout <code>ViewItem</code> but never explicitly initialized. This mostly self-heals today &mdash; an unset variable evaluates to <code>Blank()</code>, which is falsy for <code>Visible</code>, so the modal still starts closed &mdash; but it's a real naming bug, not intentional design, and worth fixing before it causes a genuinely confusing symptom (e.g. if <code>Visible</code>'s logic ever gets more complex than a bare read).</p>
+    <p><strong>Fix</strong> &mdash; <code>App &rarr; OnStart</code>, one-line change:</p>
     <table>
       <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>dpkPublishDate1</code></td><td><code>Format</code></td><td><code>=Text(Self.SelectedDate, "d mmm yyy ")</code></td><td><code>=Text(Self.SelectedDate, "d mmm yyyy")</code></td></tr>
+      <tr><td><code>App.OnStart</code></td><td><code>Set(...)</code> call</td><td><code>Set(varShowDuplicateModal, false)</code></td><td><code>Set(varShowDuplicateModal1, false)</code></td></tr>
     </table>
-  </div>
-
-  <h2 id="tier2">Tier 2 — Recommended polish</h2>
-  <p>Real, low-risk fixes &mdash; won't break anything if skipped for tomorrow, but worth batching in if you've got the time.</p>
-
-  <div class="finding">
-    <h3>7. "Show only my items" hover highlight is misplaced <span class="sev sev-polish">POLISH</span></h3>
-    <p><strong>Screen:</strong> <code>Main</code> header.</p>
-    <p><strong>What's wrong:</strong> <code>MyItemsBG</code> is a transparent button whose only job is to show a hover highlight behind the <code>MyItems</code> toggle + <code>MyItemsLBL</code> label. It's positioned at <code>X: =1086, Y: =215</code>, but the toggle and label it's supposed to sit behind are at <code>X: =1164, Y: =28</code> and <code>X: =1132, Y: =21</code> &mdash; roughly 190px too low and 50&ndash;80px too far left. It also has no explicit <code>Height</code> set at all.</p>
-    <p><strong>Concrete failure:</strong> hovering over the actual toggle/label shows no highlight, while hovering over an unrelated spot ~190px lower (over the type-filter/gallery area) shows an unexplained blue highlight with nothing under it.</p>
-    <table>
-      <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>MyItemsBG</code></td><td><code>X</code></td><td><code>=1086</code></td><td><code>=1122</code></td></tr>
-      <tr><td><code>MyItemsBG</code></td><td><code>Y</code></td><td><code>=215</code></td><td><code>=15</code></td></tr>
-      <tr><td><code>MyItemsBG</code></td><td><code>Width</code></td><td><code>=240</code></td><td><code>=233</code></td></tr>
-      <tr><td><code>MyItemsBG</code></td><td><code>Height</code></td><td>(not set)</td><td><code>=40</code></td></tr>
-    </table>
-  </div>
-
-  <div class="finding">
-    <h3>8. Overdue-summary warning uses pure red instead of the app's error colour <span class="sev sev-polish">POLISH</span></h3>
-    <p><strong>Screen:</strong> <code>Main</code> &mdash; each card's summary text (<code>Summary.DisabledColor</code>), turns red when a summary is missing and the item is due within 4 days.</p>
-    <p><strong>What's wrong:</strong> uses flat <code>RGBA(255, 0, 0, 1)</code>, which stands out as harsh against the app's muted palette everywhere else &mdash; the rest of the app (field validation, error highlights) consistently uses <code>RGBA(163, 45, 45, 1)</code>.</p>
-    <table>
-      <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>Summary</code></td><td><code>DisabledColor</code> (the <code>RGBA(255, 0, 0, 1)</code> branch only, the <code>RGBA(0, 0, 0, 1)</code> default branch stays as-is)</td><td><code>RGBA(255, 0, 0, 1)</code></td><td><code>RGBA(163, 45, 45, 1)</code></td></tr>
-    </table>
-  </div>
-
-  <div class="finding">
-    <h3>9. Overview's "Return" button flashes purple &rarr; dark green &rarr; bright green <span class="sev sev-polish">POLISH</span></h3>
-    <p><strong>Screen:</strong> <code>Overview</code> &mdash; <code>OverviewBTN</code>.</p>
-    <p><strong>What's wrong:</strong> <code>Fill: =RGBA(109, 49, 162, 1)</code> (purple) but <code>HoverFill: =RGBA(21, 68, 18, 1)</code> and <code>PressedFill: =RGBA(52, 152, 47, 1)</code> are both green &mdash; the pressed colour is even the exact same green Main uses for its active tab. A single button that's purple at rest and green on hover/press reads as a copy-paste mismatch, not an intentional 3-colour design.</p>
-    <table>
-      <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>OverviewBTN</code></td><td><code>Fill</code></td><td><code>=RGBA(109, 49, 162, 1)</code></td><td><code>=RGBA(0, 64, 47, 1)</code></td></tr>
-    </table>
-    <p>(Picked a green consistent with the Hover/Pressed states already on this button &mdash; darker than both so the hover/press progression still reads as "getting brighter," matching the same visual logic <code>BossPublishBtn</code> already uses elsewhere in this app.)</p>
-  </div>
-
-  <div class="finding">
-    <h3>10. Publish Date's red error-highlight bar doesn't track its own field width <span class="sev sev-polish">POLISH</span></h3>
-    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>recErrPublishDate1</code> (the red bar that appears behind the date field on a validation error).</p>
-    <p><strong>What's wrong:</strong> its three sibling error bars (<code>recErrTitle1</code>, <code>recErrDocType1</code>, <code>recErrOwner1</code>) all use <code>Width: =Parent.Width + 4</code> and <code>X: =-2</code> so the highlight always matches its field's actual rendered width. <code>recErrPublishDate1</code> instead has a hardcoded <code>Width: =298</code> and no <code>X</code> at all &mdash; but its parent (<code>conFieldPublishDate1</code>) is <code>(Parent.Width - 16) / 2</code>, a width that changes with screen size.</p>
-    <table>
-      <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>recErrPublishDate1</code></td><td><code>Width</code></td><td><code>=298</code></td><td><code>=Parent.Width + 4</code></td></tr>
-      <tr><td><code>recErrPublishDate1</code></td><td><code>X</code></td><td>(not set)</td><td><code>=-2</code></td></tr>
-    </table>
-  </div>
-
-  <div class="finding">
-    <h3>11. App theme green doesn't match the app's documented palette (or itself) <span class="sev sev-polish">NEEDS YOUR CALL</span></h3>
-    <p><strong>Screen:</strong> <code>App.OnStart</code> &mdash; <code>AppTheme.palette</code>, consumed in 3 places on <code>ViewItem</code> (<code>BasePaletteColor</code> on a few buttons).</p>
-    <p><strong>What's wrong:</strong> there are three different candidate greens live in this app right now, and none of them agree:</p>
-    <table>
-      <tr><th>Source</th><th>Green used</th></tr>
-      <tr><td>Live <code>App.OnStart</code> (<code>AppTheme.palette.themePrimary</code>)</td><td><code>RGBA(0, 64, 47, 1)</code></td></tr>
-      <tr><td><code>docs/index.html</code>'s documented V2 palette</td><td><code>RGBA(46, 125, 89, 1)</code></td></tr>
-      <tr><td><code>Main</code>'s actual active-tab/primary-button green in practice</td><td><code>RGBA(11, 74, 54, 1)</code></td></tr>
-    </table>
-    <p>Impact is narrow since only 3 controls on <code>ViewItem</code> read <code>AppTheme</code> directly, but those 3 will render a visibly different green than the rest of the app.</p>
-    <div class="ask"><strong>Needs your call:</strong> which green is actually "the" brand colour? If it's the documented V2 one, here's the fix &mdash; <code>App &rarr; OnStart</code>, full <code>Set(AppTheme, ...)</code> replacement:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(
-    AppTheme,
-    {
-        palette: {
-            themePrimary: RGBA(46, 125, 89, 1),
-            themeSecondary: RGBA(36, 100, 70, 1),
-            themeTertiary: RGBA(28, 80, 55, 1),
-            neutralLight: RGBA(237, 237, 237, 1),
-            neutralDark: RGBA(50, 49, 48, 1),
-            white: RGBA(255, 255, 255, 1)
-        },
-        semanticColors: {
-            buttonBackground: RGBA(46, 125, 89, 1),
-            buttonBackgroundHovered: RGBA(36, 100, 70, 1),
-            buttonBackgroundPressed: RGBA(28, 80, 55, 1),
-            buttonText: RGBA(255, 255, 255, 1)
-        }
-    }
-);</pre></div>
-    <p>If you'd rather match <code>Main</code>'s practical green instead (<code>RGBA(11, 74, 54, 1)</code>), say so and I'll give you that version &mdash; same shape, different three numbers.</p>
-    </div>
-  </div>
-
-  <h2 id="tier3">Tier 3 — Dead code cleanup</h2>
-  <p>Zero behaviour change, purely removing things that do nothing. Every variable below was checked with a repo-wide search before being listed here &mdash; confirmed no reads anywhere outside its own assignment.</p>
-
-  <div class="finding">
-    <h3>12. <code>varSelectedPerson</code> — set in 6 places, read nowhere <span class="sev sev-dead">DEAD</span></h3>
-    <p>Appears in <code>ViewItem.yaml</code> (x2), <code>Main.yaml</code> (x2), <code>Historic.yaml</code> (x1), <code>Overview.yaml</code> (x1) &mdash; every single occurrence in the whole repo is inside a <code>Set(varSelectedPerson, ...)</code> call, never once read back. Delete each line below (shown with 1&ndash;2 lines of surrounding context so you can confirm you've found the right spot &mdash; the line itself is unique and safe to delete on its own, nothing else needs to change around it):</p>
-    <table>
-      <tr><th>File / control</th><th>Delete this exact line</th></tr>
-      <tr><td><code>ViewItem.yaml</code> &mdash; <code>OnVisible</code>, deep-link branch (context: right after <code>Set(varSourceScreen, "Main");</code>, right before <code>Refresh(PolicyLinks);</code>)</td><td><code>Set(varSelectedPerson, varDeepLinkItem.Owner);</code></td></tr>
-      <tr><td><code>ViewItem.yaml</code> &mdash; <code>cmb_Owner1.OnChange</code>, full replacement (only this variable removed):<br><code>=Set(varUnsavedChanges, true); Set(varErrOwner, false)</code></td><td>was: <code>=Set(varSelectedPerson, cmb_Owner1.Selected); Set(varUnsavedChanges, true); Set(varErrOwner, false)</code></td></tr>
-      <tr><td><code>Main.yaml</code> &mdash; card <code>OnSelect</code> #1 (context: right after <code>Set(varSourceScreen, "Main");</code>, right before the <code>// Load links immediately</code> comment)</td><td><code>Set(varSelectedPerson, ThisItem.Owner);</code></td></tr>
-      <tr><td><code>Main.yaml</code> &mdash; card <code>OnSelect</code> #2 (context: right after <code>Set(varSourceScreen, "Main");</code>, right before <code>Set(varLoadingLinks, true);</code>)</td><td><code>Set(varSelectedPerson, ThisItem.Owner);</code></td></tr>
-      <tr><td><code>Historic.yaml</code> &mdash; row <code>OnSelect</code> (context: right after the <code>// &lt;-- Add this line</code> comment &mdash; see finding 17, clean that up at the same time)</td><td><code>Set(varSelectedPerson, ThisItem.Owner);</code></td></tr>
-      <tr><td><code>Overview.yaml</code> &mdash; card <code>OnSelect</code> (context: right after <code>Set(varParentSaved, true);</code>, right before the <code>// 3) Preload links used by ViewItem</code> comment)</td><td><code>Set(varSelectedPerson, varSelectedRelease.Owner);</code></td></tr>
-    </table>
-    <p><em>Not listed above:</em> <code>ViewItem_1.yaml</code> also has 2 occurrences &mdash; that's the abandoned parallel test screen, not the live app, safe to ignore.</p>
-  </div>
-
-  <div class="finding">
-    <h3>13. <code>varLoading</code> — set on <code>ViewItem</code>, never read <span class="sev sev-dead">DEAD</span></h3>
-    <p><code>Set(varLoading, true)</code> / <code>Set(varLoading, false)</code> in <code>ViewItem</code>'s <code>OnVisible</code> (deep-link branch only) &mdash; nothing binds a spinner, <code>Visible</code>, or <code>DisplayMode</code> to it anywhere. Looks like a loading-state flag that was scaffolded but never wired up.</p>
-    <div class="note">If you're also doing the Tier 4 <code>OnVisible</code> restructure (finding 19), this is already removed there for free &mdash; no separate action needed. Only delete these two lines manually if you're <em>not</em> doing Tier 4.</div>
-  </div>
-
-  <div class="finding">
-    <h3>14. Three dead global variables in <code>App.OnStart</code> <span class="sev sev-dead">DEAD</span></h3>
-    <p><code>varSelectedDate</code>, <code>varFormSaved</code>, <code>varSaveMode</code> &mdash; each set once in <code>OnStart</code>, zero reads anywhere else in the repo. Safe to delete all three <code>Set()</code> calls from <code>App.OnStart</code> unless you know of an unbuilt feature that was going to use one of them.</p>
-  </div>
-
-  <div class="finding">
-    <h3>15. <code>Overview</code>'s <code>Title3</code> label — permanently hidden, still costs a per-row calculation <span class="sev sev-dead">DEAD</span></h3>
-    <p><code>Title3.Visible: =false</code>, hardcoded, no condition. It still evaluates a per-row <code>FontWeight: =If(ThisItem.IsSelected, ...)</code> formula for every row of a control nobody ever sees. Safe to delete the whole control.</p>
-  </div>
-
-  <div class="finding">
-    <h3>16. <code>NewsletterPack</code>'s <code>txtEmailPackHidden</code> — orphaned control <span class="sev sev-dead">DEAD</span></h3>
-    <p>Its <code>Default</code> duplicates the same <code>Concat(...)</code> formula <code>btnCopyAll.OnSelect</code> already builds and copies directly &mdash; but <code>txtEmailPackHidden</code> itself is never referenced anywhere else (confirmed by repo-wide search: the only hit is its own definition). Leftover from before <code>Copy()</code> was wired straight to the button. Safe to delete.</p>
-  </div>
-
-  <div class="finding">
-    <h3>17. Leftover dev comment in <code>Historic.yaml</code> <span class="sev sev-dead">CLEANUP</span></h3>
-    <p><code>Button1.OnSelect</code>: <code>Set(varSelectedRelease, ThisItem); // &lt;-- Add this line</code> &mdash; harmless, but it's an editing note to a past version of yourself, not something that should ship. Delete the trailing <code>// &lt;-- Add this line</code> comment (keep the code before it).</p>
   </div>
 
   <h2 id="tier4">Tier 4 — Performance, not urgent</h2>
-  <p>All three of these are real, but none of them are wrong <em>today</em> &mdash; they're about how the app behaves as the list grows, or maintenance risk down the line. None are blocking for a launch tomorrow; each is safe to schedule as a fast-follow if you'd rather not touch more formulas tonight.</p>
+  <p>All three are real, but none are wrong <em>today</em> &mdash; they're about maintenance risk and behaviour as the list grows. Safe to schedule as a fast-follow.</p>
 
   <div class="finding">
-    <h3>18. Search-as-you-type and every badge/chip count re-query SharePoint directly <span class="sev sev-perf">PERFORMANCE</span></h3>
-    <p><strong>Screens:</strong> <code>Main</code> (search overlay, 4 dashboard badges, ~10 type-filter chip counts), <code>Historic</code> (search box, footer count).</p>
-    <p>These all run <code>Filter('Policy Proof Tracker', ...)</code> directly against the live SharePoint list, several using <code>Lower(...)</code>/<code>in</code> which SharePoint can't delegate &mdash; meaning past the delegation warning threshold (typically 500&ndash;2000 rows depending on your list settings), results and counts will silently under-count instead of erroring, and search re-hits the live source on every keystroke rather than filtering something already in memory.</p>
-    <p><strong>Recommended approach</strong> (not a quick copy-paste &mdash; this is a real refactor, described here so it's not forgotten, worth doing as its own session rather than squeezed in tonight): build one <code>ClearCollect</code> of the currently-relevant rows once per real state change (tab switch, filter change), and have search/badges/chip-counts all read from that local collection via <code>CountRows</code>/<code>Filter</code> instead of re-querying <code>'Policy Proof Tracker'</code> each time.</p>
+    <h3>5. The file-extension/link-loading formula is copy-pasted six times across two screens <span class="sev sev-perf">MAINTENANCE</span></h3>
+    <p><strong>Screens:</strong> <code>Main.yaml</code> (release-row click, search-result-row click) and <code>ViewItem.yaml</code> (both branches of <code>OnVisible</code>, <code>frmLink_2.OnSuccess</code>, the delete-link confirm action) all contain the identical ~35-line block: <code>ClearCollect(colLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = ...), FileExt, With({FileParamStart: Find("file=", LinkUrl, 1)}, With({FileNamePart: ...}, Switch(true, Right(FileNamePart,5)=".docx","docx", ...)))))</code>.</p>
+    <p><strong>Why it matters:</strong> any bug fix or new file-type support (e.g. adding <code>.pdf</code> variants, handling a URL shape that doesn't match) has to be applied in all six places by hand, or the six copies silently drift apart. Not wrong today &mdash; every copy currently matches &mdash; but it's the same shape of risk that caused the <code>NewsletterPack</code> sort-order duplication this pass fixed.</p>
+    <p><strong>Recommended approach</strong> (a real refactor, not a copy-paste fix &mdash; worth its own session): if a Power Fx named formula is available in your Studio version, define this once at the app level and call it from all six sites; otherwise, keep it as a documented "these six must match" note until named formulas are available.</p>
   </div>
 
   <div class="finding">
-    <h3>19. <code>ViewItem</code> double-refreshes links on every deep-linked open <span class="sev sev-perf">PERFORMANCE</span></h3>
-    <p>In <code>OnVisible</code>, the deep-link branch (<code>Param("ID")</code> present) already does its own <code>Refresh(PolicyLinks)</code> + rebuild of <code>colLinks</code>. Immediately after that branch closes, an unconditional second block (<code>If(!IsBlank(varSelectedRelease.ID), Refresh(PolicyLinks); ClearCollect(colLinks, ...), ...)</code>) runs again with the identical filter &mdash; since <code>varSelectedRelease.ID</code> is now populated from the branch that just ran, this fires a second time. Every deep-linked open (e.g. a link from Teams/email with <code>?ID=</code>) does two full SharePoint refreshes and rebuilds <code>colLinks</code> twice for no benefit. Normal in-app navigation (clicking a card on <code>Main</code>) isn't affected &mdash; only the <code>?ID=</code> deep-link path.</p>
-    <p><strong>Fix</strong> &mdash; nest the second <code>If</code> as the deep-link <code>If</code>'s else-branch instead of a separate statement, so only one of the two paths ever runs. This is the same file you've already pasted <code>OnVisible</code> into a few times this session for other fixes (the 10-day banner, the Add Document Link flow) &mdash; this version includes all of those plus this restructure, plus the dead <code>varLoading</code> removal from finding 13, so it's safe to paste over whatever you currently have in one go rather than layering yet another partial edit on top:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
-Set(varSaving, false);
-Set(varShowLinkModal, false);
-Set(varSelectedLink, Blank());
-Set(varErrTitle, false);
-Set(varErrOwner, false);
-Set(varErrDocType, false);
-Set(varErrPublishDate, false);
-Set(
-    varOwnerDefault,
-    If(
-        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
-        Office365Users.SearchUserV2({searchTerm: User().Email, isSearchTermRequired: true, top: 1}).value,
-        Office365Users.SearchUserV2({searchTerm: varSelectedRelease.Owner.Email, isSearchTermRequired: true, top: 1}).value
-    )
-);
-If(
-    !varDeepLinkHandled && !IsBlank(Param("ID")),
-    Set(varDeepLinkHandled, true);
-    Set(varItemID, Param("ID"));
-    Refresh('Policy Proof Tracker');
-    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
-    If(
-        !IsBlank(varDeepLinkItem),
-        Set(varSelectedRelease, varDeepLinkItem);
-        Set(varSelectPolicy, "Filled");
-        Set(varParentSaved, true);
-        Set(varSelectedItem, varDeepLinkItem);
-        Set(varSourceScreen, "Main");
-        Refresh(PolicyLinks);
-        ClearCollect(
-            colLinks,
-            AddColumns(
-                Filter(PolicyLinks, PolicyTrackerSource.Id = varDeepLinkItem.ID),
-                FileExt,
-                With(
-                    {FileParamStart: Find("file=", LinkUrl, 1)},
-                    With(
-                        {
-                            FileNamePart: If(
-                                FileParamStart > 0,
-                                With(
-                                    {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
-                                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                                ),
-                                If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-                            )
-                        },
-                        Switch(
-                            true,
-                            Right(FileNamePart, 5) = ".docx", "docx",
-                            Right(FileNamePart, 4) = ".doc", "doc",
-                            Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                            Right(FileNamePart, 4) = ".xls", "xls",
-                            Right(FileNamePart, 5) = ".pptx", "pptx",
-                            Right(FileNamePart, 4) = ".ppt", "ppt",
-                            Right(FileNamePart, 4) = ".pdf", "pdf",
-                            ""
-                        )
-                    )
-                )
-            )
-        );
-        Set(varLoadingLinks, false);
-        Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value),
-        Set(varLoadingLinks, false)
-    ),
-    If(
-        !IsBlank(varSelectedRelease.ID),
-        Refresh(PolicyLinks);
-        ClearCollect(
-            colLinks,
-            AddColumns(
-                Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID),
-                FileExt,
-                With(
-                    {FileParamStart: Find("file=", LinkUrl, 1)},
-                    With(
-                        {
-                            FileNamePart: If(
-                                FileParamStart > 0,
-                                With(
-                                    {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
-                                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                                ),
-                                If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-                            )
-                        },
-                        Switch(
-                            true,
-                            Right(FileNamePart, 5) = ".docx", "docx",
-                            Right(FileNamePart, 4) = ".doc", "doc",
-                            Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                            Right(FileNamePart, 4) = ".xls", "xls",
-                            Right(FileNamePart, 5) = ".pptx", "pptx",
-                            Right(FileNamePart, 4) = ".ppt", "ppt",
-                            Right(FileNamePart, 4) = ".pdf", "pdf",
-                            ""
-                        )
-                    )
-                )
-            )
-        );
-        Set(varLoadingLinks, false),
-        Clear(colLinks);
-        Set(varLoadingLinks, false)
-    )
-);
-
-Reset(txtTitle1);
-Reset(drpDocType1);
-Reset(dpkPublishDate1);
-Reset(ckbHighPriority1);
-Reset(txtReasonHighPri1);
-Reset(ckbExtConsult1);
-Reset(txtExtConsultDetails1);
-Reset(ckbTopItem1);
-Reset(txtNewsletterTitle1);
-Reset(txtAudience1);
-Reset(txtSummary1);
-Reset(txtRemarks1);
-Reset(ckbPillarLead1);
-Reset(radApproval1);
-Reset(ckbPublished1);
-Reset(dpkPublishedDate1)</pre></div>
-    <div class="warn">This also removes the now-dead <code>Set(varSelectedPerson, varDeepLinkItem.Owner)</code> line from finding 12 and the dead <code>varLoading</code> lines from finding 13 &mdash; if you paste this, you don't need to separately edit those two spots in <code>OnVisible</code> (the other 5 <code>varSelectedPerson</code> locations outside <code>OnVisible</code> still need their own separate cleanup per finding 12's table).</div>
+    <h3>6. Main's type-filter chip bar re-scans the whole table per chip, on every render <span class="sev sev-perf">PERFORMANCE</span></h3>
+    <p><strong>Screen:</strong> <code>Main</code> &mdash; <code>ChipLabel.Text</code>, inside the ~10-row type-filter chip gallery. Each chip independently runs <code>CountRows(Filter('Policy Proof Tracker', &lt;4-branch state condition&gt; &amp;&amp; ownerFilter &amp;&amp; 'Document Type'.Value = ThisItem.ChoiceValue))</code> &mdash; a fresh full-table filter per chip, up to 10 times, recomputed on every re-render (e.g. every time <code>varSelectedState</code>, <code>varFilterOwner</code>, or <code>varTypeFilter</code> changes).</p>
+    <p><strong>Fix direction:</strong> compute per-type counts once (e.g. <code>GroupBy</code>/<code>AddColumns</code> into a collection keyed by document type, built at the same point <code>varSelectedState</code> changes) and have <code>ChipLabel.Text</code> just read the precomputed count instead of re-filtering.</p>
   </div>
 
   <div class="finding">
-    <h3>20. <code>NewsletterPack</code> duplicates a ~60-line formula verbatim, twice <span class="sev sev-perf">MAINTENANCE</span></h3>
-    <p><code>OnVisible</code> and <code>btnRefresh.OnSelect</code> contain the identical <code>ClearCollect(colNewsletterPack, ...)</code> formula, copy-pasted in full rather than shared. Not wrong today, but a real drift risk &mdash; any future change to the filter/sort logic (including the <code>IsFinalApproved</code> question in finding 5, if you decide to fix it) has to be made in both places, or the initial screen-load and the manual refresh button will silently diverge. Worth a note for whenever this screen is next touched, not urgent enough to restructure tonight.</p>
+    <h3>7. Duplicate-entry Thursday picker re-filters 52 times instead of grouping once <span class="sev sev-perf">PERFORMANCE</span></h3>
+    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>btnDuplicate1.OnSelect</code>. <code>ForAll(Sequence(52), If(..., CountRows(Filter(colUpcomingEntries, Year(...)=Year(thurDate) &amp;&amp; Month(...)=Month(thurDate) &amp;&amp; Day(...)=Day(thurDate)))))</code> runs a fresh <code>Filter</code>+<code>CountRows</code> over <code>colUpcomingEntries</code> once per iteration, 52 times, to build the list of upcoming Thursdays and their item counts.</p>
+    <p><strong>Fix direction:</strong> pre-group <code>colUpcomingEntries</code> by date once (e.g. <code>GroupBy</code>) before the <code>ForAll(Sequence(52), ...)</code>, then look counts up from the grouped collection instead of re-filtering the whole collection 52 times. Only fires when a user opens the duplicate flow, so not urgent, but it's 52x more work than needed every time it does.</p>
   </div>
 
   <h2 id="clean">Checked and found clean</h2>
   <div class="checked-clean">
-    Verified across all six screens, not just spot-checked in one: no <code>Rectangle</code> or <code>Label</code> control anywhere carries a <code>Radius*</code> property (the one control-family gotcha that's bitten this app hardest, historically). No <code>Table(...) &amp;</code> table-concatenation anti-pattern anywhere. Every <code>ManualLayout</code>/<code>GroupContainer</code> with an authored <code>Height</code> sitting inside an <code>AutoLayout</code> parent correctly sets <code>FillPortions: =0</code> &mdash; the exact bug class that broke <code>ViewItem_1</code>'s layout earlier this week didn't recur anywhere in the real screens. No stray <code>Reset(Self)</code>-for-validation misuse outside the one <code>OnVisible</code> load-time reset block, which is the safe/correct usage. <code>colBossButtonUsers</code> staff-gating (Newsletter nav button, quick-publish, bulk-publish) is consistent and correct everywhere it's checked &mdash; no leak to non-staff, no false negative for staff. No leftover controls from the abandoned <code>Main_1</code>/<code>Main_2</code> prototype experiments found in the real <code>Main.yaml</code>.
+    Verified across all six document-type colour consumers (<code>Main</code>, <code>Historic</code>, <code>Overview</code>, and now <code>NewsletterPack</code>): every <code>ColorCode</code>/<code>ColorCodeFaded</code> lookup correctly sources from <code>colChoiceColors</code> with the standard <code>RGBA(150, 150, 150, 1)</code>/<code>RGBA(150, 150, 150, 0.1)</code> fallback (the one exception is finding 2 above). No hand-duplicated colour <code>Switch</code> blocks survive anywhere except the file-extension formula noted in finding 5, which is a different kind of duplication (link parsing, not colour). No <code>Rectangle</code> or <code>Label</code> control anywhere carries a <code>Radius*</code> property (the control-family gotcha that's bitten this app hardest historically). Every <code>ManualLayout</code> container with an authored <code>Height</code> sitting inside an <code>AutoLayout</code> parent correctly sets <code>FillPortions</code> across all six screens, including the new <code>NewsletterPack_2</code> build. <code>Main</code>'s <code>ReleaseGallery.Items</code> and every colour consumer on <code>Overview</code>/<code>Historic</code> already use the centralized <code>LookUp(colChoiceColors, ...)</code> pattern from issue #15 &mdash; <code>NewsletterPack</code> was the one holdout, now fixed by this pass.
   </div>
 
 </main>
 <script>
 function copyBlock(btn) {
-  const text = btn.nextElementSibling.innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    btn.classList.add('ok');
-    btn.textContent = 'Copied';
-    setTimeout(() => { btn.classList.remove('ok'); btn.textContent = 'Copy'; }, 1400);
-  });
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) {
+      btn.classList.add('ok');
+      btn.textContent = 'Copied';
+    } else {
+      btn.classList.add('err');
+      btn.textContent = 'Select + Ctrl+C';
+    }
+    setTimeout(function () {
+      btn.classList.remove('ok', 'err');
+      btn.textContent = 'Copy';
+    }, 1600);
+  }
+
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  var legacyCopied = false;
+  try {
+    legacyCopied = document.execCommand('copy');
+  } catch (e) {
+    legacyCopied = false;
+  }
+
+  if (legacyCopied) {
+    showResult(true);
+    return;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () {
+      showResult(true);
+    }, function () {
+      showResult(false);
+    });
+  } else {
+    showResult(false);
+  }
 }
 </script>
 </body>
