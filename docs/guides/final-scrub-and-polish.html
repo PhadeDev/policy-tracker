@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Final Scrub &amp; Polish — Pre-Launch Audit</title>
+  <title>Final Scrub &amp; Polish — Tier 4 Performance</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
@@ -30,124 +30,340 @@
     .finding { border: 1px solid #2b3546; border-radius: 10px; padding: 18px 20px; margin: 18px 0; background: #141a26; }
     .finding h3 { margin-top: 0; }
     .sev { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
-    .sev-bug { background: #3a1414; color: #ff9f9f; border: 1px solid #6a2424; }
-    .sev-polish { background: #1a2a3a; color: #8dc3ff; border: 1px solid #2a4a6a; }
-    .sev-dead { background: #241a3a; color: #c8a8ff; border: 1px solid #4a2a6a; }
     .sev-perf { background: #2a2a14; color: #e0d888; border: 1px solid #5a5a24; }
-    .sev-done { background: #11291e; color: #7fd8a4; border: 1px solid #234a34; }
-    .tier-summary { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 30px; }
-    .tier-card { flex: 1; min-width: 180px; background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 14px 16px; }
-    .tier-card .count { font-size: 1.6rem; font-weight: 700; color: #b7e4c7; }
-    .tier-card .label { font-size: .82rem; color: #8a94a6; }
+    .step-list { margin: 14px 0 22px; padding-left: 22px; }
+    .step-list li { margin-bottom: 10px; }
     .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
     .toc a { display: block; padding: 3px 0; font-size: .9rem; }
-    .checked-clean { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 14px 16px; margin: 14px 0; color: #9fc9ae; font-size: .88rem; }
+    .done-summary { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 14px 16px; margin: 14px 0; color: #9fc9ae; font-size: .88rem; }
   </style>
 </head>
 <body>
 <main>
   <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
-  <h1>Final Scrub &amp; Polish — Pre-Launch Audit</h1>
-  <p>Full pass across every screen (<code>Main</code>, <code>ViewItem</code>, <code>Historic</code>, <code>Overview</code>, <code>NewsletterPack</code>) plus <code>App.OnStart</code>, against the fresh export attached to issue #15 on 2026-07-09 — the same batch that confirmed the document-type colour centralization is live. This replaces the previous version of this guide (2026-07-08, issue #12 export): everything in that version has since been fixed, superseded, or re-checked and found clean against the current app. Every finding below is quoted against the exact current formula, not a guess about what state the app is in.</p>
+  <h1>Final Scrub &amp; Polish — Tier 4 Performance</h1>
+  <p>Tiers 1&ndash;3 from the previous version of this guide are all applied &mdash; date-format fix, owner-avatar fallback colour, duplicate-modal variable naming, and <code>Main.OnVisible</code> confirmed intentional and removed. This version replaces the whole guide with just what's left: the three Tier 4 performance/maintenance items, each with full step-by-step instructions and complete replacement formulas, written against the new centralized colour system (<code>colChoiceColors</code>) so nothing here fights it.</p>
 
-  <div class="tier-summary">
-    <div class="tier-card"><div class="count">1</div><div class="label">Tier 1 — fix before publishing</div></div>
-    <div class="tier-card"><div class="count">2</div><div class="label">Tier 2 — consistency polish</div></div>
-    <div class="tier-card"><div class="count">1</div><div class="label">Tier 3 — naming drift</div></div>
-    <div class="tier-card"><div class="count">3</div><div class="label">Tier 4 — performance, not urgent</div></div>
-  </div>
-
-  <div class="note">Graded by real risk, not one flat list — Tier 1 is something a user will actually see today. Tier 4 is real but won't break anything for a launch tomorrow, safe to schedule as a fast-follow.</div>
+  <div class="done-summary">Applied and off this guide: Planned Publish Date format regression, owner-initials fallback colour, <code>varShowDuplicateModal</code>/<code>varShowDuplicateModal1</code> naming drift, <code>Main.OnVisible</code> (deleted &mdash; confirmed nothing else in the app writes <code>varSelectedState</code>/<code>varTypeFilter</code>/<code>varFilterOwner</code> except Main's own tab/chip/toggle controls, so there was nothing for it to reset).</div>
 
   <div class="toc">
     <strong>Jump to:</strong>
-    <a href="#delivered">Delivered this pass — Newsletter Pack V2</a>
-    <a href="#tier1">Tier 1 — Fix before publishing (1)</a>
-    <a href="#tier2">Tier 2 — Consistency polish (2)</a>
-    <a href="#tier3">Tier 3 — Naming drift (1)</a>
-    <a href="#tier4">Tier 4 — Performance, not urgent (3)</a>
-    <a href="#clean">Checked and found clean</a>
+    <a href="#item1">1. Link-loading formula, one definition instead of six copies</a>
+    <a href="#item2">2. Type-filter chip counts, computed once per tab/owner change instead of ~10&times; per render</a>
+    <a href="#item3">3. Duplicate-entry Thursday picker, grouped once instead of 52 re-filters</a>
   </div>
 
-  <h2 id="delivered">Delivered this pass — Newsletter Pack V2</h2>
-  <div class="finding">
-    <h3>Newsletter Pack restyled to match Main/Overview/Historic's V2 language <span class="sev sev-done">DONE</span></h3>
-    <p><strong>Screen:</strong> <code>NewsletterPack</code>. Full restyle: light V2 background (<code>RGBA(244, 246, 243, 1)</code>), white rounded top bar and panels, muted-grey body text (<code>RGBA(91, 105, 97, 1)</code>), forest-green primary actions (<code>RGBA(11, 74, 54, 1)</code>) — same palette as <code>Overview</code>/<code>Historic</code>. Each plain-text row and email-preview row now carries a document-type accent bar and pill sourced from <code>colChoiceColors</code> (<code>LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode/ColorCodeFaded)</code>), matching the pattern already proven on <code>Overview</code>'s cards.</p>
-    <p><strong>Also fixes the exact gap flagged in issue #15:</strong> the ~65-line <code>ClearCollect(colNewsletterPack, ...)</code> formula previously hand-duplicated its own <code>SortKey</code> <code>Switch</code> block in both <code>OnVisible</code> <em>and</em> <code>btnRefresh.OnSelect</code> — any future change to the sort logic had to be made in two places by hand. Both now use the single centralized <code>LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder)</code>, the same pattern <code>Main</code>'s <code>ReleaseGallery.Items</code> already uses. <strong>One behaviour note:</strong> the old local <code>Switch</code> matched both emoji-prefixed and bare document-type text ("📄 MoD Policy" and "MoD Policy" as separate cases); <code>colChoiceColors</code> only matches the emoji-prefixed form, same as <code>Main</code> already does. If any live SharePoint rows still store the bare non-emoji text, they'll silently sort last (fallback rank 99) instead of their real rank — check your data if sort order on Newsletter Pack looks off after pasting this.</p>
-    <p>Paste-ready copy page: <a href="../screens/NewsletterPack_2.html" target="_blank">screens/NewsletterPack_2.html</a> — paste as a <strong>new</strong> screen, does not touch your live <code>NewsletterPack</code>. Validated clean against <code>payaml-validate</code> (syntax, property-per-control-type, and layout layers) before publishing.</p>
-  </div>
+  <h2 id="item1">1. Link-loading formula: one definition instead of six copies <span class="sev sev-perf">MAINTENANCE</span></h2>
+  <p>The ~35-line "parse the file extension out of the SharePoint link URL, rebuild <code>colLinks</code>" formula is currently pasted verbatim in six places: two click handlers on <code>Main</code> (<code>Selector.OnSelect</code>, <code>btnResultSelect.OnSelect</code>) and four spots on <code>ViewItem</code> (both branches of <code>OnVisible</code>, <code>frmLink_2.OnSuccess</code>, and the delete-link confirm button <code>btnModalAction1_1.OnSelect</code>). Any future change &mdash; a new file type, a different URL shape &mdash; has to be made in all six by hand or they drift.</p>
 
-  <h2 id="tier1">Tier 1 — Fix before publishing</h2>
-  <p>Something a user will actually notice today.</p>
+  <p><strong>The fix:</strong> Power Fx <a href="https://learn.microsoft.com/en-us/power-platform/power-fx/working-with-formulas" target="_blank">User Defined Functions</a> (entered in the <code>Formulas</code> property, same place as <code>App.OnStart</code>) now support parameters and behaviour functions like <code>ClearCollect</code>, confirmed current as of this pass. One function, six one-line call sites.</p>
 
-  <div class="finding">
-    <h3>1. Planned Publish Date still renders garbled — the year token regressed <span class="sev sev-bug">BUG</span></h3>
-    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>dpkPublishDate1</code> (<code>ModernDatePicker@1.0.1</code>).</p>
-    <p><strong>What's wrong:</strong> the earlier fix for issue #11 ("2 Jul26 2026") correctly dropped <code>Format</code> from four <code>m</code>s (<code>mmmm</code>, unsupported by this control) down to three (<code>mmm</code>) — that part is confirmed live and correct. But somewhere in applying that edit, the year token was also typed wrong: the live <code>Format</code> is now</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Text(Self.SelectedDate, "d mmm yyy ")</pre></div>
-    <p>— three <code>y</code>s, plus a trailing space inside the closing quote. Its sibling field <code>dpkPublishedDate1</code> (the actual Published Date, further down the same screen) correctly reads <code>"d mmm yyyy"</code> with four <code>y</code>s and no trailing space — that's the reference to match. This is a one-character-level typo, not a control problem: same control, same property, no swap needed.</p>
-    <p><strong>Fix</strong> &mdash; <code>dpkPublishDate1.Format</code>, full replacement:</p>
-    <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Text(Self.SelectedDate, "d mmm yyyy")</pre></div>
-  </div>
+  <div class="warn"><strong>Test the function on its own first.</strong> Paste it into <code>Formulas</code>, save, and confirm Studio doesn't flag a syntax error before touching any of the six call sites. If it doesn't parse for any reason, none of your existing six copies are touched yet &mdash; you've lost nothing by checking first.</div>
 
-  <h2 id="tier2">Tier 2 — Consistency polish</h2>
-  <p>Real, low-risk fixes &mdash; won't break anything if skipped, worth batching in when you're next in these screens.</p>
+  <ol class="step-list">
+    <li>In the Tree view, select <strong>App</strong>. In the property dropdown (top-left of the formula bar), select <strong>Formulas</strong>.</li>
+    <li>Paste this in (adds to whatever's already there, doesn't replace it &mdash; if this is the first named formula/UDF in the app, it'll be the only thing in the box):</li>
+  </ol>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>BuildLinksForSource(SourceID: Number): Boolean =
+    ClearCollect(
+        colLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id = SourceID),
+            FileExt,
+            With(
+                {FileParamStart: Find("file=", LinkUrl, 1)},
+                With(
+                    {
+                        FileNamePart: If(
+                            FileParamStart > 0,
+                            With(
+                                {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                                Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                            ),
+                            If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+                        )
+                    },
+                    Switch(
+                        true,
+                        Right(FileNamePart, 5) = ".docx", "docx",
+                        Right(FileNamePart, 4) = ".doc", "doc",
+                        Right(FileNamePart, 5) = ".xlsx", "xlsx",
+                        Right(FileNamePart, 4) = ".xls", "xls",
+                        Right(FileNamePart, 5) = ".pptx", "pptx",
+                        Right(FileNamePart, 4) = ".ppt", "ppt",
+                        Right(FileNamePart, 4) = ".pdf", "pdf",
+                        ""
+                    )
+                )
+            )
+        )
+    );
+    true</pre></div>
 
-  <div class="finding">
-    <h3>2. Owner-initials circle falls back to brand green instead of the app-standard grey <span class="sev sev-polish">POLISH</span></h3>
-    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>lblOwnerInitials1.Fill</code>.</p>
-    <p><strong>What's wrong:</strong> every other <code>Coalesce(LookUp(colChoiceColors, ...), ...)</code> fallback in the app (<code>Main</code>, <code>Historic</code>, <code>Overview</code>, and everywhere else in <code>ViewItem</code>) uses <code>RGBA(150, 150, 150, 1)</code> as the "unrecognised document type" fallback colour. This one control uses <code>RGBA(11, 74, 54, 1)</code> (the app's brand green) instead — so an item whose <code>Document Type</code> doesn't match anything in <code>colChoiceColors</code> renders its owner-initials circle in brand green rather than the neutral grey used everywhere else for the same "unknown" state.</p>
-    <table>
-      <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>lblOwnerInitials1</code></td><td><code>Fill</code> (fallback branch only)</td><td><code>RGBA(11, 74, 54, 1)</code></td><td><code>RGBA(150, 150, 150, 1)</code></td></tr>
-    </table>
-  </div>
+  <p>Once that's saved with no error, replace each of the six call sites. Every one of them keeps everything else in its handler exactly as-is &mdash; only the <code>ClearCollect(colLinks, AddColumns(...))</code> block is being swapped for one line.</p>
 
-  <div class="finding">
-    <h3>3. Main's own OnVisible is a no-op <span class="sev sev-polish">NEEDS YOUR CALL</span></h3>
-    <p><strong>Screen:</strong> <code>Main.OnVisible</code> is literally <code>=false</code> &mdash; not blank, not missing, an explicit boolean that does nothing. Every other screen in the app (<code>Historic</code>, <code>Overview</code>, <code>NewsletterPack</code>, <code>ViewItem</code>) uses <code>OnVisible</code> to reset filter/search state or refresh data on entry.</p>
-    <div class="ask"><strong>Needs your call:</strong> is this intentional (Main genuinely needs no entry logic, since <code>OnStart</code> already primes everything it needs), or is this vestigial from an older version that used to reset something on re-entry to Main (e.g. <code>varTypeFilter</code>, <code>varSelectedState</code>) and got disabled rather than removed? If nothing resets those filters when you navigate back to Main, that's the tell it should probably be doing something. Tell me which and I'll give you the exact replacement.</div>
-  </div>
+  <h3>Site 1 of 6 &mdash; <code>Main</code> &rarr; release row &rarr; <code>Selector.OnSelect</code></h3>
+  <p>Full replacement (only the <code>ClearCollect</code> block changes):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Select(Parent);
+Set(varSelectPolicy, "Filled");
+Set(varParentSaved, true);
+Set(varSelectedItem, ThisItem);
+Set(varSourceScreen, "Main");
+Set(varSelectedPerson, ThisItem.Owner);
 
-  <h2 id="tier3">Tier 3 — Naming drift</h2>
+// Load links immediately
+Set(varSelectedRelease, ThisItem);
+Set(varLoadingLinks, true);
+BuildLinksForSource(ThisItem.ID);
+Set(varLoadingLinks, false);
 
-  <div class="finding">
-    <h3>4. Duplicate-entry modal variable name drift: <code>varShowDuplicateModal</code> vs <code>varShowDuplicateModal1</code> <span class="sev sev-dead">DRIFT</span></h3>
-    <p><strong>Screens:</strong> <code>App.OnStart</code> initializes <code>Set(varShowDuplicateModal, false)</code> (no suffix). <code>ViewItem</code>'s actual duplicate-confirmation modal (<code>DuplicateModal1.Visible</code>, plus the <code>Set()</code> calls that open/close it) all read and write <code>varShowDuplicateModal1</code> &mdash; with a "1" suffix, matching the naming convention nearly every other control on this screen uses (<code>lblOwnerLabel1</code>, <code>conRowDateFlag1</code>, etc.).</p>
-    <p>The two names never intersect: <code>varShowDuplicateModal</code> is set once in <code>OnStart</code> and never read again anywhere in the app; <code>varShowDuplicateModal1</code> is read/written throughout <code>ViewItem</code> but never explicitly initialized. This mostly self-heals today &mdash; an unset variable evaluates to <code>Blank()</code>, which is falsy for <code>Visible</code>, so the modal still starts closed &mdash; but it's a real naming bug, not intentional design, and worth fixing before it causes a genuinely confusing symptom (e.g. if <code>Visible</code>'s logic ever gets more complex than a bare read).</p>
-    <p><strong>Fix</strong> &mdash; <code>App &rarr; OnStart</code>, one-line change:</p>
-    <table>
-      <tr><th>Control</th><th>Property</th><th>Old</th><th>New</th></tr>
-      <tr><td><code>App.OnStart</code></td><td><code>Set(...)</code> call</td><td><code>Set(varShowDuplicateModal, false)</code></td><td><code>Set(varShowDuplicateModal1, false)</code></td></tr>
-    </table>
-  </div>
+// Navigate to ViewItem
+Navigate(ViewItem, ScreenTransition.Fade);</pre></div>
 
-  <h2 id="tier4">Tier 4 — Performance, not urgent</h2>
-  <p>All three are real, but none are wrong <em>today</em> &mdash; they're about maintenance risk and behaviour as the list grows. Safe to schedule as a fast-follow.</p>
+  <h3>Site 2 of 6 &mdash; <code>Main</code> &rarr; search result row &rarr; <code>btnResultSelect.OnSelect</code></h3>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedRelease, ThisItem);
+Set(varSelectPolicy, "Filled");
+Set(varParentSaved, true);
+Set(varSelectedItem, ThisItem);
+Set(varSourceScreen, "Main");
+Set(varSelectedPerson, ThisItem.Owner);
+Set(varLoadingLinks, true);
+BuildLinksForSource(ThisItem.ID);
+Set(varLoadingLinks, false);
+Navigate(ViewItem, ScreenTransition.Fade);</pre></div>
+  <div class="note">If <code>btnResultSelect.OnSelect</code> has anything after the old <code>ClearCollect</code> block that isn't shown here (e.g. closing the search overlay), keep that tail exactly as it is &mdash; only the six-copy formula is being replaced app-wide, nothing else about this handler.</div>
 
-  <div class="finding">
-    <h3>5. The file-extension/link-loading formula is copy-pasted six times across two screens <span class="sev sev-perf">MAINTENANCE</span></h3>
-    <p><strong>Screens:</strong> <code>Main.yaml</code> (release-row click, search-result-row click) and <code>ViewItem.yaml</code> (both branches of <code>OnVisible</code>, <code>frmLink_2.OnSuccess</code>, the delete-link confirm action) all contain the identical ~35-line block: <code>ClearCollect(colLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = ...), FileExt, With({FileParamStart: Find("file=", LinkUrl, 1)}, With({FileNamePart: ...}, Switch(true, Right(FileNamePart,5)=".docx","docx", ...)))))</code>.</p>
-    <p><strong>Why it matters:</strong> any bug fix or new file-type support (e.g. adding <code>.pdf</code> variants, handling a URL shape that doesn't match) has to be applied in all six places by hand, or the six copies silently drift apart. Not wrong today &mdash; every copy currently matches &mdash; but it's the same shape of risk that caused the <code>NewsletterPack</code> sort-order duplication this pass fixed.</p>
-    <p><strong>Recommended approach</strong> (a real refactor, not a copy-paste fix &mdash; worth its own session): if a Power Fx named formula is available in your Studio version, define this once at the app level and call it from all six sites; otherwise, keep it as a documented "these six must match" note until named formulas are available.</p>
-  </div>
+  <h3>Site 3 of 6 &mdash; <code>ViewItem.OnVisible</code>, deep-link branch</h3>
+  <p>This is inside the <code>If(!varDeepLinkHandled &amp;&amp; !IsBlank(Param("ID")), ...)</code> block. Full replacement for that inner <code>If(!IsBlank(varDeepLinkItem), ...)</code> branch:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varDeepLinkItem),
+    Set(varSelectedRelease, varDeepLinkItem);
+    Set(varSelectPolicy, "Filled");
+    Set(varParentSaved, true);
+    Set(varSelectedItem, varDeepLinkItem);
+    Set(varSourceScreen, "Main");
+    Set(varSelectedPerson, varDeepLinkItem.Owner);
+    Refresh(PolicyLinks);
+    BuildLinksForSource(varDeepLinkItem.ID);
+    Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value)
+);</pre></div>
 
-  <div class="finding">
-    <h3>6. Main's type-filter chip bar re-scans the whole table per chip, on every render <span class="sev sev-perf">PERFORMANCE</span></h3>
-    <p><strong>Screen:</strong> <code>Main</code> &mdash; <code>ChipLabel.Text</code>, inside the ~10-row type-filter chip gallery. Each chip independently runs <code>CountRows(Filter('Policy Proof Tracker', &lt;4-branch state condition&gt; &amp;&amp; ownerFilter &amp;&amp; 'Document Type'.Value = ThisItem.ChoiceValue))</code> &mdash; a fresh full-table filter per chip, up to 10 times, recomputed on every re-render (e.g. every time <code>varSelectedState</code>, <code>varFilterOwner</code>, or <code>varTypeFilter</code> changes).</p>
-    <p><strong>Fix direction:</strong> compute per-type counts once (e.g. <code>GroupBy</code>/<code>AddColumns</code> into a collection keyed by document type, built at the same point <code>varSelectedState</code> changes) and have <code>ChipLabel.Text</code> just read the precomputed count instead of re-filtering.</p>
-  </div>
+  <h3>Site 4 of 6 &mdash; <code>ViewItem.OnVisible</code>, normal-selection branch</h3>
+  <p>The second top-level <code>If</code> in <code>OnVisible</code>, right after the deep-link one closes:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varSelectedRelease.ID),
+    Refresh(PolicyLinks);
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
 
-  <div class="finding">
-    <h3>7. Duplicate-entry Thursday picker re-filters 52 times instead of grouping once <span class="sev sev-perf">PERFORMANCE</span></h3>
-    <p><strong>Screen:</strong> <code>ViewItem</code> &mdash; <code>btnDuplicate1.OnSelect</code>. <code>ForAll(Sequence(52), If(..., CountRows(Filter(colUpcomingEntries, Year(...)=Year(thurDate) &amp;&amp; Month(...)=Month(thurDate) &amp;&amp; Day(...)=Day(thurDate)))))</code> runs a fresh <code>Filter</code>+<code>CountRows</code> over <code>colUpcomingEntries</code> once per iteration, 52 times, to build the list of upcoming Thursdays and their item counts.</p>
-    <p><strong>Fix direction:</strong> pre-group <code>colUpcomingEntries</code> by date once (e.g. <code>GroupBy</code>) before the <code>ForAll(Sequence(52), ...)</code>, then look counts up from the grouped collection instead of re-filtering the whole collection 52 times. Only fires when a user opens the duplicate flow, so not urgent, but it's 52x more work than needed every time it does.</p>
-  </div>
+  <h3>Site 5 of 6 &mdash; <code>ViewItem</code> &rarr; <code>frmLink_2.OnSuccess</code></h3>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=// Refresh PolicyLinks after successful save
+Refresh(PolicyLinks);
 
-  <h2 id="clean">Checked and found clean</h2>
-  <div class="checked-clean">
-    Verified across all six document-type colour consumers (<code>Main</code>, <code>Historic</code>, <code>Overview</code>, and now <code>NewsletterPack</code>): every <code>ColorCode</code>/<code>ColorCodeFaded</code> lookup correctly sources from <code>colChoiceColors</code> with the standard <code>RGBA(150, 150, 150, 1)</code>/<code>RGBA(150, 150, 150, 0.1)</code> fallback (the one exception is finding 2 above). No hand-duplicated colour <code>Switch</code> blocks survive anywhere except the file-extension formula noted in finding 5, which is a different kind of duplication (link parsing, not colour). No <code>Rectangle</code> or <code>Label</code> control anywhere carries a <code>Radius*</code> property (the control-family gotcha that's bitten this app hardest historically). Every <code>ManualLayout</code> container with an authored <code>Height</code> sitting inside an <code>AutoLayout</code> parent correctly sets <code>FillPortions</code> across all six screens, including the new <code>NewsletterPack_2</code> build. <code>Main</code>'s <code>ReleaseGallery.Items</code> and every colour consumer on <code>Overview</code>/<code>Historic</code> already use the centralized <code>LookUp(colChoiceColors, ...)</code> pattern from issue #15 &mdash; <code>NewsletterPack</code> was the one holdout, now fixed by this pass.
-  </div>
+// Reload colLinks so the gallery updates immediately
+Set(varLoadingLinks, true);
+BuildLinksForSource(varSelectedRelease.ID);
+Set(varLoadingLinks, false);
+
+// Close modal and reset variables
+Set(varSelectedItem, varSelectedRelease);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+
+// Notify user
+Notify("Link saved successfully!", NotificationType.Success);</pre></div>
+
+  <h3>Site 6 of 6 &mdash; <code>ViewItem</code> &rarr; delete-link confirm &rarr; <code>btnModalAction1_1.OnSelect</code></h3>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=IfError(
+    Remove(PolicyLinks, varSelectedLink),
+    UpdateContext({locDisplayAttDeletePopUp: false});
+    Notify("Delete failed. Please check your connection and try again.", NotificationType.Error),
+    Set(varLoadingLinks, true);
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false);
+    UpdateContext({locDisplayAttDeletePopUp: false});
+    Set(varSelectedLink, Blank());
+    Notify("Link deleted.", NotificationType.Success)
+)</pre></div>
+
+  <p>Once all six are pasted, do one real test per site type: click into an item from a <code>Main</code> card, click into one from search results, open a deep link (<code>?ID=</code> URL), add a new link, and delete a link. Confirm <code>colLinks</code> populates and file-type icons still show correctly in each case &mdash; the function is byte-for-byte the same logic that was in all six copies, so behaviour shouldn't change, only where the logic lives.</p>
+
+  <h2 id="item2">2. Type-filter chip counts: computed once per tab/owner change <span class="sev sev-perf">PERFORMANCE</span></h2>
+  <p><code>Main</code>'s <code>TypeFilterGallery</code> (the ~10 document-type chips under the tab bar) currently has each chip's <code>ChipLabel.Text</code> independently run <code>CountRows(Filter('Policy Proof Tracker', &lt;state/owner condition&gt; &amp;&amp; 'Document Type'.Value = ThisItem.ChoiceValue))</code> &mdash; a fresh scan of the whole table, per chip, every time it re-renders. The state/owner part of that condition is identical across all ~10 chips; only the document-type equality changes per row.</p>
+
+  <p><strong>The fix:</strong> build one collection, <code>colTypeCounts</code>, scoped to the current tab + owner-toggle state (rebuilt only when either of those changes &mdash; i.e. only where they're already <code>Set()</code>: the four tab buttons, the owner toggle, and once in <code>OnStart</code> for the initial "Current" tab). Each chip's count then becomes a cheap <code>Filter</code> over that already-small collection instead of the full table, and the gallery carries the count as a column instead of each label computing its own.</p>
+
+  <h3>Step 1 &mdash; seed <code>colTypeCounts</code> in <code>App.OnStart</code></h3>
+  <p>Add this anywhere after <code>colChoiceColors</code> is built (order doesn't matter relative to it, just needs to run once at startup):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' >= Today() &&
+        'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);</pre></div>
+
+  <h3>Step 2 &mdash; add the same rebuild to each tab button and the owner toggle</h3>
+  <p>Four tab buttons (<code>Button2</code> = Current, <code>Button2_1</code> = Future, <code>Button2_2</code> = UnapprovedHistoric, <code>Button2_3</code> = History) plus <code>MyItems.OnChange</code> (the "My items only" toggle). Full replacement for each:</p>
+
+  <table>
+    <tr><th>Control</th><th>Property</th><th>Full replacement</th></tr>
+  </table>
+
+  <p><code>Button2.OnSelect</code> (Current tab):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedState, "Current");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' >= Today() &&
+        'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery)</pre></div>
+
+  <p><code>Button2_1.OnSelect</code> (Future tab):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedState, "Future");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' > DateAdd(Today(), 28, "Days") &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery)</pre></div>
+
+  <p><code>Button2_2.OnSelect</code> (UnapprovedHistoric tab):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedState, "UnapprovedHistoric");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' < Today() &&
+        Published = false &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery)</pre></div>
+
+  <p><code>Button2_3.OnSelect</code> (History tab):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedState, "Historic");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") &&
+        'Planned Publish Date' < Today() &&
+        Published = true &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery);</pre></div>
+
+  <p><code>MyItems.OnChange</code> (owner toggle) &mdash; uses <code>Self.Value</code> rather than <code>varFilterOwner</code> since this runs before the <code>Set</code> that updates it:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varFilterOwner, Self.Value);
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        (
+            (varSelectedState = "Current" && 'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days")) ||
+            (varSelectedState = "Future" && 'Planned Publish Date' > DateAdd(Today(), 28, "Days")) ||
+            (varSelectedState = "UnapprovedHistoric" && 'Planned Publish Date' < Today() && Published = false) ||
+            (varSelectedState = "Historic" && 'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") && 'Planned Publish Date' < Today() && Published = true)
+        ) &&
+        (Self.Value = false || Owner.Email = User().Email)
+    )
+)</pre></div>
+
+  <h3>Step 3 &mdash; carry the count on the gallery instead of per-label</h3>
+  <p><code>TypeFilterGallery.Items</code>, full replacement:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=AddColumns(
+    colChoiceColors,
+    TypeCount,
+    CountRows(Filter(colTypeCounts, 'Document Type'.Value = ChoiceValue))
+)</pre></div>
+
+  <h3>Step 4 &mdash; read the precomputed count instead of filtering live</h3>
+  <p><code>ChipLabel.Text</code>, full replacement (identical label logic, only the count source changes &mdash; the whole <code>CountRows(Filter('Policy Proof Tracker', ...))</code> tail is gone):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=With(
+    {
+        FullLabel: Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1)
+    },
+    Switch(
+        FullLabel,
+        "Newsletter Item", "Newsletter",
+        "Internal Document", "Internal",
+        FullLabel
+    )
+) & " (" & ThisItem.TypeCount & ")"</pre></div>
+
+  <p>Test: switch tabs, toggle "My items only", and check the chip counts still match what you'd get by manually counting the visible cards in each state. <code>AllTypesBtn</code> (the standalone "All types" pill, separate from this gallery) isn't touched &mdash; it only ever sets <code>varTypeFilter</code>, which was never part of this count in the first place.</p>
+
+  <h2 id="item3">3. Duplicate-entry Thursday picker: grouped once instead of 52 re-filters <span class="sev sev-perf">PERFORMANCE</span></h2>
+  <p><code>ViewItem</code> &rarr; <code>btnDuplicate1.OnSelect</code> builds the list of upcoming Thursdays by looping <code>ForAll(Sequence(52), ...)</code> and, for each one, running a fresh <code>CountRows(Filter(colUpcomingEntries, Year(...) = Year(thurDate) &amp;&amp; Month(...) = Month(thurDate) &amp;&amp; Day(...) = Day(thurDate)))</code> &mdash; 52 full scans of <code>colUpcomingEntries</code> (up to 365 days of data) to build one picker.</p>
+
+  <p><strong>The fix:</strong> group <code>colUpcomingEntries</code> by date once with <code>GroupBy</code>, then each of the 52 iterations does one cheap <code>LookUp</code> against the small grouped collection instead of a full <code>Filter</code>+<code>CountRows</code> against the whole thing. This only fires when the duplicate flow is opened, so it's not urgent, but it's real waste every time it runs. Full replacement for <code>btnDuplicate1.OnSelect</code>:</p>
+
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=ClearCollect(
+    colUpcomingEntries,
+    AddColumns(
+        Filter(
+            'Policy Proof Tracker',
+            'Planned Publish Date' >= Today() &&
+            'Planned Publish Date' <= DateAdd(Today(), 365, "Days")
+        ),
+        EntryDateKey,
+        Date(Year('Planned Publish Date'), Month('Planned Publish Date'), Day('Planned Publish Date'))
+    )
+);
+Set(
+    varDaysToNextThursday,
+    If(Mod(5 - Weekday(Today()) + 7, 7) = 0, 7, Mod(5 - Weekday(Today()) + 7, 7))
+);
+ClearCollect(
+    colUpcomingCounts,
+    GroupBy(colUpcomingEntries, EntryDateKey, GroupedEntries)
+);
+Clear(colThursdays);
+ForAll(
+    Sequence(52),
+    If(
+        varSelectedRelease.'High Priority' ||
+        varDaysToNextThursday + (Value - 1) * 7 >= 10,
+        With(
+            {thurDate: DateAdd(Today(), varDaysToNextThursday + (Value - 1) * 7, "Days")},
+            With(
+                {matchedGroup: LookUp(colUpcomingCounts, EntryDateKey = thurDate)},
+                With(
+                    {cnt: If(IsBlank(matchedGroup), 0, CountRows(matchedGroup.GroupedEntries))},
+                    Collect(
+                        colThursdays,
+                        {
+                            ThursdayDate: thurDate,
+                            ThursdayLabel: Text(thurDate, "dddd d mmmm yyyy") &
+                                If(
+                                    cnt = 0, " - clear",
+                                    cnt = 1, " - 1 entry already scheduled",
+                                    " - " & Text(cnt, "0") & " entries already scheduled"
+                                )
+                        }
+                    )
+                )
+            )
+        )
+    )
+);
+Set(varShowDuplicateModal1, true)</pre></div>
+
+  <p>Test: open the duplicate flow on a real item and confirm the Thursday list still shows the right "already scheduled" counts against dates you know have existing entries, and "clear" against ones you know don't.</p>
 
 </main>
 <script>
