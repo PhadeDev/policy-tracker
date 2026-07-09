@@ -428,14 +428,17 @@ ClearCollect(
         }
     ),
     ItemsForDate,
-    Filter(
-        'Policy Proof Tracker',
-        Year('Planned Publish Date') = Year(PublishDate) &&
-        Month('Planned Publish Date') = Month(PublishDate) &&
-        Day('Planned Publish Date') = Day(PublishDate)
+    With(
+        {_targetDate: PublishDate},
+        Filter(
+            'Policy Proof Tracker',
+            Year('Planned Publish Date') = Year(_targetDate) &&
+            Month('Planned Publish Date') = Month(_targetDate) &&
+            Day('Planned Publish Date') = Day(_targetDate)
+        )
     )
 )</pre></div>
-  <p>Always returns exactly 4 rows, already in chronological order, so the old <code>SortByColumns</code> wrapper isn't needed any more. The date match uses <code>Year</code>/<code>Month</code>/<code>Day</code> component comparison rather than a raw <code>=</code> between <code>'Planned Publish Date'</code> and the computed <code>PublishDate</code>, same defensive pattern <code>NewsletterPack</code> already uses for the same kind of computed-date match &mdash; a straight <code>=</code> is fragile against any time-of-day component on the SharePoint column and can silently match nothing.</p>
+  <p>Always returns exactly 4 rows, already in chronological order, so the old <code>SortByColumns</code> wrapper isn't needed any more. Two things had to change from a naive version: raw <code>=</code> between <code>'Planned Publish Date'</code> and the computed date is fragile against any time-of-day component on the SharePoint column (matches nothing) &mdash; fixed with <code>Year</code>/<code>Month</code>/<code>Day</code> component comparison, same pattern <code>NewsletterPack</code> already uses. And referencing the outer <code>AddColumns</code> row's <code>PublishDate</code> directly from inside the nested <code>Filter</code>'s own record scope is unreliable two scopes deep (same class of bug as the <code>PublishAllBtn</code> fix above) &mdash; fixed by capturing it into <code>_targetDate</code> with <code>With()</code> before <code>Filter</code> opens its own scope.</p>
 
   <p><strong>New empty-state label, add as a new child inside <code>galOverviewColumns1</code>, alongside <code>conColHeader1</code> and <code>galColCards1</code>:</strong></p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- lblNoReleases1:
