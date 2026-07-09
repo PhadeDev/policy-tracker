@@ -56,43 +56,22 @@
   <p>Only the 3 items still left. Everything else from the original 11-item list is confirmed done and has been removed from this page, in priority order, worst first.</p>
 
   <div class="progress-summary">
+    <div class="progress-card"><div class="count">1</div><div class="label">Top priority, likely breaking Owner too</div></div>
     <div class="progress-card"><div class="count">1</div><div class="label">Data loss, confirmed broken</div></div>
-    <div class="progress-card"><div class="count">1</div><div class="label">Broken state, can't test without publishing</div></div>
     <div class="progress-card"><div class="count">1</div><div class="label">Missing feature, cosmetic</div></div>
   </div>
 
   <div class="toc">
     <strong>Jump to:</strong>
-    <a href="#f1"><span class="toc-num">1.</span> Close button still discards unsaved edits with no warning</a>
-    <a href="#f2"><span class="toc-num">2.</span> Deep link "not found" case is unfinished and currently broken</a>
+    <a href="#f1"><span class="toc-num">1.</span> Invalid formula in ViewItem.OnVisible &mdash; may be breaking Owner, Reset, everything else in it</a>
+    <a href="#f2"><span class="toc-num">2.</span> Close button still discards unsaved edits with no warning</a>
     <a href="#f3"><span class="toc-num">3.</span> Overview cards don't sort Top Item to the top</a>
   </div>
 
-  <h2 id="f1">1. Close button still discards unsaved edits with no warning <span class="sev sev-critical">DATA LOSS, CONFIRMED BROKEN NOW</span></h2>
-  <p>Checked your live export directly: the "ask before discarding" logic exists, but it landed on the wrong button. <code>btnClose1</code> (the real top-bar Close button people actually click) still closes instantly with zero warning, exactly what you just saw. The confirm-check formula ended up on <code>btnCloseModal1_2</code>, the tiny X icon <em>inside</em> the discard-confirmation modal, a control nobody clicks unless the modal is already open.</p>
+  <h2 id="f1">1. Invalid formula in ViewItem.OnVisible &mdash; do this one first, before anything else <span class="sev sev-critical">TOP PRIORITY, LIKELY ROOT CAUSE OF THE OWNER BUG TOO</span></h2>
+  <p><code>ViewItem.OnVisible</code> currently contains an invalid <code>Navigate(Main, ScreenTransition.Fade)</code> call, sitting inside the deep-link "item not found" branch. Studio doesn't allow <code>Navigate</code> inside a screen's own <code>OnVisible</code> at all, even nested inside an <code>If</code> that only reaches it conditionally, and flags it as an error (the "Navigate cannot be used here" message from earlier). It still saves despite the error, but Power Fx compiles each property as one whole unit, so a hard error anywhere in <code>OnVisible</code> can mean the entire property fails to run reliably at runtime, not just the one broken branch.</p>
 
-  <p><strong>Fix: swap the two formulas.</strong></p>
-
-  <p><code>btnClose1.OnSelect</code>, full replacement:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=If(
-    varUnsavedChanges,
-    UpdateContext({locDisplayDiscardPopUp: true}),
-    Set(varSelectPolicy, "Empty");
-    Set(varSelectedRelease, Blank());
-    Set(varUnsavedChanges, false);
-    Set(varShowLinkModal, false);
-    If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
-)</pre></div>
-
-  <p><code>btnCloseModal1_2.OnSelect</code> (the small X icon inside the modal), full replacement:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=UpdateContext({locDisplayDiscardPopUp: false})</pre></div>
-
-  <p>No unsaved changes, Close behaves exactly as today, instant, no popup. Unsaved changes present, it stops and asks first. Nothing else needs touching, <code>btnCancelModal1_2</code> and <code>btnModalAction1_2</code> (Cancel and Discard inside the modal) are already correct.</p>
-
-  <div class="test">Test: open an existing entry, change the summary text only, click Close. You should get the "Discard changes?" popup instead of leaving immediately. Click Cancel, confirm your edit is still there. Click Close again, click Discard, confirm it now navigates away.</div>
-
-  <h2 id="f2">2. Deep link "not found" case is unfinished and currently broken <span class="sev sev-bug">CAN'T TEST WITHOUT PUBLISHING</span></h2>
-  <p>Studio blocks <code>Navigate</code> inside a screen's own <code>OnVisible</code> outright, even nested inside an <code>If</code> that only reaches it conditionally. Your export still has the invalid version, a direct <code>Navigate(Main, ScreenTransition.Fade)</code> sitting inside <code>ViewItem.OnVisible</code>'s deep-link else-branch, which Studio flagged as an error when you hit it earlier. It saved anyway but is not reliable at runtime. This needs the Timer-based workaround below, not yet applied.</p>
+  <p><strong>This is very likely why the <code>Reset(cmb_Owner1)</code> fix hasn't worked even though it's genuinely sitting in the formula</strong> &mdash; if <code>OnVisible</code> as a whole isn't executing cleanly because of this error, nothing later in that same formula can be trusted either, including the Owner reset, until this is fixed. Do this one before re-testing Owner again.</p>
 
   <p><strong>Find this exact block in <code>ViewItem.OnVisible</code>:</strong></p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
@@ -139,6 +118,33 @@
 
   <div class="test">Test without publishing: temporarily change <code>Value(varItemID)</code> to something you know doesn't exist (e.g. <code>999999</code>), open ViewItem directly, confirm you get the "could not be found" notification and land back on Main a moment later instead of a blank form. Revert the temporary change once confirmed.</div>
 
+  <div class="warn"><strong>After this is done:</strong> fully close and restart Preview (not a browser refresh, see note below), then re-test Owner by clicking into 3-4 different items in a row. <code>Reset(cmb_Owner1)</code> is already correctly sitting in <code>OnVisible</code> from an earlier fix, it just may not have been able to run properly with the error above still present. If Owner is still wrong after this, that theory was wrong and it needs a fresh look, tell me and I'll dig further rather than assume.</div>
+
+  <div class="note"><strong>On restarting Preview:</strong> pressing F5 while focus is inside the Studio editor canvas (not a text/formula field) is the built-in Preview shortcut, safe, no data loss. A literal browser page reload (Ctrl+R / the browser's own reload button) is the one that can trigger the "read only" / editing-session-conflict warning, avoid that instead.</div>
+
+  <h2 id="f2">2. Close button still discards unsaved edits with no warning <span class="sev sev-critical">DATA LOSS, CONFIRMED BROKEN NOW</span></h2>
+  <p>Checked your live export directly: the "ask before discarding" logic exists, but it landed on the wrong button. <code>btnClose1</code> (the real top-bar Close button people actually click) still closes instantly with zero warning, exactly what you saw. The confirm-check formula ended up on <code>btnCloseModal1_2</code>, the tiny X icon <em>inside</em> the discard-confirmation modal, a control nobody clicks unless the modal is already open. (This one is a straightforward OnSelect swap on two separate controls, unrelated to the OnVisible error above, so it's safe to fix independently of item 1.)</p>
+
+  <p><strong>Fix: swap the two formulas.</strong></p>
+
+  <p><code>btnClose1.OnSelect</code>, full replacement:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=If(
+    varUnsavedChanges,
+    UpdateContext({locDisplayDiscardPopUp: true}),
+    Set(varSelectPolicy, "Empty");
+    Set(varSelectedRelease, Blank());
+    Set(varUnsavedChanges, false);
+    Set(varShowLinkModal, false);
+    If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
+)</pre></div>
+
+  <p><code>btnCloseModal1_2.OnSelect</code> (the small X icon inside the modal), full replacement:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=UpdateContext({locDisplayDiscardPopUp: false})</pre></div>
+
+  <p>No unsaved changes, Close behaves exactly as today, instant, no popup. Unsaved changes present, it stops and asks first. Nothing else needs touching, <code>btnCancelModal1_2</code> and <code>btnModalAction1_2</code> (Cancel and Discard inside the modal) are already correct.</p>
+
+  <div class="test">Test: open an existing entry, change the summary text only, click Close. You should get the "Discard changes?" popup instead of leaving immediately. Click Cancel, confirm your edit is still there. Click Close again, click Discard, confirm it now navigates away.</div>
+
   <h2 id="f3">3. Overview cards don't sort Top Item to the top <span class="sev sev-bug">MISSING FEATURE</span></h2>
   <p>This fix already landed on Main and NewsletterPack, just missing on Overview. <code>galColCards1.Items</code> there is still the plain document-type sort with no Top Item awareness.</p>
 
@@ -166,9 +172,10 @@
       <li>Top Item sort order on Main and NewsletterPack</li>
       <li>Overview hiding empty weeks / narrow columns</li>
       <li>ViewItem button hover/pressed states</li>
-      <li>Owner showing current user instead of the real owner (root cause: <code>cmb_Owner1</code> missing from the <code>OnVisible</code> Reset list)</li>
     </ul>
   </details>
+
+  <div class="warn"><strong>Owner bug (not in the done list above, not resolved yet):</strong> <code>Reset(cmb_Owner1)</code> was added to <code>ViewItem.OnVisible</code> and confirmed present, but Owner is still showing the current user instead of the real one. Current theory is item 1 above (the invalid <code>Navigate</code> call) is breaking the whole <code>OnVisible</code> property so the reset never actually runs, fix that first and re-test before assuming this theory is wrong too.</div>
 
 </main>
 <script>
