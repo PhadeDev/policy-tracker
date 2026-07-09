@@ -2,6 +2,7 @@ Screens:
   Main:
     Properties:
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: =Refresh('Policy Proof Tracker')
     Children:
       - ScreenContainer1:
           Control: GroupContainer@1.5.0
@@ -340,7 +341,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Set(varSelectedState, "Current");
+                                      =Refresh('Policy Proof Tracker');
+                                      Set(varSelectedState, "Current");
                                       Set(
                                           colTypeCounts,
                                           Filter(
@@ -432,7 +434,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Set(varSelectedState, "Future");
+                                      =Refresh('Policy Proof Tracker');
+                                      Set(varSelectedState, "Future");
                                       Set(
                                           colTypeCounts,
                                           Filter(
@@ -531,7 +534,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Set(varSelectedState, "UnapprovedHistoric");
+                                      =Refresh('Policy Proof Tracker');
+                                      Set(varSelectedState, "UnapprovedHistoric");
                                       Set(
                                           colTypeCounts,
                                           Filter(
@@ -626,7 +630,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Set(varSelectedState, "Historic");
+                                      =Refresh('Policy Proof Tracker');
+                                      Set(varSelectedState, "Historic");
                                       Set(
                                           colTypeCounts,
                                           Filter(
@@ -961,11 +966,15 @@ Screens:
                                                 Items: |-
                                                   =Sort(
                                                       ThisItem.GroupedItems,
-                                                      LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder),
+                                                      If(
+                                                          'Top Item',
+                                                          -1000,
+                                                          LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder)
+                                                      ),
                                                       SortOrder.Ascending
                                                   )
-                                                OnSelect: |+
-                                                  =Set(varSelectedRelease, ThisItem);
+                                                OnSelect: |-
+                                                  =Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
                                                   Navigate(ViewItem, ScreenTransition.Fade)
                                                 TemplateSize: =110
                                                 Width: =Parent.Width
@@ -975,9 +984,15 @@ Screens:
                                                     Control: GroupContainer@1.5.0
                                                     Variant: ManualLayout
                                                     Properties:
-                                                      BorderColor: =If(ThisItem.'External consultation required', RGBA(110, 76, 126, 1), If(ThisItem.Published, Color.Green, RGBA(0,0,0,1)))
-                                                      BorderStyle: =If(ThisItem.'External consultation required', BorderStyle.Dashed, BorderStyle.Solid)
-                                                      BorderThickness: =If(ThisItem.'External consultation required', 2, 1)
+                                                      BorderColor: |-
+                                                        =If(
+                                                            ThisItem.'External consultation required', RGBA(110, 76, 126, 1),
+                                                            ThisItem.'High Priority', RGBA(255, 186, 8, 1),
+                                                            ThisItem.Published, Color.Green,
+                                                            RGBA(0,0,0,1))
+                                                      BorderStyle: |+
+                                                        =If(ThisItem.'External consultation required', BorderStyle.Dashed, BorderStyle.Solid)
+                                                      BorderThickness: =If(ThisItem.'External consultation required', 2, ThisItem.'High Priority', 2, 1)
                                                       DropShadow: =DropShadow.Regular
                                                       Fill: |-
                                                         =If(
@@ -1440,10 +1455,10 @@ Screens:
                                                         Set(varParentSaved, true);
                                                         Set(varSelectedItem, ThisItem);
                                                         Set(varSourceScreen, "Main");
-                                                        Set(varSelectedPerson, ThisItem.Owner);
+                                                        Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
+                                                        Set(varSelectedPerson, varSelectedRelease.Owner);
 
                                                         // Load links immediately
-                                                        Set(varSelectedRelease, ThisItem);
                                                         Set(varLoadingLinks, true);
                                                         BuildLinksForSource(ThisItem.ID);
                                                         Set(varLoadingLinks, false);
@@ -1668,10 +1683,10 @@ Screens:
                                             Set(varPublishGroupDate, ThisItem.PlannedDate);
                                             Set(varPublishGroupCount, CountRows(Filter(ThisItem.GroupedItems, 'External consultation required' = false)));
                                             ForAll(
-                                                Filter(ThisItem.GroupedItems, 'External consultation required' = false),
+                                                Filter(ThisItem.GroupedItems, 'External consultation required' = false) As PubItem,
                                                 Patch(
                                                     'Policy Proof Tracker',
-                                                    LookUp('Policy Proof Tracker', ID = ID),
+                                                    LookUp('Policy Proof Tracker', ID = PubItem.ID),
                                                     {
                                                         Published: true,
                                                         'Published Date': varPublishGroupDate
@@ -1746,7 +1761,8 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =26
             OnChange: |-
-              =Set(varFilterOwner, Self.Value);
+              =Refresh('Policy Proof Tracker');
+              Set(varFilterOwner, Self.Value);
               Set(
                   colTypeCounts,
                   Filter(
@@ -1927,12 +1943,12 @@ Screens:
                               HoverColor: =Color.Transparent
                               HoverFill: =RGBA(0, 64, 47, 0.07)
                               OnSelect: |-
-                                =Set(varSelectedRelease, ThisItem);
+                                =Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
                                 Set(varSelectPolicy, "Filled");
                                 Set(varParentSaved, true);
                                 Set(varSelectedItem, ThisItem);
                                 Set(varSourceScreen, "Main");
-                                Set(varSelectedPerson, ThisItem.Owner);
+                                Set(varSelectedPerson, varSelectedRelease.Owner);
                                 Set(varLoadingLinks, true);
                                 BuildLinksForSource(ThisItem.ID);
                                 Set(varLoadingLinks, false);

@@ -26,7 +26,11 @@ Screens:
                         'External consultation required' = false
                     ),
                     SortKey,
-                    Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99),
+                    If(
+                        'Top Item',
+                        -1000,
+                        Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
+                    ),
                     IsFinalApproved,
                     Or(
                         'Approved For Release By'.Value = "XO",
@@ -154,7 +158,11 @@ Screens:
                                           'External consultation required' = false
                                       ),
                                       SortKey,
-                                      Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99),
+                                      If(
+                                          'Top Item',
+                                          -1000,
+                                          Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
+                                      ),
                                       IsFinalApproved,
                                       Or(
                                           'Approved For Release By'.Value = "XO",

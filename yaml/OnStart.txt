@@ -115,73 +115,18 @@ Set(
     AppTheme,
     {
         palette: {
-            themePrimary: RGBA(
-                0,
-                64,
-                47,
-                1
-            ),
-            // Main brand color
-themeSecondary: RGBA(
-                45,
-                128,
-                40,
-                1
-            ),
-            // Hover/secondary
-themeTertiary: RGBA(
-                52,
-                152,
-                47,
-                1
-            ),
-            // Pressed
-neutralLight: RGBA(
-                237,
-                237,
-                237,
-                1
-            ),
-            // Light backgrounds
-neutralDark: RGBA(
-                50,
-                49,
-                48,
-                1
-            ),
-            // Dark text
-white: RGBA(
-                255,
-                255,
-                255,
-                1
-            )// White
+            themePrimary: RGBA(11, 74, 54, 1),
+            themeSecondary: RGBA(9, 60, 44, 1),
+            themeTertiary: RGBA(7, 48, 36, 1),
+            neutralLight: RGBA(237, 237, 237, 1),
+            neutralDark: RGBA(50, 49, 48, 1),
+            white: RGBA(255, 255, 255, 1)
         },
         semanticColors: {
-            buttonBackground: RGBA(
-                0,
-                64,
-                47,
-                1
-            ),
-            buttonBackgroundHovered: RGBA(
-                45,
-                128,
-                40,
-                1
-            ),
-            buttonBackgroundPressed: RGBA(
-                52,
-                152,
-                47,
-                1
-            ),
-            buttonText: RGBA(
-                255,
-                255,
-                255,
-                1
-            )
+            buttonBackground: RGBA(11, 74, 54, 1),
+            buttonBackgroundHovered: RGBA(9, 60, 44, 1),
+            buttonBackgroundPressed: RGBA(7, 48, 36, 1),
+            buttonText: RGBA(255, 255, 255, 1)
         }
     }
 );

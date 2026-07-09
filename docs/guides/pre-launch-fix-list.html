@@ -70,7 +70,7 @@
     <a href="#f8"><span class="toc-num">8.</span> Top Item doesn't change sort order (issue #22)</a>
     <a href="#f9"><span class="toc-num">9.</span> Overview hides empty weeks and columns are too narrow (issue #22)</a>
     <a href="#f10"><span class="toc-num">10.</span> ViewItem button hover/pressed states (issue #17)</a>
-    <a href="#f11"><span class="toc-num">11.</span> Owner shows current user instead of real owner (unconfirmed theory)</a>
+    <a href="#f11"><span class="toc-num">11.</span> Owner shows current user instead of real owner (confirmed root cause)</a>
   </div>
 
   <h2 id="f1">1. Saving is blocked on existing items due today or soon <span class="sev sev-critical">BLOCKING</span></h2>
@@ -511,12 +511,34 @@ PressedFill: =ColorFade(RGBA(255, 236, 179, 1), -15%)</pre></div>
 
   <div class="test">Test: hover and click each of the buttons mentioned above, confirm hover and pressed states now look distinct from each other and consistent with the rest of the app's green.</div>
 
-  <h2 id="f11">11. Owner shows current user instead of real owner <span class="sev sev-theory">UNCONFIRMED THEORY, DEFENSIVE FIX</span></h2>
-  <p><strong>This item is different from the other ten &mdash; it's a working theory, not a confirmed root cause.</strong> Found live: opening any item on <code>ViewItem</code> shows the current logged-in user as Owner regardless of which item was clicked, only started happening after this session's other fixes went in, everything else on the record (Title, Document Type, links) displays correctly.</p>
+  <h2 id="f11">11. Owner shows current user instead of real owner <span class="sev sev-critical">CONFIRMED ROOT CAUSE</span></h2>
+  <p>Found live: opening any item on <code>ViewItem</code> shows the current logged-in user as Owner regardless of which item was clicked, every other field on the record (Title, Document Type, links) displays correctly.</p>
 
-  <p><code>ViewItem.OnVisible</code> falls back to <code>Office365Users.SearchUserV2({searchTerm: User().Email, ...})</code> (i.e. you) whenever <code>varSelectedRelease.Owner.Email</code> comes back blank &mdash; that fallback exists on purpose, for brand-new unsaved items with no owner yet. The theory is that it's now also firing for existing items because <code>Refresh('Policy Proof Tracker')</code> (added to Main in item 6) doesn't block or wait for the reload to finish, and <code>Owner</code> is a SharePoint Person/Group column, the one field type on this record that needs an extra resolve step rather than being cached eagerly like plain text/choice columns. Clicking an item shortly after a refresh could catch <code>ThisItem.Owner</code> mid-resolve.</p>
+  <p><strong>Real cause, confirmed by reading <code>ViewItem.OnVisible</code> directly:</strong> the tail end of that formula explicitly calls <code>Reset()</code> on sixteen input controls &mdash; <code>txtTitle1</code>, <code>drpDocType1</code>, <code>dpkPublishDate1</code>, <code>ckbHighPriority1</code>, and so on through every field on the form &mdash; specifically so each one re-reads its <code>Default</code>/<code>DefaultSelectedItems</code> against the newly-selected item every time the screen opens. <code>cmb_Owner1</code>, the Owner people-picker, is the one control missing from that list. In this control library, <code>Default</code>/<code>DefaultSelectedItems</code> only evaluates once, the moment the control is first created &mdash; it does not automatically re-read the underlying variable on every subsequent visit unless something forces it to with <code>Reset()</code>. Same root idea as the <code>dpkPublishDate1</code> <code>Reset(Self)</code> incident already in the Bible, just the opposite failure mode: that one fired a <code>Reset</code> it shouldn't have, this one is missing a <code>Reset</code> it needs. Once <code>cmb_Owner1</code> first rendered, it locked onto whatever it showed then and never updated again, regardless of which item you clicked into afterwards &mdash; matches "doesn't matter what I click, it's always me" exactly, not something timing-dependent.</p>
 
-  <p><strong>Not proven</strong> &mdash; couldn't be tested against the live app to confirm this specific cause. The fix below is being added anyway because it's a no-downside safeguard: instead of trusting the gallery row's cached <code>Owner</code> at click time, it re-fetches that one record fresh by ID, which fixes this failure mode if the theory is right and does nothing harmful if it's wrong.</p>
+  <p><strong><code>ViewItem.OnVisible</code>, the <code>Reset()</code> block at the end, full replacement (only the added <code>Reset(cmb_Owner1)</code> line is new):</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1)</pre></div>
+  <p>This is the block right at the end of <code>OnVisible</code>, after the deep-link handling and the links refresh &mdash; find the existing <code>Reset(txtTitle1); ...</code> chain and replace the whole thing with the above (note the last line before this one changes from ending in a plain <code>;</code> to no trailing punctuation needed at the very end, since <code>Reset(cmb_Owner1)</code> is now the final statement in the chain).</p>
+
+  <div class="test">Test: click into three or four different items in a row without closing the app between them, confirm the Owner field updates to the real owner every single time, not just on the first item you open in a session.</div>
+
+  <p><strong>Also kept from the earlier pass on this bug</strong> (originally offered as an unconfirmed defensive theory before the real cause above was found &mdash; harmless, and still a small improvement, but was not the actual fix):</p>
 
   <p><strong><code>ReleaseGallery.OnSelect</code> (Main, Current tab card click), full replacement:</strong></p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));

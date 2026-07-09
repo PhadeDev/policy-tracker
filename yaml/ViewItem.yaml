@@ -37,7 +37,9 @@ Screens:
             Set(varSelectedPerson, varDeepLinkItem.Owner);
             Refresh(PolicyLinks);
             BuildLinksForSource(varDeepLinkItem.ID);
-            Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value)
+            Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value),
+            Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+            Navigate(Main, ScreenTransition.Fade)
         );
             Set(varLoading, false)
         );
@@ -251,6 +253,7 @@ Screens:
                               varErrTitle || varErrOwner || varErrDocType || varErrPublishDate,
                               false,
                               If(
+                                  varSelectPolicy <> "Filled" &&
                                   !IsBlank(dpkPublishDate1.SelectedDate) &&
                                   DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
                                   DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
@@ -345,6 +348,7 @@ Screens:
                               varErrTitle || varErrOwner || varErrDocType || varErrPublishDate,
                               false,
                               If(
+                                  varSelectPolicy <> "Filled" &&
                                   !IsBlank(dpkPublishDate1.SelectedDate) &&
                                   DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
                                   DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
@@ -404,7 +408,9 @@ Screens:
                                   Set(varSaving, false)
                               )
                           )
-                        PressedFill: =RGBA(227, 239, 232, 1)
+                        PressedBorderColor: =RGBA(11, 74, 54, 1)
+                        PressedColor: =RGBA(11, 74, 54, 1)
+                        PressedFill: =ColorFade(RGBA(227, 239, 232, 1), -15%)
                         RadiusBottomLeft: =8
                         RadiusBottomRight: =8
                         RadiusTopLeft: =8
@@ -437,6 +443,7 @@ Screens:
                         Font: =Font.'Open Sans'
                         FontWeight: =FontWeight.Bold
                         Height: =38
+                        HoverColor: =RGBA(91, 105, 97, 1)
                         HoverFill: =RGBA(227, 239, 232, 1)
                         OnSelect: |-
                           =Set(varSelectPolicy, "Empty");
@@ -444,6 +451,9 @@ Screens:
                           Set(varUnsavedChanges, false);
                           Set(varShowLinkModal, false);
                           If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
+                        PressedBorderColor: =RGBA(223, 229, 224, 1)
+                        PressedColor: =RGBA(91, 105, 97, 1)
+                        PressedFill: =ColorFade(RGBA(227, 239, 232, 1), -15%)
                         RadiusBottomLeft: =8
                         RadiusBottomRight: =8
                         RadiusTopLeft: =8
@@ -503,8 +513,12 @@ Screens:
                         Font: =Font.'Open Sans'
                         FontWeight: =FontWeight.Bold
                         Height: =38
+                        HoverColor: =RGBA(130, 80, 0, 1)
                         HoverFill: =RGBA(255, 236, 179, 1)
                         OnSelect: =Back()
+                        PressedBorderColor: =RGBA(130, 80, 0, 1)
+                        PressedColor: =RGBA(130, 80, 0, 1)
+                        PressedFill: =ColorFade(RGBA(255, 236, 179, 1), -15%)
                         RadiusBottomLeft: =8
                         RadiusBottomRight: =8
                         RadiusTopLeft: =8
@@ -1792,6 +1806,7 @@ Screens:
                                     BorderColor: =RGBA(122, 138, 143, 1)
                                     BorderStyle: =BorderStyle.Solid
                                     BorderThickness: =1
+                                    DisplayMode: =If(varSaving, DisplayMode.Disabled, DisplayMode.Edit)
                                     Font: =Font.Lato
                                     FontWeight: =""
                                     Height: =39
@@ -1810,6 +1825,7 @@ Screens:
                                               Set(varSelectedLink, Defaults(PolicyLinks));
                                               Set(varShowLinkModal, true),
                                               If(
+                                                  varSelectPolicy <> "Filled" &&
                                                   !IsBlank(dpkPublishDate1.SelectedDate) &&
                                                   DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
                                                   DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
@@ -2537,7 +2553,7 @@ Screens:
                                     Navigate(Main, ScreenTransition.Fade)
                                 )
                               Text: ="Delete"
-      - DeleteItemModal1_1:
+      - DeleteLinkModal1:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
           Properties:
@@ -2679,4 +2695,139 @@ Screens:
                               RadiusTopLeft: =4
                               RadiusTopRight: =4
                               Text: ="Delete"
+                              VerticalAlign: =VerticalAlign.Middle
+      - UnsavedChangesModal:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(53, 61, 63, 0.84)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.End
+            LayoutDirection: =LayoutDirection.Vertical
+            PaddingRight: =20
+            PaddingTop: =80
+            Visible: =locDisplayDiscardPopUp
+            Width: =Parent.Width
+          Children:
+            - conModalData1_2:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Height: =300
+                  LayoutDirection: =LayoutDirection.Vertical
+                Children:
+                  - conHeaderPopUp1_2:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =80
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        PaddingLeft: =24
+                        PaddingRight: =24
+                      Children:
+                        - txtModalTitle1_2:
+                            Control: Text@0.0.51
+                            Properties:
+                              AutoHeight: =true
+                              FillPortions: =1
+                              Size: =24
+                              Text: ="Discard changes?"
+                              Weight: ='TextCanvas.Weight'.Semibold
+                        - btnCloseModal1_2:
+                            Control: ModernButton@1.0.0
+                            Properties:
+                              Align: =Align.Center
+                              Appearance: =ButtonAppearance.Subtle
+                              FontWeight: =""
+                              Icon: ="Dismiss"
+                              Layout: =ButtonLayout.IconOnly
+                              OnSelect: |-
+                                =If(
+                                    varUnsavedChanges,
+                                    UpdateContext({locDisplayDiscardPopUp: true}),
+                                    Set(varSelectPolicy, "Empty");
+                                    Set(varSelectedRelease, Blank());
+                                    Set(varUnsavedChanges, false);
+                                    Set(varShowLinkModal, false);
+                                    If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
+                                )
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =5
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: =30
+                  - txtModalText1_2:
+                      Control: ModernText@1.0.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        FillPortions: =1
+                        LayoutMinWidth: =96
+                        PaddingBottom: =0
+                        PaddingLeft: =24
+                        PaddingRight: =24
+                        PaddingTop: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =20
+                        Text: ="You have unsaved changes. Are you sure you want to close without saving?"
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =96
+                  - conFooterPopUp1_2:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =80
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =16
+                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        PaddingLeft: =24
+                        PaddingRight: =24
+                      Children:
+                        - btnCancelModal1_2:
+                            Control: Button@0.0.45
+                            Properties:
+                              Appearance: ='ButtonCanvas.Appearance'.Outline
+                              OnSelect: |-
+                                =UpdateContext({locDisplayDiscardPopUp: false})
+                              Text: ="Cancel"
+                        - btnModalAction1_2:
+                            Control: ModernButton@1.0.0
+                            Properties:
+                              Align: =Align.Center
+                              BasePaletteColor: =RGBA(249, 83, 109, 1)
+                              DisplayMode: =If(varDeletingItem, DisplayMode.Disabled, DisplayMode.Edit)
+                              FontWeight: =""
+                              OnSelect: |-
+                                =UpdateContext({locDisplayDiscardPopUp: false});
+                                Set(varSelectPolicy, "Empty");
+                                Set(varSelectedRelease, Blank());
+                                Set(varUnsavedChanges, false);
+                                Set(varShowLinkModal, false);
+                                If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =5
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Text: ="Discard"
                               VerticalAlign: =VerticalAlign.Middle

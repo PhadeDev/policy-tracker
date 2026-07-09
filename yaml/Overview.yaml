@@ -74,20 +74,26 @@ Screens:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   FillPortions: =0
                   Items: |-
-                    =SortByColumns(
-                        GroupBy(
+                    =AddColumns(
+                        ForAll(
+                            Sequence(4),
+                            {
+                                PublishDate: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")
+                            }
+                        ),
+                        ItemsForDate,
+                        With(
+                            {_targetDate: PublishDate},
                             Filter(
                                 'Policy Proof Tracker',
-                                'Planned Publish Date' >= Today() &&
-                                'Planned Publish Date' <= Today() + 28
-                            ),
-                            'Planned Publish Date',
-                            ItemsForDate
-                        ),
-                        "PublishDate",
-                        SortOrder.Ascending
+                                Year('Planned Publish Date') = Year(_targetDate) &&
+                                Month('Planned Publish Date') = Month(_targetDate) &&
+                                Day('Planned Publish Date') = Day(_targetDate)
+                            )
+                        )
                     )
-                  TemplateSize: =260
+                  TemplatePadding: =12
+                  TemplateSize: =(Parent.Width - 48) / 4.2
                   Width: =Parent.Width
                 Children:
                   - conColHeader1:
@@ -246,6 +252,19 @@ Screens:
                                     PressedFill: =RGBA(11, 74, 54, 0.09)
                                     Text: =""
                                     Width: =Parent.Width
+                  - lblNoReleases1:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Color: =RGBA(112, 116, 134, 1)
+                        Font: =Font.'Open Sans'
+                        Height: =Parent.TemplateHeight - 40
+                        Text: ="No releases planned"
+                        Visible: =CountRows(ThisItem.ItemsForDate) = 0
+                        Width: =Parent.TemplateWidth - 16
+                        X: =16
+                        Y: =40
       - conLightboxScrim1:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
