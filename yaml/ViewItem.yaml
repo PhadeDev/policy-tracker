@@ -27,88 +27,24 @@ Screens:
             Set(varLoading, true);
             Refresh('Policy Proof Tracker');
             Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
-            If(
-                !IsBlank(varDeepLinkItem),
-                Set(varSelectedRelease, varDeepLinkItem);
-                Set(varSelectPolicy, "Filled");
-                Set(varParentSaved, true);
-                Set(varSelectedItem, varDeepLinkItem);
-                Set(varSourceScreen, "Main");
-                Set(varSelectedPerson, varDeepLinkItem.Owner);
-                Refresh(PolicyLinks);
-                ClearCollect(
-                    colLinks,
-                    AddColumns(
-                        Filter(PolicyLinks, PolicyTrackerSource.Id = varDeepLinkItem.ID),
-                        FileExt,
-                        With(
-                            {FileParamStart: Find("file=", LinkUrl, 1)},
-                            With(
-                                {
-                                    FileNamePart: If(
-                                        FileParamStart > 0,
-                                        With(
-                                            {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
-                                            Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                                        ),
-                                        If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-                                    )
-                                },
-                                Switch(
-                                    true,
-                                    Right(FileNamePart, 5) = ".docx", "docx",
-                                    Right(FileNamePart, 4) = ".doc", "doc",
-                                    Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                                    Right(FileNamePart, 4) = ".xls", "xls",
-                                    Right(FileNamePart, 5) = ".pptx", "pptx",
-                                    Right(FileNamePart, 4) = ".ppt", "ppt",
-                                    Right(FileNamePart, 4) = ".pdf", "pdf",
-                                    ""
-                                )
-                            )
-                        )
-                    )
-                );
-                Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value)
-            );
+           If(
+            !IsBlank(varDeepLinkItem),
+            Set(varSelectedRelease, varDeepLinkItem);
+            Set(varSelectPolicy, "Filled");
+            Set(varParentSaved, true);
+            Set(varSelectedItem, varDeepLinkItem);
+            Set(varSourceScreen, "Main");
+            Set(varSelectedPerson, varDeepLinkItem.Owner);
+            Refresh(PolicyLinks);
+            BuildLinksForSource(varDeepLinkItem.ID);
+            Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value)
+        );
             Set(varLoading, false)
         );
         If(
             !IsBlank(varSelectedRelease.ID),
             Refresh(PolicyLinks);
-            ClearCollect(
-                colLinks,
-                AddColumns(
-                    Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID),
-                    FileExt,
-                    With(
-                        {FileParamStart: Find("file=", LinkUrl, 1)},
-                        With(
-                            {
-                                FileNamePart: If(
-                                    FileParamStart > 0,
-                                    With(
-                                        {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
-                                        Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                                    ),
-                                    If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-                                )
-                            },
-                            Switch(
-                                true,
-                                Right(FileNamePart, 5) = ".docx", "docx",
-                                Right(FileNamePart, 4) = ".doc", "doc",
-                                Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                                Right(FileNamePart, 4) = ".xls", "xls",
-                                Right(FileNamePart, 5) = ".pptx", "pptx",
-                                Right(FileNamePart, 4) = ".ppt", "ppt",
-                                Right(FileNamePart, 4) = ".pdf", "pdf",
-                                ""
-                            )
-                        )
-                    )
-                )
-            );
+            BuildLinksForSource(varSelectedRelease.ID);
             Set(varLoadingLinks, false),
             Clear(colLinks);
             Set(varLoadingLinks, false)
@@ -217,23 +153,34 @@ Screens:
                         X: =340
                         Y: =20
                   - btnDuplicate1:
-                      Control: Button@0.0.45
+                      Control: ModernButton@1.0.0
                       Properties:
+                        AccessibleLabel: ="Duplicate entry"
+                        Align: =Align.Center
                         BasePaletteColor: =RGBA(11, 74, 54, 1)
+                        FontWeight: =""
                         Height: =38
                         Icon: ="Copy"
                         OnSelect: |-
                           =ClearCollect(
                               colUpcomingEntries,
-                              Filter(
-                                  'Policy Proof Tracker',
-                                  'Planned Publish Date' >= Today() &&
-                                  'Planned Publish Date' <= DateAdd(Today(), 365, "Days")
+                              AddColumns(
+                                  Filter(
+                                      'Policy Proof Tracker',
+                                      'Planned Publish Date' >= Today() &&
+                                      'Planned Publish Date' <= DateAdd(Today(), 365, "Days")
+                                  ),
+                                  EntryDateKey,
+                                  Date(Year('Planned Publish Date'), Month('Planned Publish Date'), Day('Planned Publish Date'))
                               )
                           );
                           Set(
                               varDaysToNextThursday,
                               If(Mod(5 - Weekday(Today()) + 7, 7) = 0, 7, Mod(5 - Weekday(Today()) + 7, 7))
+                          );
+                          ClearCollect(
+                              colUpcomingCounts,
+                              GroupBy(colUpcomingEntries, EntryDateKey, GroupedEntries)
                           );
                           Clear(colThursdays);
                           ForAll(
@@ -244,34 +191,38 @@ Screens:
                                   With(
                                       {thurDate: DateAdd(Today(), varDaysToNextThursday + (Value - 1) * 7, "Days")},
                                       With(
-                                          {
-                                              cnt: CountRows(
-                                                  Filter(
-                                                      colUpcomingEntries,
-                                                      Year('Planned Publish Date') = Year(thurDate) &&
-                                                      Month('Planned Publish Date') = Month(thurDate) &&
-                                                      Day('Planned Publish Date') = Day(thurDate)
-                                                  )
+                                          {matchedGroup: LookUp(colUpcomingCounts, EntryDateKey = thurDate)},
+                                          With(
+                                              {cnt: If(IsBlank(matchedGroup), 0, CountRows(matchedGroup.GroupedEntries))},
+                                              Collect(
+                                                  colThursdays,
+                                                  {
+                                                      ThursdayDate: thurDate,
+                                                      ThursdayLabel: Text(thurDate, "dddd d mmmm yyyy") &
+                                                          If(
+                                                              cnt = 0, " - clear",
+                                                              cnt = 1, " - 1 entry already scheduled",
+                                                              " - " & Text(cnt, "0") & " entries already scheduled"
+                                                          )
+                                                  }
                                               )
-                                          },
-                                          Collect(
-                                              colThursdays,
-                                              {
-                                                  ThursdayDate: thurDate,
-                                                  ThursdayLabel: Text(thurDate, "dddd d mmmm yyyy") &
-                                                      If(
-                                                          cnt = 0, " - clear",
-                                                          cnt = 1, " - 1 entry already scheduled",
-                                                          " - " & Text(cnt, "0") & " entries already scheduled"
-                                                      )
-                                              }
                                           )
                                       )
                                   )
                               )
                           );
                           Set(varShowDuplicateModal1, true)
+                        PaddingBottom: =5
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =5
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
                         Text: =""
+                        Tooltip: ="Duplicate Entry"
+                        VerticalAlign: =VerticalAlign.Middle
                         Visible: =varSelectPolicy = "Filled"
                         Width: =38
                         X: =Parent.Width - 160
@@ -934,7 +885,7 @@ Screens:
                                         Properties:
                                           Align: =Align.Center
                                           Color: =RGBA(255, 255, 255, 1)
-                                          Fill: =Coalesce(LookUp(colChoiceColors, ChoiceValue = varSelectedRelease.'Document Type'.Value, ColorCode), RGBA(11, 74, 54, 1))
+                                          Fill: =Coalesce(LookUp(colChoiceColors, ChoiceValue = varSelectedRelease.'Document Type'.Value, ColorCode), RGBA(150, 150, 150, 1))
                                           Font: =Font.'Open Sans'
                                           FontWeight: =FontWeight.Bold
                                           Height: =68
@@ -942,6 +893,7 @@ Screens:
                                           Text: =If(!IsBlank(cmb_Owner1.Selected.DisplayName) && Find(" ", cmb_Owner1.Selected.DisplayName) > 0, Upper(Left(cmb_Owner1.Selected.DisplayName, 1) & Mid(cmb_Owner1.Selected.DisplayName, Find(" ", cmb_Owner1.Selected.DisplayName) + 1, 1)), Upper(Left(Coalesce(cmb_Owner1.Selected.DisplayName, "?"), 1)))
                                           Visible: =IsBlank(imgOwnerAvatar1.Image)
                                           Width: =68
+                                          X: =10
                                           Y: =22
                                     - imgOwnerAvatar1:
                                         Control: Image@2.2.3
@@ -1984,51 +1936,7 @@ Screens:
 
                                             // Reload colLinks so the gallery updates immediately
                                             Set(varLoadingLinks, true);
-                                            ClearCollect(
-                                                colLinks,
-                                                AddColumns(
-                                                    Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID),
-                                                    FileExt,
-                                                    With(
-                                                        {
-                                                            FileParamStart: Find("file=", LinkUrl, 1)
-                                                        },
-                                                        With(
-                                                            {
-                                                                FileNamePart: If(
-                                                                    FileParamStart > 0,
-                                                                    With(
-                                                                        {
-                                                                            AmpPos: Find("&", LinkUrl, FileParamStart + 5)
-                                                                        },
-                                                                        Mid(
-                                                                            LinkUrl,
-                                                                            FileParamStart + 5,
-                                                                            If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1)
-                                                                        )
-                                                                    ),
-                                                                    If(
-                                                                        Find("?", LinkUrl, 1) > 0,
-                                                                        Left(LinkUrl, Find("?", LinkUrl, 1) - 1),
-                                                                        LinkUrl
-                                                                    )
-                                                                )
-                                                            },
-                                                            Switch(
-                                                                true,
-                                                                Right(FileNamePart, 5) = ".docx", "docx",
-                                                                Right(FileNamePart, 4) = ".doc", "doc",
-                                                                Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                                                                Right(FileNamePart, 4) = ".xls", "xls",
-                                                                Right(FileNamePart, 5) = ".pptx", "pptx",
-                                                                Right(FileNamePart, 4) = ".ppt", "ppt",
-                                                                Right(FileNamePart, 4) = ".pdf", "pdf",
-                                                                ""
-                                                            )
-                                                        )
-                                                    )
-                                                )
-                                            );
+                                            BuildLinksForSource(varSelectedRelease.ID);
                                             Set(varLoadingLinks, false);
 
                                             // Close modal and reset variables
@@ -2744,52 +2652,31 @@ Screens:
                                 =UpdateContext({locDisplayAttDeletePopUp: false})
                               Text: ="Cancel"
                         - btnModalAction1_1:
-                            Control: Button@0.0.45
+                            Control: ModernButton@1.0.0
                             Properties:
+                              Align: =Align.Center
                               BasePaletteColor: =RGBA(249, 83, 109, 1)
                               DisplayMode: =If(varDeletingItem, DisplayMode.Disabled, DisplayMode.Edit)
+                              FontWeight: =""
                               OnSelect: |-
                                 =IfError(
                                     Remove(PolicyLinks, varSelectedLink),
                                     UpdateContext({locDisplayAttDeletePopUp: false});
                                     Notify("Delete failed. Please check your connection and try again.", NotificationType.Error),
                                     Set(varLoadingLinks, true);
-                                    ClearCollect(
-                                        colLinks,
-                                        AddColumns(
-                                            Filter(PolicyLinks, PolicyTrackerSource.Id = varSelectedRelease.ID),
-                                            FileExt,
-                                            With(
-                                                {FileParamStart: Find("file=", LinkUrl, 1)},
-                                                With(
-                                                    {
-                                                        FileNamePart: If(
-                                                            FileParamStart > 0,
-                                                            With(
-                                                                {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
-                                                                Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                                                            ),
-                                                            If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-                                                        )
-                                                    },
-                                                    Switch(
-                                                        true,
-                                                        Right(FileNamePart, 5) = ".docx", "docx",
-                                                        Right(FileNamePart, 4) = ".doc", "doc",
-                                                        Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                                                        Right(FileNamePart, 4) = ".xls", "xls",
-                                                        Right(FileNamePart, 5) = ".pptx", "pptx",
-                                                        Right(FileNamePart, 4) = ".ppt", "ppt",
-                                                        Right(FileNamePart, 4) = ".pdf", "pdf",
-                                                        ""
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    );
+                                    BuildLinksForSource(varSelectedRelease.ID);
                                     Set(varLoadingLinks, false);
                                     UpdateContext({locDisplayAttDeletePopUp: false});
                                     Set(varSelectedLink, Blank());
                                     Notify("Link deleted.", NotificationType.Success)
                                 )
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =5
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
                               Text: ="Delete"
+                              VerticalAlign: =VerticalAlign.Middle

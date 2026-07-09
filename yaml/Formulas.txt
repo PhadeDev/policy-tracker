@@ -1,0 +1,36 @@
+BuildLinksForSource(SourceID: Number): Boolean = {
+    ClearCollect(
+        colLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id = SourceID),
+            FileExt,
+            With(
+                {FileParamStart: Find("file=", LinkUrl, 1)},
+                With(
+                    {
+                        FileNamePart: If(
+                            FileParamStart > 0,
+                            With(
+                                {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                                Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                            ),
+                            If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+                        )
+                    },
+                    Switch(
+                        true,
+                        Right(FileNamePart, 5) = ".docx", "docx",
+                        Right(FileNamePart, 4) = ".doc", "doc",
+                        Right(FileNamePart, 5) = ".xlsx", "xlsx",
+                        Right(FileNamePart, 4) = ".xls", "xls",
+                        Right(FileNamePart, 5) = ".pptx", "pptx",
+                        Right(FileNamePart, 4) = ".ppt", "ppt",
+                        Right(FileNamePart, 4) = ".pdf", "pdf",
+                        ""
+                    )
+                )
+            )
+        )
+    );
+    true
+};

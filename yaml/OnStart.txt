@@ -31,7 +31,7 @@ Set(
 Set(varSelectedItem, Blank());
 Set(varSelectedLink, Blank());
 Set(
-    varShowDuplicateModal,
+    varShowDuplicateModal1,
     false
 );
 Set(varSaving, false);
@@ -99,6 +99,15 @@ ClearCollect(
                 99
             )
         }
+    )
+);
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' >= Today() &&
+        'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+        (varFilterOwner = false || Owner.Email = User().Email)
     )
 );
 // Theme

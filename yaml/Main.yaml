@@ -2,7 +2,6 @@ Screens:
   Main:
     Properties:
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
-      OnVisible: =false
     Children:
       - ScreenContainer1:
           Control: GroupContainer@1.5.0
@@ -342,6 +341,15 @@ Screens:
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
                                       =Set(varSelectedState, "Current");
+                                      Set(
+                                          colTypeCounts,
+                                          Filter(
+                                              'Policy Proof Tracker',
+                                              'Planned Publish Date' >= Today() &&
+                                              'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+                                              (varFilterOwner = false || Owner.Email = User().Email)
+                                          )
+                                      );
                                       Reset(HeaderGallery)
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
@@ -425,6 +433,14 @@ Screens:
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
                                       =Set(varSelectedState, "Future");
+                                      Set(
+                                          colTypeCounts,
+                                          Filter(
+                                              'Policy Proof Tracker',
+                                              'Planned Publish Date' > DateAdd(Today(), 28, "Days") &&
+                                              (varFilterOwner = false || Owner.Email = User().Email)
+                                          )
+                                      );
                                       Reset(HeaderGallery)
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
@@ -516,6 +532,15 @@ Screens:
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
                                       =Set(varSelectedState, "UnapprovedHistoric");
+                                      Set(
+                                          colTypeCounts,
+                                          Filter(
+                                              'Policy Proof Tracker',
+                                              'Planned Publish Date' < Today() &&
+                                              Published = false &&
+                                              (varFilterOwner = false || Owner.Email = User().Email)
+                                          )
+                                      );
                                       Reset(HeaderGallery)
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
@@ -600,10 +625,19 @@ Screens:
                                     HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
-                                    OnSelect: |+
+                                    OnSelect: |-
                                       =Set(varSelectedState, "Historic");
+                                      Set(
+                                          colTypeCounts,
+                                          Filter(
+                                              'Policy Proof Tracker',
+                                              'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") &&
+                                              'Planned Publish Date' < Today() &&
+                                              Published = true &&
+                                              (varFilterOwner = false || Owner.Email = User().Email)
+                                          )
+                                      );
                                       Reset(HeaderGallery);
-
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
                                     PressedFill: =RGBA(0,128,64,0.12)
@@ -691,7 +725,12 @@ Screens:
                                   Properties:
                                     BorderColor: =RGBA(0, 18, 107, 1)
                                     FillPortions: =0
-                                    Items: =colChoiceColors
+                                    Items: |-
+                                      =AddColumns(
+                                          colChoiceColors,
+                                          TypeCount,
+                                          CountRows(Filter(colTypeCounts, 'Document Type'.Value = ChoiceValue))
+                                      )
                                     LayoutMinHeight: =44
                                     LayoutMinWidth: =16
                                     ShowScrollbar: =false
@@ -743,29 +782,16 @@ Screens:
                                           Size: =10
                                           Text: |-
                                             =With(
-                                            {
-                                            FullLabel: Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1)
-                                            },
-                                            Switch(
-                                            FullLabel,
-                                            "Newsletter Item", "Newsletter",
-                                            "Internal Document", "Internal",
-                                            FullLabel
-                                            )
-                                            ) & " (" &
-                                            CountRows(
-                                            Filter(
-                                            'Policy Proof Tracker',
-                                            (
-                                            (varSelectedState = "Current" && 'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days")) ||
-                                            (varSelectedState = "Future" && 'Planned Publish Date' > DateAdd(Today(), 28, "Days")) ||
-                                            (varSelectedState = "UnapprovedHistoric" && 'Planned Publish Date' < Today() && Published = false) ||
-                                            (varSelectedState = "Historic" && 'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") && 'Planned Publish Date' < Today() && Published = true)
-                                            ) &&
-                                            (varFilterOwner = false || Owner.Email = User().Email) &&
-                                            'Document Type'.Value = ThisItem.ChoiceValue
-                                            )
-                                            ) & ")"
+                                                {
+                                                    FullLabel: Mid(ThisItem.ChoiceValue, Find(" ", ThisItem.ChoiceValue) + 1)
+                                                },
+                                                Switch(
+                                                    FullLabel,
+                                                    "Newsletter Item", "Newsletter",
+                                                    "Internal Document", "Internal",
+                                                    FullLabel
+                                                )
+                                            ) & " (" & ThisItem.TypeCount & ")"
                                           Width: =104
                                           X: =5
                                           Y: =3
@@ -1419,51 +1445,7 @@ Screens:
                                                         // Load links immediately
                                                         Set(varSelectedRelease, ThisItem);
                                                         Set(varLoadingLinks, true);
-                                                        ClearCollect(
-                                                            colLinks,
-                                                            AddColumns(
-                                                                Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID),
-                                                                FileExt,
-                                                                With(
-                                                                    {
-                                                                        FileParamStart: Find("file=", LinkUrl, 1)
-                                                                    },
-                                                                    With(
-                                                                        {
-                                                                            FileNamePart: If(
-                                                                                FileParamStart > 0,
-                                                                                With(
-                                                                                    {
-                                                                                        AmpPos: Find("&", LinkUrl, FileParamStart + 5)
-                                                                                    },
-                                                                                    Mid(
-                                                                                        LinkUrl,
-                                                                                        FileParamStart + 5,
-                                                                                        If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1)
-                                                                                    )
-                                                                                ),
-                                                                                If(
-                                                                                    Find("?", LinkUrl, 1) > 0,
-                                                                                    Left(LinkUrl, Find("?", LinkUrl, 1) - 1),
-                                                                                    LinkUrl
-                                                                                )
-                                                                            )
-                                                                        },
-                                                                        Switch(
-                                                                            true,
-                                                                            Right(FileNamePart, 5) = ".docx", "docx",
-                                                                            Right(FileNamePart, 4) = ".doc", "doc",
-                                                                            Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                                                                            Right(FileNamePart, 4) = ".xls", "xls",
-                                                                            Right(FileNamePart, 5) = ".pptx", "pptx",
-                                                                            Right(FileNamePart, 4) = ".ppt", "ppt",
-                                                                            Right(FileNamePart, 4) = ".pdf", "pdf",
-                                                                            ""
-                                                                        )
-                                                                    )
-                                                                )
-                                                            )
-                                                        );
+                                                        BuildLinksForSource(ThisItem.ID);
                                                         Set(varLoadingLinks, false);
 
                                                         // Navigate to ViewItem
@@ -1763,7 +1745,21 @@ Screens:
             FocusedBorderThickness: =0
             Font: =Font.'Open Sans'
             Height: =26
-            OnChange: =Set(varFilterOwner, Self.Value)
+            OnChange: |-
+              =Set(varFilterOwner, Self.Value);
+              Set(
+                  colTypeCounts,
+                  Filter(
+                      'Policy Proof Tracker',
+                      (
+                          (varSelectedState = "Current" && 'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days")) ||
+                          (varSelectedState = "Future" && 'Planned Publish Date' > DateAdd(Today(), 28, "Days")) ||
+                          (varSelectedState = "UnapprovedHistoric" && 'Planned Publish Date' < Today() && Published = false) ||
+                          (varSelectedState = "Historic" && 'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") && 'Planned Publish Date' < Today() && Published = true)
+                      ) &&
+                      (Self.Value = false || Owner.Email = User().Email)
+                  )
+              )
             ShowLabel: =false
             TextPosition: =TextPosition.Left
             TrueFill: =RGBA(0, 64, 47, 1)
@@ -1938,55 +1934,9 @@ Screens:
                                 Set(varSourceScreen, "Main");
                                 Set(varSelectedPerson, ThisItem.Owner);
                                 Set(varLoadingLinks, true);
-                                ClearCollect(
-                                    colLinks,
-                                    AddColumns(
-                                        Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID),
-                                        FileExt,
-                                        With(
-                                            {
-                                                FileParamStart: Find("file=", LinkUrl, 1)
-                                            },
-                                            With(
-                                                {
-                                                    FileNamePart: If(
-                                                        FileParamStart > 0,
-                                                        With(
-                                                            {
-                                                                AmpPos: Find("&", LinkUrl, FileParamStart + 5)
-                                                            },
-                                                            Mid(
-                                                                LinkUrl,
-                                                                FileParamStart + 5,
-                                                                If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1)
-                                                            )
-                                                        ),
-                                                        If(
-                                                            Find("?", LinkUrl, 1) > 0,
-                                                            Left(LinkUrl, Find("?", LinkUrl, 1) - 1),
-                                                            LinkUrl
-                                                        )
-                                                    )
-                                                },
-                                                Switch(
-                                                    true,
-                                                    Right(FileNamePart, 5) = ".docx", "docx",
-                                                    Right(FileNamePart, 4) = ".doc", "doc",
-                                                    Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                                                    Right(FileNamePart, 4) = ".xls", "xls",
-                                                    Right(FileNamePart, 5) = ".pptx", "pptx",
-                                                    Right(FileNamePart, 4) = ".ppt", "ppt",
-                                                    Right(FileNamePart, 4) = ".pdf", "pdf",
-                                                    ""
-                                                )
-                                            )
-                                        )
-                                    )
-                                );
+                                BuildLinksForSource(ThisItem.ID);
                                 Set(varLoadingLinks, false);
-                                Set(varShowSearch, false);
-                                Reset(txtSearchOverlay);
-                                Navigate(ViewItem, ScreenTransition.Fade)
+                                Navigate(ViewItem, ScreenTransition.Fade);
                               PressedBorderColor: =Color.Transparent
                               PressedColor: =Self.Fill
                               PressedFill: =RGBA(0, 64, 47, 0.12)
