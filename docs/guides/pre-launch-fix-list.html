@@ -203,10 +203,23 @@ If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navi
     BuildLinksForSource(varDeepLinkItem.ID);
     Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value),
     Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
-    Navigate(Main, ScreenTransition.Fade)
+    Set(varDeepLinkNotFound, true)
 );</pre></div>
 
-  <div class="test">Test without publishing: temporarily change <code>Value(varItemID)</code> to something you know doesn't exist (e.g. <code>999999</code>), open ViewItem directly, confirm you get the "could not be found" notification and land back on Main instead of a blank form. Revert the temporary change once confirmed.</div>
+  <p><strong>Important: Studio blocks <code>Navigate</code> inside a screen's own <code>OnVisible</code></strong> outright, even nested inside an <code>If</code> that only reaches it conditionally &mdash; it can't statically prove the navigate won't fire unconditionally, so it refuses the whole property. The formula above only sets a flag, <code>varDeepLinkNotFound</code>; the actual navigate happens from a one-shot Timer instead, which is the standard workaround for this restriction.</p>
+
+  <p><strong>Add a Timer control</strong> (Insert &rarr; search "Timer"), rename it <code>tmrDeepLinkNotFound</code> in Tree view, and set:</p>
+  <ul>
+    <li><code>Visible</code>: <code>=false</code></li>
+    <li><code>AutoStart</code>: <code>=false</code></li>
+    <li><code>Repeat</code>: <code>=false</code></li>
+    <li><code>Duration</code>: <code>=100</code></li>
+    <li><code>Start</code>: <code>=varDeepLinkNotFound</code></li>
+    <li><code>OnTimerEnd</code>: <code>=Navigate(Main, ScreenTransition.Fade); Set(varDeepLinkNotFound, false)</code></li>
+  </ul>
+  <p>Setting <code>varDeepLinkNotFound</code> to <code>true</code> starts the timer, which fires once ~100ms later and does the real navigate outside of <code>OnVisible</code>, then resets the flag so it's armed for next time.</p>
+
+  <div class="test">Test without publishing: temporarily change <code>Value(varItemID)</code> to something you know doesn't exist (e.g. <code>999999</code>), open ViewItem directly, confirm you get the "could not be found" notification and land back on Main a moment later instead of a blank form. Revert the temporary change once confirmed.</div>
 
   <h2 id="f6">6. Main screen never refreshes on its own <span class="sev sev-bug">CONFUSING, LOOKS BROKEN</span></h2>
   <p>Main's gallery reads live off <code>'Policy Proof Tracker'</code>, so it's capable of showing fresh data, but nothing on Main ever tells it to refresh. There's no <code>Main.OnVisible</code> at all right now, and none of the four tabs or the owner toggle call <code>Refresh()</code>. Your own edits through ViewItem often look fine because <code>Patch()</code> updates that one record's local copy directly, but a colleague's change, or one made directly in SharePoint, sits stale until an F5 forces a full reload.</p>
