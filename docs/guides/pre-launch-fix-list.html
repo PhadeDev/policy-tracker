@@ -308,14 +308,99 @@ BorderThickness: =If(ThisItem.'External consultation required', 2, ThisItem.'Hig
     SortOrder.Ascending
 )</pre></div>
 
-  <p><strong>NewsletterPack, the <code>SortKey</code> column inside <code>OnVisible</code>'s <code>ClearCollect(colNewsletterPack, ...)</code>, only this line changes:</strong></p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>SortKey,
-If(
-    'Top Item',
-    -1000,
-    Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
-),</pre></div>
-  <p>If you're on the older NewsletterPack that duplicates this formula in both <code>OnVisible</code> and <code>btnRefresh.OnSelect</code>, make the same change in both copies.</p>
+  <p><strong><code>NewsletterPack.OnVisible</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+Refresh('Policy Proof Tracker');
+ClearCollect(
+    colNewsletterPack,
+    Sort(
+        AddColumns(
+            Filter(
+                'Policy Proof Tracker',
+                Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
+                Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
+                Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
+                (
+                    ReadyForRelease = true ||
+                    'Approved For Release By'.Value = "XO" ||
+                    'Approved For Release By'.Value = "ACOS" ||
+                    'Approved For Release By'.Value = "DCOMD" ||
+                    'Approved For Release By'.Value = "D Commander"
+                ) &&
+                Published = false &&
+                'External consultation required' = false
+            ),
+            SortKey,
+            If(
+                'Top Item',
+                -1000,
+                Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
+            ),
+            IsFinalApproved,
+            Or(
+                'Approved For Release By'.Value = "XO",
+                'Approved For Release By'.Value = "ACOS",
+                'Approved For Release By'.Value = "DCOMD",
+                'Approved For Release By'.Value = "D Commander"
+            ),
+            PackTitle,
+            Coalesce('Title for Newsletter', Title),
+            PackAudience,
+            Coalesce(Audience, ""),
+            PackSummary,
+            Coalesce('Item summary', "")
+        ),
+        SortKey,
+        SortOrder.Ascending
+    )
+)</pre></div>
+
+  <p><strong><code>btnRefresh.OnSelect</code>, full replacement (identical body, this screen has it duplicated in two places):</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+Refresh('Policy Proof Tracker');
+ClearCollect(
+    colNewsletterPack,
+    Sort(
+        AddColumns(
+            Filter(
+                'Policy Proof Tracker',
+                Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
+                Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
+                Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
+                (
+                    ReadyForRelease = true ||
+                    'Approved For Release By'.Value = "XO" ||
+                    'Approved For Release By'.Value = "ACOS" ||
+                    'Approved For Release By'.Value = "DCOMD" ||
+                    'Approved For Release By'.Value = "D Commander"
+                ) &&
+                Published = false &&
+                'External consultation required' = false
+            ),
+            SortKey,
+            If(
+                'Top Item',
+                -1000,
+                Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
+            ),
+            IsFinalApproved,
+            Or(
+                'Approved For Release By'.Value = "XO",
+                'Approved For Release By'.Value = "ACOS",
+                'Approved For Release By'.Value = "DCOMD",
+                'Approved For Release By'.Value = "D Commander"
+            ),
+            PackTitle,
+            Coalesce('Title for Newsletter', Title),
+            PackAudience,
+            Coalesce(Audience, ""),
+            PackSummary,
+            Coalesce('Item summary', "")
+        ),
+        SortKey,
+        SortOrder.Ascending
+    )
+)</pre></div>
 
   <p><strong>Overview, <code>galColCards1.Items</code>, full replacement:</strong></p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Sort(
