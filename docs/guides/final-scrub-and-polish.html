@@ -64,7 +64,7 @@
     <li>In the Tree view, select <strong>App</strong>. In the property dropdown (top-left of the formula bar), select <strong>Formulas</strong>.</li>
     <li>Paste this in (adds to whatever's already there, doesn't replace it &mdash; if this is the first named formula/UDF in the app, it'll be the only thing in the box):</li>
   </ol>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>BuildLinksForSource(SourceID: Number): Boolean =
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>BuildLinksForSource(SourceID: Number): Boolean = {
     ClearCollect(
         colLinks,
         AddColumns(
@@ -98,7 +98,10 @@
             )
         )
     );
-    true</pre></div>
+    true
+};</pre></div>
+
+  <div class="note">Behavior UDFs (any UDF whose body calls a side-effecting function like <code>ClearCollect</code>) must wrap their whole body in <code>{ }</code> right after the <code>:</code> return type &mdash; a plain semicolon-chain without the braces gets rejected with "Please wrap the user-defined function body with curly braces to declare a behavior UDF." Non-behavior (pure calculation) UDFs don't need the braces, only ones with side effects.</div>
 
   <p>Once that's saved with no error, replace each of the six call sites. Every one of them keeps everything else in its handler exactly as-is &mdash; only the <code>ClearCollect(colLinks, AddColumns(...))</code> block is being swapped for one line.</p>
 
