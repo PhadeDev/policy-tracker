@@ -110,15 +110,15 @@ DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
 
   <p><strong>Failure scenario:</strong> click "Mark All as Published" on a Thursday with 3 items, the same one record gets patched 3 times, the other two are left unpublished, while the notification claims all 3 succeeded.</p>
 
-  <p><strong><code>PublishAllBtn.OnSelect</code>, full replacement (only the <code>LookUp</code> line changes):</strong></p>
+  <p><strong><code>PublishAllBtn.OnSelect</code>, full replacement (only the <code>ForAll</code>/<code>LookUp</code> lines change):</strong></p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=// PublishAllBtn.OnSelect
 Set(varPublishGroupDate, ThisItem.PlannedDate);
 Set(varPublishGroupCount, CountRows(Filter(ThisItem.GroupedItems, 'External consultation required' = false)));
 ForAll(
-    Filter(ThisItem.GroupedItems, 'External consultation required' = false),
+    Filter(ThisItem.GroupedItems, 'External consultation required' = false) As PubItem,
     Patch(
         'Policy Proof Tracker',
-        LookUp('Policy Proof Tracker', 'Policy Proof Tracker'.ID = ThisRecord.ID),
+        LookUp('Policy Proof Tracker', ID = PubItem.ID),
         {
             Published: true,
             'Published Date': varPublishGroupDate
@@ -131,7 +131,7 @@ Notify(
     NotificationType.Success
 )</pre></div>
 
-  <p>Qualifying both sides removes the ambiguity, same fix shape the correctly-written single-item <code>BossPublishBtn</code> already uses.</p>
+  <p>Naming the outer loop item <code>As PubItem</code> means the bare <code>ID</code> inside <code>LookUp</code> unambiguously refers to the <code>LookUp</code>'s own scope while <code>PubItem.ID</code> refers to the outer loop item, no shadowing, same fix shape the correctly-written single-item <code>BossPublishBtn</code> already uses. (Note: an earlier version of this guide used <code>'Policy Proof Tracker'.ID = ThisRecord.ID</code>, which is invalid, that syntax evaluates to the whole ID column as a Table rather than disambiguating a scope, causing a "Table, Number" type error — <code>As PubItem</code> is the correct fix.)</p>
 
   <div class="test">Test: pick a Thursday group with at least 2 unpublished items, click Mark All as Published, then reopen each item and confirm every one shows Published, not just one of them.</div>
 
