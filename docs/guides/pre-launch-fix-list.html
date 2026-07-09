@@ -73,39 +73,75 @@
 
   <p><strong>This is very likely why the <code>Reset(cmb_Owner1)</code> fix hasn't worked even though it's genuinely sitting in the formula</strong> &mdash; if <code>OnVisible</code> as a whole isn't executing cleanly because of this error, nothing later in that same formula can be trusted either, including the Owner reset, until this is fixed. Do this one before re-testing Owner again.</p>
 
-  <p><strong>Find this exact block in <code>ViewItem.OnVisible</code>:</strong></p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    !IsBlank(varDeepLinkItem),
-    Set(varSelectedRelease, varDeepLinkItem);
-    Set(varSelectPolicy, "Filled");
-    Set(varParentSaved, true);
-    Set(varSelectedItem, varDeepLinkItem);
-    Set(varSourceScreen, "Main");
-    Set(varSelectedPerson, varDeepLinkItem.Owner);
+  <p><strong>Step 1: click the <code>ViewItem</code> screen itself in Tree view (not a control inside it), select the <code>OnVisible</code> property at the top, select everything currently in that formula box, and paste this over the whole thing:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Office365Users.SearchUserV2({searchTerm: User().Email, isSearchTermRequired: true, top: 1}).value,
+        Office365Users.SearchUserV2({searchTerm: varSelectedRelease.Owner.Email, isSearchTermRequired: true, top: 1}).value
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+If(
+    !IsBlank(varSelectedRelease.ID),
     Refresh(PolicyLinks);
-    BuildLinksForSource(varDeepLinkItem.ID);
-    Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value),
-    Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
-    Navigate(Main, ScreenTransition.Fade)
-);</pre></div>
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1)</pre></div>
 
-  <p><strong>Replace with (only the last line of the else-branch changes):</strong></p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    !IsBlank(varDeepLinkItem),
-    Set(varSelectedRelease, varDeepLinkItem);
-    Set(varSelectPolicy, "Filled");
-    Set(varParentSaved, true);
-    Set(varSelectedItem, varDeepLinkItem);
-    Set(varSourceScreen, "Main");
-    Set(varSelectedPerson, varDeepLinkItem.Owner);
-    Refresh(PolicyLinks);
-    BuildLinksForSource(varDeepLinkItem.ID);
-    Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value),
-    Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
-    Set(varDeepLinkNotFound, true)
-);</pre></div>
+  <p>This is the entire property, start to finish &mdash; nothing to find, nothing to splice in by hand. It folds in both fixes at once: the deep-link "not found" branch now sets a flag (<code>varDeepLinkNotFound</code>) instead of the invalid direct <code>Navigate</code> call, and <code>Reset(cmb_Owner1)</code> is added as the final line so the Owner field re-reads correctly on every visit, same as every other field on the form already does.</p>
 
-  <p><strong>Add a Timer control</strong> (Insert &rarr; search "Timer"), rename it <code>tmrDeepLinkNotFound</code> in Tree view, and set:</p>
+  <p><strong>Step 2: add a Timer control</strong> (Insert &rarr; search "Timer"), rename it <code>tmrDeepLinkNotFound</code> in Tree view, and set:</p>
   <ul>
     <li><code>Visible</code>: <code>=false</code></li>
     <li><code>AutoStart</code>: <code>=false</code></li>
@@ -118,7 +154,7 @@
 
   <div class="test">Test without publishing: temporarily change <code>Value(varItemID)</code> to something you know doesn't exist (e.g. <code>999999</code>), open ViewItem directly, confirm you get the "could not be found" notification and land back on Main a moment later instead of a blank form. Revert the temporary change once confirmed.</div>
 
-  <div class="warn"><strong>After this is done:</strong> fully close and restart Preview (not a browser refresh, see note below), then re-test Owner by clicking into 3-4 different items in a row. <code>Reset(cmb_Owner1)</code> is already correctly sitting in <code>OnVisible</code> from an earlier fix, it just may not have been able to run properly with the error above still present. If Owner is still wrong after this, that theory was wrong and it needs a fresh look, tell me and I'll dig further rather than assume.</div>
+  <div class="warn"><strong>After this is pasted in:</strong> fully close and restart Preview (not a browser refresh, see note below), then re-test Owner by clicking into 3-4 different items in a row. If Owner is still wrong after this, tell me and I'll dig further rather than assume the theory above was right.</div>
 
   <div class="note"><strong>On restarting Preview:</strong> pressing F5 while focus is inside the Studio editor canvas (not a text/formula field) is the built-in Preview shortcut, safe, no data loss. A literal browser page reload (Ctrl+R / the browser's own reload button) is the one that can trigger the "read only" / editing-session-conflict warning, avoid that instead.</div>
 
