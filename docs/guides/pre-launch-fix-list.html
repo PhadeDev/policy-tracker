@@ -59,6 +59,7 @@
     <div class="progress-card"><div class="count">1</div><div class="label">Top priority, likely breaking Owner too</div></div>
     <div class="progress-card"><div class="count">1</div><div class="label">Data loss, confirmed broken</div></div>
     <div class="progress-card"><div class="count">2</div><div class="label">Missing feature</div></div>
+    <div class="progress-card"><div class="count">1</div><div class="label">Performance polish</div></div>
   </div>
 
   <div class="toc">
@@ -67,6 +68,7 @@
     <a href="#f2"><span class="toc-num">2.</span> Close button still discards unsaved edits with no warning</a>
     <a href="#f3"><span class="toc-num">3.</span> Overview cards don't sort Top Item to the top</a>
     <a href="#f4"><span class="toc-num">4.</span> Consultation Only items never appear on Main once their date passes</a>
+    <a href="#f5"><span class="toc-num">5.</span> Owner briefly shows the previous item's owner before catching up</a>
   </div>
 
   <h2 id="f1">1. Invalid formula in ViewItem.OnVisible &mdash; do this one first, before anything else <span class="sev sev-critical">TOP PRIORITY, LIKELY ROOT CAUSE OF THE OWNER BUG TOO</span></h2>
@@ -309,6 +311,79 @@ Switch(
   <p>Real items that are simply overdue and genuinely unpublished still correctly stay out of "Previously Published" and show up in Issues instead &mdash; this only widens the door for the specific case of a ticked Consultation Only item, nothing else changes.</p>
 
   <div class="test">Test: find (or create) a Consultation Only item with a Planned Publish Date in the past. Confirm it now shows up under the "Previously Published" tab with the existing violet "CONSULTATION ONLY — NOT FOR RELEASE" banner, and confirm it still does not appear under Issues.</div>
+
+  <h2 id="f5">5. Owner briefly shows the previous item's owner before catching up <span class="sev sev-polish">PERFORMANCE, NOT DATA LOSS</span></h2>
+  <p><code>varOwnerDefault</code> is rebuilt on every visit via a live network call to <code>Office365Users.SearchUserV2(...)</code>, re-fetching the owner's name and email from the Office 365 connector even though that exact data is already sitting in <code>varSelectedRelease.Owner</code>, loaded as part of the record itself, no separate call needed. That round trip is what causes the brief flash of the previous item's owner while it resolves. Fix removes the network call entirely instead of just hiding the delay behind a spinner.</p>
+
+  <p><strong><code>ViewItem.OnVisible</code>, full replacement (only the two <code>varOwnerDefault</code> assignments change, everything else is identical to the version from item 1):</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Table({DisplayName: User().FullName, Mail: User().Email}),
+        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email})),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+If(
+    !IsBlank(varSelectedRelease.ID),
+    Refresh(PolicyLinks);
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1)</pre></div>
+
+  <p>Both the normal load path and the deep-link path now build <code>varOwnerDefault</code> as a plain <code>Table({DisplayName:, Mail:})</code> straight from data already on the record, same two-field shape the existing Save logic already uses elsewhere on this screen (<code>Set(varOwnerDefault, Table({DisplayName: cmb_Owner1.Selected.DisplayName, Mail: cmb_Owner1.Selected.Mail}))</code>), so nothing downstream needs to change, only where the value comes from.</p>
+
+  <div class="test">Test: open one item, note the owner, close, open a different item with a different owner. Owner should now show correctly straight away with no visible flash of the previous person.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
