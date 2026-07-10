@@ -58,7 +58,7 @@
   <div class="progress-summary">
     <div class="progress-card"><div class="count">1</div><div class="label">Top priority, likely breaking Owner too</div></div>
     <div class="progress-card"><div class="count">1</div><div class="label">Data loss, confirmed broken</div></div>
-    <div class="progress-card"><div class="count">1</div><div class="label">Missing feature, cosmetic</div></div>
+    <div class="progress-card"><div class="count">2</div><div class="label">Missing feature</div></div>
   </div>
 
   <div class="toc">
@@ -66,6 +66,7 @@
     <a href="#f1"><span class="toc-num">1.</span> Invalid formula in ViewItem.OnVisible &mdash; may be breaking Owner, Reset, everything else in it</a>
     <a href="#f2"><span class="toc-num">2.</span> Close button still discards unsaved edits with no warning</a>
     <a href="#f3"><span class="toc-num">3.</span> Overview cards don't sort Top Item to the top</a>
+    <a href="#f4"><span class="toc-num">4.</span> Consultation Only items never appear on Main once their date passes</a>
   </div>
 
   <h2 id="f1">1. Invalid formula in ViewItem.OnVisible &mdash; do this one first, before anything else <span class="sev sev-critical">TOP PRIORITY, LIKELY ROOT CAUSE OF THE OWNER BUG TOO</span></h2>
@@ -196,6 +197,118 @@ Reset(cmb_Owner1)</pre></div>
 )</pre></div>
 
   <div class="test">Test: mark one item Top Item on a Thursday that already has other items of different types. Confirm it now appears first in that day's column on Overview, same as it already does on Main and Newsletter Pack.</div>
+
+  <h2 id="f4">4. Consultation Only items never appear on Main once their date passes <span class="sev sev-bug">MISSING FEATURE</span></h2>
+  <p>Every tab on Main filters on <code>Published</code>. Consultation Only items are never meant to be published, so once their date is in the past they fall out of every tab at once &mdash; not shown as an issue (that part's already correct, the Issues tab already excludes them), just invisible, findable only via Search or the separate Historic screen.</p>
+
+  <p><strong>Fix: one condition in the "Previously Published" tab's filter</strong> &mdash; include Consultation Only items by date even though <code>Published</code> stays false for them. No new tab, no new pill needed: the card already shows a violet "CONSULTATION ONLY &mdash; NOT FOR RELEASE" banner whenever that box is ticked, and the green Published stepper already hides itself for these items, so once they're included here they'll display correctly with zero other changes.</p>
+
+  <p><strong><code>HeaderGallery.Items</code>, full replacement (only the <code>"Historic"</code> branch's <code>Published = true</code> line changes, the other three branches are untouched):</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=// HeaderGallery.Items — full replacement
+Switch(
+    varSelectedState,
+
+    "Historic",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") &&
+                        'Planned Publish Date' < Today() &&
+                        (Published = true || 'External consultation required' = true) &&
+                        (varFilterOwner = false || Owner.Email = User().Email) &&
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Descending
+    ),
+
+    "Future",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' > DateAdd(Today(), 28, "Days") &&
+                        (varFilterOwner = false || Owner.Email = User().Email) &&
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Ascending
+    ),
+
+    "Current",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' >= Today() &&
+                        'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+                        (varFilterOwner = false || Owner.Email = User().Email) &&
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Ascending
+    ),
+
+    "UnapprovedHistoric",
+    Sort(
+        AddColumns(
+            GroupBy(
+                AddColumns(
+                    Filter(
+                        'Policy Proof Tracker',
+                        'Planned Publish Date' < Today() &&
+                        Published = false &&
+                        'External consultation required' = false &&
+                        (varFilterOwner = false || Owner.Email = User().Email) &&
+                        (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+                    ),
+                    PlannedDate, 'Planned Publish Date',
+                    ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
+                ),
+                PlannedDate,
+                GroupedItems
+            ),
+            ItemCount, CountRows(GroupedItems)
+        ),
+        PlannedDate,
+        SortOrder.Descending
+    )
+)</pre></div>
+
+  <p>Real items that are simply overdue and genuinely unpublished still correctly stay out of "Previously Published" and show up in Issues instead &mdash; this only widens the door for the specific case of a ticked Consultation Only item, nothing else changes.</p>
+
+  <div class="test">Test: find (or create) a Consultation Only item with a Planned Publish Date in the past. Confirm it now shows up under the "Previously Published" tab with the existing violet "CONSULTATION ONLY — NOT FOR RELEASE" banner, and confirm it still does not appear under Issues.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
