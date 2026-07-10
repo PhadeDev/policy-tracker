@@ -345,6 +345,7 @@ Reset(cmb_Owner1)</pre></div>
                         - lblThuRelative1:
                             Control: ModernText@1.0.0
                             Properties:
+                              AutoHeight: =true
                               Text: |-
                                 =With(
                                     {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
@@ -371,9 +372,7 @@ Reset(cmb_Owner1)</pre></div>
                         - lblThuDate1:
                             Control: Label@2.5.1
                             Properties:
-                              Text: |-
-                                =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy") &
-                                If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, "   ★ This week's release", "")
+                              Text: =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy")
                               Color: =RGBA(22, 33, 28, 1)
                               Font: =Font.'Open Sans'
                               FontWeight: =FontWeight.Bold
@@ -382,9 +381,41 @@ Reset(cmb_Owner1)</pre></div>
                               Width: =Parent.Width - 260
                               X: =86
                               Y: =10
+                        - pillThuNextTag1:
+                            Control: ModernText@1.0.0
+                            Properties:
+                              AutoHeight: =true
+                              Align: =Align.Center
+                              Color: =RGBA(80, 50, 0, 1)
+                              Fill: =RGBA(255, 186, 8, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Bold
+                              Size: =8
+                              Height: =18
+                              RadiusBottomLeft: =9
+                              RadiusBottomRight: =9
+                              RadiusTopLeft: =9
+                              RadiusTopRight: =9
+                              Text: |-
+                                =With(
+                                    {
+                                        _startOfWeek: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
+                                        _thu: First(colThursdayOptions).ThursdayDate
+                                    },
+                                    If(
+                                        _thu <= _startOfWeek + 6, "THIS WEEK'S RELEASE",
+                                        _thu <= _startOfWeek + 13, "NEXT WEEK'S RELEASE",
+                                        "NEXT RELEASE"
+                                    )
+                                )
+                              Visible: =ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate
+                              Width: =150
+                              X: =Parent.Width - 190
+                              Y: =10
                         - pillThuLoad1:
                             Control: ModernText@1.0.0
                             Properties:
+                              AutoHeight: =true
                               Text: =ThisItem.ItemCount & " item" & If(ThisItem.ItemCount <> 1, "s", "")
                               Color: |-
                                 =If(
@@ -424,6 +455,8 @@ Reset(cmb_Owner1)</pre></div>
   <div class="note">Every rounded control above is either <code>GroupContainer</code>, <code>ModernText</code>, or <code>Classic/Button</code> with <code>DisplayMode.View</code> &mdash; the three confirmed-working options for <code>Radius*</code> properties in this app. <code>recThuCardHit1</code> is a bare <code>Rectangle</code> with no radius at all, which is fine, it's an invisible click target fully covered by <code>conThuCard1</code>'s already-rounded corners.</div>
 
   <p>If your version of Studio doesn't accept a paste this deep in one go, paste <code>ThursdayPickerModal1</code> down through <code>galThursdayOptions1</code> first (stop before <code>Children:</code> under the gallery), confirm that lands, then select <code>galThursdayOptions1</code> in Tree view and paste just the <code>conThuCard1</code> block (from <code>- conThuCard1:</code> down) as its item template.</p>
+
+  <div class="note"><strong>Three fixes folded into the block above, versus what first shipped:</strong> <code>AutoHeight: =true</code> added to <code>lblThuRelative1</code> and <code>pillThuLoad1</code> (without it, <code>ModernText</code> shows a tiny internal scrollbar instead of sizing to fit). The "this week's release" tag is now its own gold pill control (<code>pillThuNextTag1</code>), matching the mockup, instead of plain text appended after the date. And its wording is now dynamic instead of hardcoded &mdash; it checks whether the nearest Thursday falls in the current Monday&ndash;Sunday week or the following one, so a Thursday that's still a week away correctly reads "Next week's release," and flips to "This week's release" on its own once the calendar week turns over, with "Next release" as a fallback for the (should never happen, since the nearest Thursday is always within 6 days) case where it's neither.</div>
 
   <h2 id="s5">5. Test everything</h2>
   <ul class="step-list">
