@@ -48,14 +48,15 @@
   <p>Full read-through of a fresh export of all 6 screens plus <code>OnStart</code> and <code>Formulas</code>. Confirmed first: every fix from every earlier guide this project (all 10 pre-launch items, the Owner fix, the Thursday picker, the Duplicate modal) is correctly present, nothing has regressed. What follows is everything new found on top of that.</p>
 
   <div class="progress-summary">
-    <div class="progress-card"><div class="count">3</div><div class="label">Actual fixes below</div></div>
+    <div class="progress-card"><div class="count">2</div><div class="label">Actual fixes below</div></div>
+    <div class="progress-card"><div class="count">1</div><div class="label">Checked live, false positive</div></div>
     <div class="progress-card"><div class="count">2</div><div class="label">Worth knowing, no action needed yet</div></div>
   </div>
 
   <div class="toc">
     <strong>Jump to:</strong>
     <a href="#f1"><span class="toc-num">1.</span> Three dead global variables</a>
-    <a href="#f2"><span class="toc-num">2.</span> Overview lightbox may have the FillPortions bug again</a>
+    <a href="#f2"><span class="toc-num">2.</span> Overview lightbox &mdash; checked live, not actually a bug</a>
     <a href="#f3"><span class="toc-num">3.</span> Historic's type chips aren't in the canonical order</a>
     <a href="#f4"><span class="toc-num">4.</span> Search delegation limit &mdash; awareness only</a>
     <a href="#f5"><span class="toc-num">5.</span> Historic vs Main link-loading &mdash; inconsistency, not a bug</a>
@@ -192,23 +193,9 @@ Set(
 
   <div class="test">Test: after pasting, do a full pass through the app (new entry, existing entry, search, duplicate, publish) and confirm nothing behaves differently. It shouldn't &mdash; these three were never read, only ever written.</div>
 
-  <h2 id="f2">2. Overview lightbox may have the FillPortions bug again <span class="sev sev-bug">WORTH CHECKING LIVE</span></h2>
-  <p><code>conLightboxBody1</code> (the item-detail popup on Overview, opens when you click a calendar card) is the exact same shape of bug that broke the Thursday picker modal twice this project: a container with an explicit <code>Height</code> nested directly under a <code>Variant: AutoLayout</code> parent, with no <code>FillPortions</code> stated. One extra red flag here &mdash; its <code>Height: =550</code> is identical to its own parent's (<code>conLightboxCard1</code>) <em>total</em> height, which is exactly what you'd see if this container is already silently ignoring its stated height and stretching to fill whatever's left over.</p>
-
-  <p>Its sibling above it, <code>conLightboxHero1</code>, already correctly has <code>FillPortions: =0</code> with a fixed 90px height. <code>conLightboxBody1</code> is everything below that &mdash; the summary, owner, and links content &mdash; which is exactly the kind of region that should be the one flexible piece filling the remaining space, the same role <code>galThursdayOptions1</code> plays inside the Thursday picker modal.</p>
-
-  <p><strong><code>conLightboxBody1</code>, these two properties, full replacement</strong> (the misleading fixed <code>Height</code> is replaced with <code>FillPortions: =1</code>, matching the pattern already proven elsewhere in this app):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>FillPortions: =1
-DropShadow: =DropShadow.None
-LayoutDirection: =LayoutDirection.Vertical
-LayoutGap: =10
-PaddingBottom: =20
-PaddingLeft: =10
-PaddingRight: =10
-PaddingTop: =16
-Width: =Parent.Width</pre></div>
-
-  <div class="test">Test: open Overview, click any item to open the lightbox, confirm the popup isn't oversized/empty-looking and the content (owner, summary, links) fills the space properly below the coloured header band. If it already looked fine before this change, no harm done &mdash; this just makes explicit what may already have been happening by accident.</div>
+  <h2 id="f2">2. Overview lightbox &mdash; checked live, not actually a bug <span class="sev sev-polish">FALSE POSITIVE, CONFIRMED RESOLVED</span></h2>
+  <p><strong>Checked directly in the live editor: this was a false alarm.</strong> <code>conLightboxBody1</code>'s properties in Studio already exactly match what this guide proposed, <code>FillPortions: =1</code> included &mdash; it just didn't show up in the exported YAML text. The lightbox itself works correctly and always has.</p>
+  <p>Worth understanding why, since it affects how much to trust a property being "missing" from an export generally: Studio's export apparently doesn't always write out every property verbatim, in this case a live, explicitly-set <code>FillPortions: =1</code> was silently dropped from the text. The reasoning in the original write-up (matching <code>galThursdayOptions1</code>'s proven pattern, the suspicious <code>Height: =550</code> matching the parent's total height) was sound given what the export showed, but the export itself wasn't a complete picture here. No change needed &mdash; leaving this section in place rather than deleting it, as a record that it was checked and cleared, not just skipped.</p>
 
   <h2 id="f3">3. Historic's type chips aren't in the canonical order <span class="sev sev-polish">MINOR CONSISTENCY</span></h2>
   <p><code>galTypeChips2</code>'s <code>Items</code> is just <code>colChoiceColors</code> directly, no <code>Sort</code> applied, so the chips render in whatever order <code>ForAll(Choices(...))</code> happens to return &mdash; not the MoD Policy&rarr;ACSO&rarr;Regulation&rarr;...&rarr;Internal Document order Main and NewsletterPack both use via <code>colChoiceColors.SortOrder</code>.</p>
