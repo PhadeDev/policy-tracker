@@ -342,121 +342,159 @@ Reset(cmb_Owner1)</pre></div>
                                 Set(varErrPublishDate, false);
                                 Set(varShowThursdayPicker, false);
                                 Reset(dpkPublishDate1)
-                        - lblThuRelative1:
-                            Control: ModernText@1.0.0
+                        - conThuCardContent1:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
                             Properties:
-                              AutoHeight: =true
-                              Text: |-
-                                =With(
-                                    {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
-                                    If(
-                                        _weeks = 0, "This week",
-                                        _weeks <= 8, _weeks & "wk ahead",
-                                        Round(_weeks / 4.345, 0) & "mo ahead"
-                                    )
-                                )
-                              Color: =RGBA(11, 74, 54, 1)
-                              Fill: =RGBA(227, 239, 232, 1)
-                              Font: =Font.'Open Sans'
-                              FontWeight: =FontWeight.Bold
-                              Size: =9
-                              Align: =Align.Center
-                              Height: =20
-                              Width: =60
-                              RadiusBottomLeft: =8
-                              RadiusBottomRight: =8
-                              RadiusTopLeft: =8
-                              RadiusTopRight: =8
-                              X: =12
-                              Y: =25
-                        - lblThuDate1:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy")
-                              Color: =RGBA(22, 33, 28, 1)
-                              Font: =Font.'Open Sans'
-                              FontWeight: =FontWeight.Bold
-                              Size: =10
-                              Height: =20
-                              Width: =Parent.Width - 260
-                              X: =86
-                              Y: =10
-                        - pillThuNextTag1:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              AutoHeight: =true
-                              Align: =Align.Center
-                              Color: =RGBA(80, 50, 0, 1)
-                              Fill: =RGBA(255, 186, 8, 1)
-                              Font: =Font.'Open Sans'
-                              FontWeight: =FontWeight.Bold
-                              Size: =8
-                              Height: =18
-                              RadiusBottomLeft: =9
-                              RadiusBottomRight: =9
-                              RadiusTopLeft: =9
-                              RadiusTopRight: =9
-                              Text: |-
-                                =With(
-                                    {
-                                        _startOfWeek: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
-                                        _thu: First(colThursdayOptions).ThursdayDate
-                                    },
-                                    If(
-                                        _thu <= _startOfWeek + 6, "THIS WEEK'S RELEASE",
-                                        _thu <= _startOfWeek + 13, "NEXT WEEK'S RELEASE",
-                                        "NEXT RELEASE"
-                                    )
-                                )
-                              Visible: =ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate
-                              Width: =150
-                              X: =Parent.Width - 190
-                              Y: =10
-                        - pillThuLoad1:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              AutoHeight: =true
-                              Text: =ThisItem.ItemCount & " item" & If(ThisItem.ItemCount <> 1, "s", "")
-                              Color: |-
-                                =If(
-                                    ThisItem.ItemCount >= 5, RGBA(163, 45, 45, 1),
-                                    ThisItem.ItemCount >= 3, RGBA(160, 100, 10, 1),
-                                    RGBA(46, 125, 89, 1)
-                                )
-                              Fill: |-
-                                =If(
-                                    ThisItem.ItemCount >= 5, RGBA(251, 230, 226, 1),
-                                    ThisItem.ItemCount >= 3, RGBA(250, 237, 216, 1),
-                                    RGBA(228, 243, 234, 1)
-                                )
-                              Font: =Font.'Open Sans'
-                              FontWeight: =FontWeight.Bold
-                              Size: =9
-                              Align: =Align.Center
-                              Height: =20
-                              Width: =90
-                              RadiusBottomLeft: =10
-                              RadiusBottomRight: =10
-                              RadiusTopLeft: =10
-                              RadiusTopRight: =10
-                              X: =86
-                              Y: =36
-                        - iconThuCheck1:
-                            Control: ModernIcon@1.1.1
-                            Properties:
-                              Icon: ="Checkmark"
-                              IconColor: =RGBA(11, 74, 54, 1)
-                              Visible: =ThisItem.ThursdayDate = varPlannedPublishDate
-                              Height: =18
-                              Width: =18
-                              X: =Parent.Width - 30
-                              Y: =26</pre></div>
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutGap: =12
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              Width: =Parent.Width
+                              Height: =Parent.Height
+                              X: =0
+                              Y: =0
+                            Children:
+                              - conThuChip1:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    FillPortions: =0
+                                    Fill: =If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(255, 186, 8, 1), RGBA(227, 239, 232, 1))
+                                    Height: =50
+                                    Width: =56
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                  Children:
+                                    - lblThuChipBig1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Text: |-
+                                            =With(
+                                                {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
+                                                If(
+                                                    _weeks = 0, "This",
+                                                    _weeks <= 8, _weeks & "wk",
+                                                    Round(_weeks / 4.345, 0) & "mo"
+                                                )
+                                            )
+                                          Color: =If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(80, 50, 0, 1), RGBA(11, 74, 54, 1))
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Align: =Align.Center
+                                          Size: =13
+                                          Height: =24
+                                          Width: =Parent.Width
+                                          Y: =6
+                                    - lblThuChipSmall1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Text: =If(DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 7, "week", "ahead")
+                                          Color: =If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(80, 50, 0, 1), RGBA(11, 74, 54, 1))
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Align: =Align.Center
+                                          Size: =7
+                                          Height: =14
+                                          Width: =Parent.Width
+                                          Y: =30
+                              - conThuTextCol1:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    FillPortions: =1
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =2
+                                    Height: =Parent.Height
+                                  Children:
+                                    - pillThuNextTag1:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          FillPortions: =0
+                                          AutoHeight: =true
+                                          Align: =Align.Center
+                                          Color: =RGBA(80, 50, 0, 1)
+                                          Fill: =RGBA(255, 186, 8, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Size: =8
+                                          Height: =18
+                                          RadiusBottomLeft: =9
+                                          RadiusBottomRight: =9
+                                          RadiusTopLeft: =9
+                                          RadiusTopRight: =9
+                                          Text: |-
+                                            =With(
+                                                {
+                                                    _startOfWeek: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
+                                                    _thu: First(colThursdayOptions).ThursdayDate
+                                                },
+                                                If(
+                                                    _thu <= _startOfWeek + 6, "THIS WEEK'S RELEASE",
+                                                    _thu <= _startOfWeek + 13, "NEXT WEEK'S RELEASE",
+                                                    "NEXT RELEASE"
+                                                )
+                                            )
+                                          Visible: =ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate
+                                          Width: =160
+                                    - lblThuDate1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          FillPortions: =0
+                                          Text: =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy")
+                                          Color: =RGBA(22, 33, 28, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Size: =10
+                                          Height: =20
+                              - pillThuLoad1:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    FillPortions: =0
+                                    AutoHeight: =true
+                                    Text: =ThisItem.ItemCount & " item" & If(ThisItem.ItemCount <> 1, "s", "")
+                                    Color: |-
+                                      =If(
+                                          ThisItem.ItemCount >= 5, RGBA(163, 45, 45, 1),
+                                          ThisItem.ItemCount >= 3, RGBA(160, 100, 10, 1),
+                                          RGBA(46, 125, 89, 1)
+                                      )
+                                    Fill: |-
+                                      =If(
+                                          ThisItem.ItemCount >= 5, RGBA(251, 230, 226, 1),
+                                          ThisItem.ItemCount >= 3, RGBA(250, 237, 216, 1),
+                                          RGBA(228, 243, 234, 1)
+                                      )
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Size: =9
+                                    Align: =Align.Center
+                                    Height: =20
+                                    Width: =88
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                              - iconThuCheck1:
+                                  Control: ModernIcon@1.1.1
+                                  Properties:
+                                    FillPortions: =0
+                                    Icon: ="Checkmark"
+                                    IconColor: =RGBA(11, 74, 54, 1)
+                                    Visible: =ThisItem.ThursdayDate = varPlannedPublishDate
+                                    Height: =18
+                                    Width: =18</pre></div>
 
   <div class="note">Every rounded control above is either <code>GroupContainer</code>, <code>ModernText</code>, or <code>Classic/Button</code> with <code>DisplayMode.View</code> &mdash; the three confirmed-working options for <code>Radius*</code> properties in this app. <code>recThuCardHit1</code> is a bare <code>Rectangle</code> with no radius at all, which is fine, it's an invisible click target fully covered by <code>conThuCard1</code>'s already-rounded corners.</div>
 
   <p>If your version of Studio doesn't accept a paste this deep in one go, paste <code>ThursdayPickerModal1</code> down through <code>galThursdayOptions1</code> first (stop before <code>Children:</code> under the gallery), confirm that lands, then select <code>galThursdayOptions1</code> in Tree view and paste just the <code>conThuCard1</code> block (from <code>- conThuCard1:</code> down) as its item template.</p>
 
-  <div class="note"><strong>Three fixes folded into the block above, versus what first shipped:</strong> <code>AutoHeight: =true</code> added to <code>lblThuRelative1</code> and <code>pillThuLoad1</code> (without it, <code>ModernText</code> shows a tiny internal scrollbar instead of sizing to fit). The "this week's release" tag is now its own gold pill control (<code>pillThuNextTag1</code>), matching the mockup, instead of plain text appended after the date. And its wording is now dynamic instead of hardcoded &mdash; it checks whether the nearest Thursday falls in the current Monday&ndash;Sunday week or the following one, so a Thursday that's still a week away correctly reads "Next week's release," and flips to "This week's release" on its own once the calendar week turns over, with "Next release" as a fallback for the (should never happen, since the nearest Thursday is always within 6 days) case where it's neither.</div>
+  <div class="note"><strong>Card internals rebuilt, versus what first shipped:</strong> the date text and the item-count pill were both hand-positioned at the same X with different Y, which is why they rendered stacked/overlapping instead of side by side. Rather than guess more pixel offsets, the card's visible content is now a real layout row instead of freehand positions: <code>conThuCardContent1</code> (a horizontal <code>AutoLayout</code> container, sized to exactly cover the card) holds, left to right, <code>conThuChip1</code> (the relative-time chip, fixed width), <code>conThuTextCol1</code> (the "next release" tag + date, <code>FillPortions: =1</code> so it takes whatever width is left over regardless of actual card width, no more manual width math), <code>pillThuLoad1</code>, then <code>iconThuCheck1</code> &mdash; each fixed-width sibling explicitly <code>FillPortions: =0</code>. <code>recThuCardHit1</code> stays a separate, absolutely-positioned invisible click target underneath, since a click-through rectangle can't itself be an AutoLayout flow item.</p>
+  <p>The relative-time chip (<code>conThuChip1</code>) is also now the two-line stacked look from the mockup &mdash; a big bold top line (<code>lblThuChipBig1</code>, e.g. "3wk") and a small caption underneath (<code>lblThuChipSmall1</code>, "ahead", or "week" for the nearest Thursday) &mdash; instead of one small line of combined text. It's the one place still using a couple of manual <code>Y</code> offsets, but only to stack two lines inside a small fixed 56&times;50 box, not to lay out the whole card.</p>
+  <p>Also folded in: <code>AutoHeight: =true</code> on every <code>ModernText</code> pill (without it, they show a tiny internal scrollbar instead of sizing to fit), and the gold "next release" tag is dynamic &mdash; checks whether the nearest Thursday falls in the current Monday&ndash;Sunday week or the following one, so it correctly reads "Next week's release" when that's true and flips to "This week's release" on its own once the calendar week turns over.</div>
 
   <h2 id="s5">5. Test everything</h2>
   <ul class="step-list">
