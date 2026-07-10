@@ -368,11 +368,17 @@ Reset(cmb_Owner1)</pre></div>
                                         Properties:
                                           Text: |-
                                             =With(
-                                                {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
-                                                If(
-                                                    _weeks = 0, "This",
-                                                    _weeks <= 8, _weeks & "wk",
-                                                    Round(_weeks / 4.345, 0) & "mo"
+                                                {
+                                                    _thisWeekStart: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
+                                                    _thuWeekStart: DateAdd(ThisItem.ThursdayDate, -(Weekday(ThisItem.ThursdayDate, StartOfWeek.Monday) - 1), "Days")
+                                                },
+                                                With(
+                                                    {_weeks: DateDiff(_thisWeekStart, _thuWeekStart, "Days") / 7},
+                                                    If(
+                                                        _weeks = 0, "This",
+                                                        _weeks <= 8, _weeks & "wk",
+                                                        Round(_weeks / 4.345, 0) & "mo"
+                                                    )
                                                 )
                                             )
                                           Color: =If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(80, 50, 0, 1), RGBA(11, 74, 54, 1))
@@ -386,7 +392,14 @@ Reset(cmb_Owner1)</pre></div>
                                     - lblThuChipSmall1:
                                         Control: Label@2.5.1
                                         Properties:
-                                          Text: =If(DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 7, "week", "ahead")
+                                          Text: |-
+                                            =With(
+                                                {
+                                                    _thisWeekStart: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
+                                                    _thuWeekStart: DateAdd(ThisItem.ThursdayDate, -(Weekday(ThisItem.ThursdayDate, StartOfWeek.Monday) - 1), "Days")
+                                                },
+                                                If(DateDiff(_thisWeekStart, _thuWeekStart, "Days") = 0, "week", "ahead")
+                                            )
                                           Color: =If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(80, 50, 0, 1), RGBA(11, 74, 54, 1))
                                           Font: =Font.'Open Sans'
                                           FontWeight: =FontWeight.Bold
@@ -786,11 +799,17 @@ Reset(cmb_Owner1)</pre></div>
                                           Height: =24
                                           Text: |-
                                             =With(
-                                                {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
-                                                If(
-                                                    _weeks = 0, "This",
-                                                    _weeks <= 8, _weeks & "wk",
-                                                    Round(_weeks / 4.345, 0) & "mo"
+                                                {
+                                                    _thisWeekStart: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
+                                                    _thuWeekStart: DateAdd(ThisItem.ThursdayDate, -(Weekday(ThisItem.ThursdayDate, StartOfWeek.Monday) - 1), "Days")
+                                                },
+                                                With(
+                                                    {_weeks: DateDiff(_thisWeekStart, _thuWeekStart, "Days") / 7},
+                                                    If(
+                                                        _weeks = 0, "This",
+                                                        _weeks <= 8, _weeks & "wk",
+                                                        Round(_weeks / 4.345, 0) & "mo"
+                                                    )
                                                 )
                                             )
                                           Width: =Parent.Width
@@ -804,7 +823,14 @@ Reset(cmb_Owner1)</pre></div>
                                           FontWeight: =FontWeight.Bold
                                           Height: =14
                                           Size: =7
-                                          Text: =If(DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 7, "week", "ahead")
+                                          Text: |-
+                                            =With(
+                                                {
+                                                    _thisWeekStart: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
+                                                    _thuWeekStart: DateAdd(ThisItem.ThursdayDate, -(Weekday(ThisItem.ThursdayDate, StartOfWeek.Monday) - 1), "Days")
+                                                },
+                                                If(DateDiff(_thisWeekStart, _thuWeekStart, "Days") = 0, "week", "ahead")
+                                            )
                                           Width: =Parent.Width
                                           Y: =30
                               - conDupTextCol1:
