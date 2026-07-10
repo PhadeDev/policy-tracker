@@ -44,6 +44,7 @@
     <a href="#s1"><span class="toc-num">1.</span> Add the popover's open/close variable</a>
     <a href="#s2"><span class="toc-num">2.</span> Replace the chip row with the trigger button</a>
     <a href="#s3"><span class="toc-num">3.</span> Build the popover</a>
+    <a href="#s3b"><span class="toc-num">3b.</span> Hide empty types, never show a blank screen</a>
     <a href="#s4"><span class="toc-num">4.</span> Test everything</a>
   </div>
 
@@ -331,13 +332,60 @@
 
   <div class="note">Every control above with a fixed <code>Height</code>/<code>Width</code> under an <code>AutoLayout</code> parent has <code>FillPortions</code> stated explicitly. Radius only ever appears on <code>GroupContainer</code>, <code>ModernText</code>/<code>ModernButton</code>, or <code>Classic/Button</code> with <code>DisplayMode.View</code> &mdash; including the small rounded colour swatch (<code>recTypeFilterSwatch1</code>), which uses the button-as-shape pattern rather than a plain <code>Rectangle</code>, since Rectangle doesn't support <code>Radius*</code> at all.</div>
 
+  <h2 id="s3b">3b. Hide empty types, and never show a blank screen</h2>
+  <p>Found from live testing: clicking a type with zero items for the current tab left the main list completely blank, no explanation. Two changes, both small.</p>
+
+  <p><strong>First: don't list a type in the popover at all if it has zero items for whatever tab is currently selected.</strong> <code>galTypeFilterList1.Items</code>, full replacement (adds one <code>Filter()</code> wrapper around the existing formula, nothing else changes):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Filter(
+    AddColumns(
+        colChoiceColors,
+        TypeCount,
+        CountRows(Filter(colTypeCounts, 'Document Type'.Value = ChoiceValue))
+    ),
+    TypeCount > 0
+)</pre></div>
+
+  <p><strong>Second, as a safety net: add a "no items match" message to the main list itself</strong>, for the case this doesn't fully cover on its own &mdash; pick a type while it has items on one tab, then switch to a different tab where that same type has none. The filter stays active across tabs, so you'd land back on a blank screen a different way. This message catches that regardless of how you got to zero results.</p>
+
+  <p>Select <code>GalleryContainer</code> in Tree view (the container that holds <code>HeaderGallery</code>), paste this in as a new child, alongside <code>HeaderGallery</code>:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- lblNoFilterResults1:
+    Control: Label@2.5.1
+    Properties:
+      Align: =Align.Center
+      Color: =RGBA(112, 116, 134, 1)
+      Font: =Font.'Open Sans'
+      Height: =120
+      Size: =11
+      Text: |-
+        =If(
+            IsBlank(varTypeFilter) || varTypeFilter = "",
+            "No items to show here.",
+            "No " & With(
+                {FullLabel: Mid(varTypeFilter, Find(" ", varTypeFilter) + 1)},
+                Switch(
+                    FullLabel,
+                    "Newsletter Item", "Newsletter",
+                    "Internal Document", "Internal",
+                    FullLabel
+                )
+            ) & " items on this tab. Try a different tab, or clear the filter."
+        )
+      VerticalAlign: =VerticalAlign.Middle
+      Visible: =CountRows(HeaderGallery.AllItems) = 0
+      Width: =Parent.Width
+      Y: =40</pre></div>
+
+  <p>Message is specific about which filter is causing the empty state, and suggests the fix, rather than just saying "nothing found." Also fires for the general case (no filter active, but the tab itself is genuinely empty, e.g. a quiet "Issues" tab with 0 items) with a plainer message, not just the type-filter case.</p>
+
+  <div class="test">Test: pick a type on a tab where you know it currently has zero items (or wait for the popover fix above to make that impossible, and instead switch tabs after picking one that has items elsewhere). Confirm you now see an explanatory message instead of a blank screen, and it correctly names the type that's filtered.</div>
+
   <h2 id="s4">4. Test everything</h2>
   <ul>
-    <li>Click the new button, confirm the popover opens showing "All types" plus all 10 real doc types with live counts matching what the old chip row used to show.</li>
+    <li>Click the new button, confirm the popover opens showing "All types" plus only the doc types that actually have items on the current tab &mdash; a type with zero items for this tab shouldn't appear in the list at all.</li>
     <li>Pick a type. Confirm the popover closes, the button's label updates to that type's short name, and the item list on Main filters exactly as it did before.</li>
     <li>Reopen the popover, confirm the type you picked shows the green highlight and checkmark, and "All types" no longer does.</li>
     <li>Click "All types" from inside the popover, confirm it clears the filter and the button goes back to reading "All types."</li>
-    <li>Switch dashboard tabs (Current/Future/Issues/Previously Published) with a type filter active, confirm the count next to each type in the popover updates to match the newly selected tab, same as the old chips did.</li>
+    <li>Switch dashboard tabs (Current/Future/Issues/Previously Published) with a type filter active, confirm the count next to each type in the popover updates to match the newly selected tab, same as the old chips did, and confirm the popover's own list of visible types changes to match too.</li>
     <li>Confirm the close (X) button in the popover header works without changing the current filter.</li>
   </ul>
 
