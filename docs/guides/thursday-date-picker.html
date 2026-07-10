@@ -315,11 +315,18 @@ Reset(cmb_Owner1)</pre></div>
                           )
                         BorderColor: |-
                           =If(
+                              varSelectPolicy = "Empty" && DateDiff(Today(), ThisItem.ThursdayDate, "Days") >= 0 && DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 10 && !ckbHighPriority1.Value && !ckbExtConsult1.Value, RGBA(163, 45, 45, 1),
                               ThisItem.ThursdayDate = varPlannedPublishDate, RGBA(11, 74, 54, 1),
                               ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(255, 186, 8, 1),
                               RGBA(223, 229, 224, 1)
                           )
-                        BorderThickness: =If(ThisItem.ThursdayDate = varPlannedPublishDate || ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, 2, 1)
+                        BorderThickness: |-
+                          =If(
+                              varSelectPolicy = "Empty" && DateDiff(Today(), ThisItem.ThursdayDate, "Days") >= 0 && DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 10 && !ckbHighPriority1.Value && !ckbExtConsult1.Value, 2,
+                              ThisItem.ThursdayDate = varPlannedPublishDate, 2,
+                              ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, 2,
+                              1
+                          )
                         DropShadow: =DropShadow.None
                         Height: =70
                         Width: =Parent.TemplateWidth - 8
@@ -440,6 +447,30 @@ Reset(cmb_Owner1)</pre></div>
                                             )
                                           Visible: =ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate
                                           Width: =160
+                                    - pillThuTooSoonTag1:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          FillPortions: =0
+                                          AutoHeight: =true
+                                          Align: =Align.Center
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: =RGBA(163, 45, 45, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Size: =8
+                                          Height: =18
+                                          RadiusBottomLeft: =9
+                                          RadiusBottomRight: =9
+                                          RadiusTopLeft: =9
+                                          RadiusTopRight: =9
+                                          Text: ="TOO SOON — HIGH PRIORITY ONLY"
+                                          Visible: |-
+                                            =varSelectPolicy = "Empty" &&
+                                            DateDiff(Today(), ThisItem.ThursdayDate, "Days") >= 0 &&
+                                            DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 10 &&
+                                            !ckbHighPriority1.Value &&
+                                            !ckbExtConsult1.Value
+                                          Width: =220
                                     - lblThuDate1:
                                         Control: Label@2.5.1
                                         Properties:
@@ -505,7 +536,12 @@ Reset(cmb_Owner1)</pre></div>
     <li>Click Save. Confirm the record actually saves with the newly picked date &mdash; this proves the hidden <code>dpkPublishDate1</code> is still correctly feeding the real save formula.</li>
     <li>Reopen Main, confirm the 10-day warning banner and any other date-based behaviour on this item still work exactly as before &mdash; nothing downstream should have changed.</li>
     <li>Pick a Thursday you know already has several items scheduled, confirm its pill shows the right colour (green under 3, amber 3&ndash;4, red 5+).</li>
+    <li>On a brand-new (unsaved) entry, open the picker. Confirm any Thursday within the next 10 days shows a red border and a "TOO SOON &mdash; HIGH PRIORITY ONLY" tag. Pick one anyway, confirm it's still selectable (not blocked), close the picker, confirm the existing yellow warning banner appears and Save is blocked exactly as before.</li>
+    <li>Still on that same red-zone date, tick <code>ckbHighPriority1</code> (High Priority), reopen the picker, confirm the red border and tag are now gone on that row and the yellow banner has cleared &mdash; the picker's warning always agrees with the real banner because it checks the identical condition, not a separate copy of the rule.</li>
+    <li>Open an existing item whose date happens to be within 10 days of today. Confirm the picker does <strong>not</strong> show it as red-zone &mdash; the 10-day rule only ever applies to new, unsaved entries.</li>
   </ul>
+
+  <div class="note"><strong>Design note on the 10-day rule inside the picker:</strong> deliberately doesn't block clicking a red-zone Thursday, and deliberately doesn't add a second "mark as urgent" checkbox inside the modal. The real gate already exists and works &mdash; the yellow banner that replaces the top bar and blocks Save until <code>ckbHighPriority1</code> is ticked. The picker's red border/tag use the exact same condition that banner already checks, so they can never disagree with each other; a second override control inside the modal would just be a second copy of that rule to keep in sync, which is the same class of drift that caused the Owner bug earlier in this project.</div>
 
 </main>
 <script>
