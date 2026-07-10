@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Pass QA, Everything Found</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
+    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    h3 { margin: 26px 0 10px; color: #f2f4f8; font-size: 1.05rem; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .88rem; }
+    th, td { border: 1px solid #2b3546; padding: 8px 10px; vertical-align: top; }
+    th { background: #182131; color: #b7e4c7; text-align: left; }
+    tr:nth-child(even) td { background: #121926; }
+    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
+    .sev { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+    .sev-critical { background: #3a1414; color: #ff9f9f; border: 1px solid #6a2424; }
+    .sev-bug { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
+    .sev-polish { background: #1a2a3a; color: #8dc3ff; border: 1px solid #2a4a6a; }
+    .sev-info { background: #1f1a3a; color: #c3b3ff; border: 1px solid #3a2a6a; }
+    .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+    .toc a { display: block; padding: 4px 0; font-size: .9rem; }
+    .toc .toc-num { color: #8a94a6; display: inline-block; width: 22px; }
+    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+    .progress-summary { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 30px; }
+    .progress-card { flex: 1; min-width: 150px; background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 14px 16px; }
+    .progress-card .count { font-size: 1.6rem; font-weight: 700; color: #b7e4c7; }
+    .progress-card .label { font-size: .8rem; color: #8a94a6; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Final Pass QA, Everything Found</h1>
+  <p>Full read-through of a fresh export of all 6 screens plus <code>OnStart</code> and <code>Formulas</code>. Confirmed first: every fix from every earlier guide this project (all 10 pre-launch items, the Owner fix, the Thursday picker, the Duplicate modal) is correctly present, nothing has regressed. What follows is everything new found on top of that.</p>
+
+  <div class="progress-summary">
+    <div class="progress-card"><div class="count">3</div><div class="label">Actual fixes below</div></div>
+    <div class="progress-card"><div class="count">2</div><div class="label">Worth knowing, no action needed yet</div></div>
+  </div>
+
+  <div class="toc">
+    <strong>Jump to:</strong>
+    <a href="#f1"><span class="toc-num">1.</span> Three dead global variables</a>
+    <a href="#f2"><span class="toc-num">2.</span> Overview lightbox may have the FillPortions bug again</a>
+    <a href="#f3"><span class="toc-num">3.</span> Historic's type chips aren't in the canonical order</a>
+    <a href="#f4"><span class="toc-num">4.</span> Search delegation limit &mdash; awareness only</a>
+    <a href="#f5"><span class="toc-num">5.</span> Historic vs Main link-loading &mdash; inconsistency, not a bug</a>
+  </div>
+
+  <h2 id="f1">1. Three dead global variables <span class="sev sev-polish">CLEANUP, NO RISK</span></h2>
+  <p><code>varSelectedDate</code>, <code>varSaveMode</code>, and <code>varFormSaved</code> are all set once in <code>OnStart</code> and never read anywhere in any of the 6 screens &mdash; confirmed by searching every file, not just these three. Safe to delete, nothing references them.</p>
+
+  <p><strong><code>App.OnStart</code>, full replacement</strong> (only those three <code>Set()</code> calls and their now-orphaned <code>// Selection variables</code> / <code>// Date type</code> comments are removed, everything else identical):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(
+    varSelectedState,
+    "Current"
+);
+Set(varTypeFilter, "");
+Set(varFilterOwner, false);
+ClearCollect(
+     colBossButtonUsers,
+     {Email: "allan.hamilton775@mod.gov.uk"},
+     {Email: "dan.smith391@mod.gov.uk"}
+ );
+
+Set(
+    varShowSearch,
+    false
+);
+Set(
+    varSelectPolicy,
+    "Empty"
+);
+Set(
+    varHistoricLimit,
+    30
+);
+Set(varSelectedItem, Blank());
+Set(varSelectedLink, Blank());
+Set(
+    varShowDuplicateModal1,
+    false
+);
+Set(varSaving, false);
+Set(varUnsavedChanges, false);
+Set(varParentSaved, false);
+Set(varLoadingLinks, false);
+Set(varDeletingItem, false);
+Set(
+    varDuplicating,
+    false
+);
+// Boolean flags (global)
+Set(
+    varShowLinkModal,
+    false
+);
+ClearCollect(
+    colChoiceColors,
+    ForAll(
+        Choices('Policy Proof Tracker'.'Document Type'),
+        {
+            ChoiceValue: Value,
+            ColorCode: Switch(
+                Value,
+                "📄 MoD Policy", RGBA(28, 32, 48, 1),
+                "📗 Manual", RGBA(0, 130, 60, 1),
+                "📄 CFI", RGBA(0, 100, 200, 1),
+                "📄 CFSO", RGBA(130, 0, 180, 1),
+                "📕 SOI", RGBA(190, 30, 30, 1),
+                "📖 Regulation", RGBA(0, 150, 150, 1),
+                "📄 CBN", RGBA(210, 100, 0, 1),
+                "📄 ACSO", RGBA(0, 60, 130, 1),
+                "📑 Internal Document", RGBA(90, 90, 110, 1),
+                "📜 Newsletter Item", RGBA(160, 120, 0, 1),
+                RGBA(150, 150, 150, 1)
+            ),
+            ColorCodeFaded: Switch(
+                Value,
+                "📄 MoD Policy", RGBA(28, 32, 48, 0.1),
+                "📗 Manual", RGBA(0, 130, 60, 0.1),
+                "📄 CFI", RGBA(0, 100, 200, 0.1),
+                "📄 CFSO", RGBA(130, 0, 180, 0.1),
+                "📕 SOI", RGBA(190, 30, 30, 0.1),
+                "📖 Regulation", RGBA(0, 150, 150, 0.1),
+                "📄 CBN", RGBA(210, 100, 0, 0.1),
+                "📄 ACSO", RGBA(0, 60, 130, 0.1),
+                "📑 Internal Document", RGBA(90, 90, 110, 0.1),
+                "📜 Newsletter Item", RGBA(160, 120, 0, 0.1),
+                RGBA(150, 150, 150, 0.1)
+            ),
+            SortOrder: Switch(
+                Value,
+                "📄 MoD Policy", 1,
+                "📄 ACSO", 2,
+                "📖 Regulation", 3,
+                "📄 CFSO", 4,
+                "📄 CFI", 5,
+                "📄 CBN", 6,
+                "📗 Manual", 7,
+                "📜 Newsletter Item", 8,
+                "📕 SOI", 9,
+                "📑 Internal Document", 10,
+                99
+            )
+        }
+    )
+);
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' >= Today() &&
+        'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+// Theme
+Set(
+    AppTheme,
+    {
+        palette: {
+            themePrimary: RGBA(11, 74, 54, 1),
+            themeSecondary: RGBA(9, 60, 44, 1),
+            themeTertiary: RGBA(7, 48, 36, 1),
+            neutralLight: RGBA(237, 237, 237, 1),
+            neutralDark: RGBA(50, 49, 48, 1),
+            white: RGBA(255, 255, 255, 1)
+        },
+        semanticColors: {
+            buttonBackground: RGBA(11, 74, 54, 1),
+            buttonBackgroundHovered: RGBA(9, 60, 44, 1),
+            buttonBackgroundPressed: RGBA(7, 48, 36, 1),
+            buttonText: RGBA(255, 255, 255, 1)
+        }
+    }
+);</pre></div>
+
+  <div class="test">Test: after pasting, do a full pass through the app (new entry, existing entry, search, duplicate, publish) and confirm nothing behaves differently. It shouldn't &mdash; these three were never read, only ever written.</div>
+
+  <h2 id="f2">2. Overview lightbox may have the FillPortions bug again <span class="sev sev-bug">WORTH CHECKING LIVE</span></h2>
+  <p><code>conLightboxBody1</code> (the item-detail popup on Overview, opens when you click a calendar card) is the exact same shape of bug that broke the Thursday picker modal twice this project: a container with an explicit <code>Height</code> nested directly under a <code>Variant: AutoLayout</code> parent, with no <code>FillPortions</code> stated. One extra red flag here &mdash; its <code>Height: =550</code> is identical to its own parent's (<code>conLightboxCard1</code>) <em>total</em> height, which is exactly what you'd see if this container is already silently ignoring its stated height and stretching to fill whatever's left over.</p>
+
+  <p>Its sibling above it, <code>conLightboxHero1</code>, already correctly has <code>FillPortions: =0</code> with a fixed 90px height. <code>conLightboxBody1</code> is everything below that &mdash; the summary, owner, and links content &mdash; which is exactly the kind of region that should be the one flexible piece filling the remaining space, the same role <code>galThursdayOptions1</code> plays inside the Thursday picker modal.</p>
+
+  <p><strong><code>conLightboxBody1</code>, these two properties, full replacement</strong> (the misleading fixed <code>Height</code> is replaced with <code>FillPortions: =1</code>, matching the pattern already proven elsewhere in this app):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>FillPortions: =1
+DropShadow: =DropShadow.None
+LayoutDirection: =LayoutDirection.Vertical
+LayoutGap: =10
+PaddingBottom: =20
+PaddingLeft: =10
+PaddingRight: =10
+PaddingTop: =16
+Width: =Parent.Width</pre></div>
+
+  <div class="test">Test: open Overview, click any item to open the lightbox, confirm the popup isn't oversized/empty-looking and the content (owner, summary, links) fills the space properly below the coloured header band. If it already looked fine before this change, no harm done &mdash; this just makes explicit what may already have been happening by accident.</div>
+
+  <h2 id="f3">3. Historic's type chips aren't in the canonical order <span class="sev sev-polish">MINOR CONSISTENCY</span></h2>
+  <p><code>galTypeChips2</code>'s <code>Items</code> is just <code>colChoiceColors</code> directly, no <code>Sort</code> applied, so the chips render in whatever order <code>ForAll(Choices(...))</code> happens to return &mdash; not the MoD Policy&rarr;ACSO&rarr;Regulation&rarr;...&rarr;Internal Document order Main and NewsletterPack both use via <code>colChoiceColors.SortOrder</code>.</p>
+
+  <p><strong><code>galTypeChips2.Items</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Sort(colChoiceColors, SortOrder, SortOrder.Ascending)</pre></div>
+
+  <div class="test">Test: open Historic, confirm the type filter chips now read left to right in the same order as Main's chips: MoD Policy, ACSO, Regulation, CFSO, CFI, CBN, Manual, Newsletter Item, SOI, Internal Document.</div>
+
+  <h2 id="f4">4. Search delegation limit &mdash; awareness only <span class="sev sev-info">NOT URGENT</span></h2>
+  <p>Both Historic's search (<code>lblHistoricCount2</code>, <code>galHistoricMonths2</code>) and Main's search overlay filter with <code>Lower(x) in Lower(Title)</code>, which SharePoint can't delegate. In practice this means the search only actually searches the first 500&ndash;2000 rows Power Apps has loaded locally (exact number depends on the app's delegation setting), not the whole table.</p>
+  <p>Not a problem at your current table size. Worth remembering specifically for Historic, since it's an archive that only ever grows &mdash; if it ever gets large enough to hit that limit, older items could silently stop showing up in search results with no error or warning. No fix proposed here since it's not causing a real problem yet; flagging so it's a known, not a surprise, if it ever comes up.</p>
+
+  <h2 id="f5">5. Historic vs Main link-loading &mdash; inconsistency, not a bug <span class="sev sev-info">FYI</span></h2>
+  <p>When you click an item on Main, the click handler calls <code>BuildLinksForSource</code> itself before navigating to <code>ViewItem</code>. When you click an item on Historic, it doesn't &mdash; it just clears <code>colLinks</code> and sets the loading flag, then lets <code>ViewItem.OnVisible</code>'s own fallback do the actual fetch.</p>
+  <p>Both work correctly. Historic's version is arguably the better one &mdash; Main's redundantly fetches the same links twice (once from the click handler, once from <code>ViewItem.OnVisible</code>), Historic's fetches once. Not proposing a fix, just flagging the inconsistency in case you want the two screens to match exactly &mdash; if so, the cheap fix would be trimming Main's click handlers to match Historic's leaner version, not the other way round.</p>
+
+  <div class="note"><strong>One more thing, not urgent, relevant later:</strong> roughly 50 properties across Main and ViewItem export as a bare <code>=</code> with nothing after it. Most are <code>LayoutMaxHeight</code>/<code>LayoutMaxWidth</code>, which is normal and harmless. A handful of <code>Text</code>/<code>OnSelect</code>/<code>Default</code> ones were checked individually and are all genuinely blank on purpose (icon-only buttons, an empty search box). None of this is an active bug &mdash; the app runs fine with them today. It matters for the renaming project specifically, since Studio's YAML importer needs an explicit <code>=""</code> rather than a bare <code>=</code> when pasting new screen YAML, confirmed in the Bible already. Something to normalise as part of that work, not something to fix today.</div>
+
+</main>
+<script>
+function copyBlock(btn) {
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) {
+      btn.classList.add('ok');
+      btn.textContent = 'Copied';
+    } else {
+      btn.classList.add('err');
+      btn.textContent = 'Select + Ctrl+C';
+    }
+    setTimeout(function () {
+      btn.classList.remove('ok', 'err');
+      btn.textContent = 'Copy';
+    }, 1600);
+  }
+
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  var legacyCopied = false;
+  try {
+    legacyCopied = document.execCommand('copy');
+  } catch (e) {
+    legacyCopied = false;
+  }
+
+  if (legacyCopied) {
+    showResult(true);
+    return;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () {
+      showResult(true);
+    }, function () {
+      showResult(false);
+    });
+  } else {
+    showResult(false);
+  }
+}
+</script>
+</body>
+</html>
