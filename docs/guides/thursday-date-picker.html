@@ -336,19 +336,6 @@ Reset(cmb_Owner1)</pre></div>
                         RadiusTopRight: =12
                         Y: =4
                       Children:
-                        - recThuCardHit1:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =RGBA(0, 0, 0, 0)
-                              Height: =Parent.Height
-                              Width: =Parent.Width
-                              HoverFill: =RGBA(0, 0, 0, 0.02)
-                              OnSelect: |-
-                                =Set(varPlannedPublishDate, ThisItem.ThursdayDate);
-                                Set(varUnsavedChanges, true);
-                                Set(varErrPublishDate, false);
-                                Set(varShowThursdayPicker, false);
-                                Reset(dpkPublishDate1)
                         - conThuCardContent1:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -446,7 +433,7 @@ Reset(cmb_Owner1)</pre></div>
                                                 )
                                             )
                                           Visible: =ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate
-                                          Width: =160
+                                          Width: =Parent.Width
                                     - pillThuTooSoonTag1:
                                         Control: ModernText@1.0.0
                                         Properties:
@@ -470,17 +457,18 @@ Reset(cmb_Owner1)</pre></div>
                                             DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 10 &&
                                             !ckbHighPriority1.Value &&
                                             !ckbExtConsult1.Value
-                                          Width: =220
+                                          Width: =Parent.Width
                                     - lblThuDate1:
                                         Control: Label@2.5.1
                                         Properties:
                                           FillPortions: =0
+                                          AutoHeight: =true
                                           Text: =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy")
                                           Color: =RGBA(22, 33, 28, 1)
                                           Font: =Font.'Open Sans'
                                           FontWeight: =FontWeight.Bold
                                           Size: =10
-                                          Height: =20
+                                          Width: =Parent.Width
                               - pillThuLoad1:
                                   Control: ModernText@1.0.0
                                   Properties:
@@ -517,7 +505,20 @@ Reset(cmb_Owner1)</pre></div>
                                     IconColor: =RGBA(11, 74, 54, 1)
                                     Visible: =ThisItem.ThursdayDate = varPlannedPublishDate
                                     Height: =18
-                                    Width: =18</pre></div>
+                                    Width: =18
+                        - recThuCardHit1:
+                            Control: Rectangle@2.3.0
+                            Properties:
+                              Fill: =RGBA(0, 0, 0, 0)
+                              Height: =Parent.Height
+                              Width: =Parent.Width
+                              HoverFill: =RGBA(0, 0, 0, 0.02)
+                              OnSelect: |-
+                                =Set(varPlannedPublishDate, ThisItem.ThursdayDate);
+                                Set(varUnsavedChanges, true);
+                                Set(varErrPublishDate, false);
+                                Set(varShowThursdayPicker, false);
+                                Reset(dpkPublishDate1)</pre></div>
 
   <div class="note">Every rounded control above is either <code>GroupContainer</code>, <code>ModernText</code>, or <code>Classic/Button</code> with <code>DisplayMode.View</code> &mdash; the three confirmed-working options for <code>Radius*</code> properties in this app. <code>recThuCardHit1</code> is a bare <code>Rectangle</code> with no radius at all, which is fine, it's an invisible click target fully covered by <code>conThuCard1</code>'s already-rounded corners.</div>
 
