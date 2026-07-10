@@ -173,207 +173,253 @@ Reset(cmb_Owner1)</pre></div>
   <p>The last two are now dead code &mdash; <code>lblThursdayNote1</code> warned about non-Thursday dates, <code>recErrPublishDate1</code> was a red error highlight behind the old picker. Neither can be reached once only Thursdays are selectable; the new trigger field gets its own error styling in the next step instead of deleting these outright.</p>
 
   <h2 id="s3">3. Build the new trigger field</h2>
-  <p>Three new controls, added as children in the same container that already holds <code>dpkPublishDate1</code> (select <code>dpkPublishDate1</code> in Tree view first so new controls Insert as siblings next to it, in the same parent).</p>
+  <p>In Tree view, click <code>dpkPublishDate1</code> once to select it (this makes new controls Insert as siblings next to it, in the same parent), then paste this whole block &mdash; it adds all three new controls in one go: <code>recPublishDateTrigger1</code>, <code>lblPublishDateTriggerText1</code>, <code>iconPublishDateChevron1</code>.</p>
 
-  <h3>3a. <code>recPublishDateTrigger1</code> &mdash; Insert &rarr; Shapes &rarr; Rectangle</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>BorderColor: =If(varErrPublishDate, RGBA(163, 45, 45, 1), RGBA(223, 229, 224, 1))
-BorderStyle: =BorderStyle.Solid
-BorderThickness: =1
-Fill: =RGBA(255, 255, 255, 1)
-HoverFill: =RGBA(244, 246, 243, 1)
-Height: =40
-RadiusBottomLeft: =8
-RadiusBottomRight: =8
-RadiusTopLeft: =8
-RadiusTopRight: =8
-Width: =Parent.Width
-Y: =22
-OnSelect: =Set(varShowThursdayPicker, true)</pre></div>
+  <div class="warn"><strong>Note on <code>recPublishDateTrigger1</code>:</strong> this needs rounded corners, and neither <code>Rectangle</code> nor classic <code>Label</code> support any <code>Radius*</code> property in this app &mdash; confirmed multiple times before, documented in the Bible's known-bad-patterns list. Using <code>Classic/Button@2.2.0</code> with <code>DisplayMode.View</code> instead, the confirmed-working substitute already used elsewhere in this app for exactly this need (the type-filter chips, the approval-stepper dots).</div>
 
-  <h3>3b. <code>lblPublishDateTriggerText1</code> &mdash; Insert &rarr; Text label (Modern Text), placed on top of the rectangle</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Color: =RGBA(22, 33, 28, 1)
-Font: =Font.'Open Sans'
-FontWeight: =FontWeight.Bold
-Size: =11
-Height: =40
-Width: =Parent.Width - 40
-X: =14
-Y: =22
-Text: =Text(varPlannedPublishDate, "dddd, d mmm yyyy")</pre></div>
-
-  <h3>3c. <code>iconPublishDateChevron1</code> &mdash; Insert &rarr; Icon (Modern Icon)</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Icon: ="ChevronDown"
-IconColor: =RGBA(91, 105, 97, 1)
-Height: =16
-Width: =16
-X: =Parent.Width - 30
-Y: =34</pre></div>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- recPublishDateTrigger1:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderColor: =If(varErrPublishDate, RGBA(163, 45, 45, 1), RGBA(223, 229, 224, 1))
+      BorderThickness: =1
+      Color: =RGBA(0, 0, 0, 0)
+      DisplayMode: =DisplayMode.View
+      Fill: =RGBA(255, 255, 255, 1)
+      Font: =Font.'Open Sans'
+      Height: =40
+      HoverBorderColor: =RGBA(11, 74, 54, 1)
+      HoverFill: =RGBA(244, 246, 243, 1)
+      OnSelect: =Set(varShowThursdayPicker, true)
+      PressedFill: =RGBA(244, 246, 243, 1)
+      RadiusBottomLeft: =8
+      RadiusBottomRight: =8
+      RadiusTopLeft: =8
+      RadiusTopRight: =8
+      Text: =""
+      Width: =Parent.Width
+      Y: =22
+- lblPublishDateTriggerText1:
+    Control: ModernText@1.0.0
+    Properties:
+      Color: =RGBA(22, 33, 28, 1)
+      Font: =Font.'Open Sans'
+      FontWeight: =FontWeight.Bold
+      Size: =11
+      Height: =40
+      Width: =Parent.Width - 40
+      X: =14
+      Y: =22
+      Text: =Text(varPlannedPublishDate, "dddd, d mmm yyyy")
+- iconPublishDateChevron1:
+    Control: ModernIcon@1.1.1
+    Properties:
+      Icon: ="ChevronDown"
+      IconColor: =RGBA(91, 105, 97, 1)
+      Height: =16
+      Width: =16
+      X: =Parent.Width - 30
+      Y: =34</pre></div>
 
   <div class="test">Test so far: click the new field, nothing should happen yet (the modal doesn't exist until step 4) &mdash; just confirm it visually replaces the old calendar and shows the current date correctly.</div>
 
   <h2 id="s4">4. Build the picker modal and card list</h2>
-  <p>One new top-level control, added as the very last child of the <code>ViewItem</code> screen (same level as <code>DeleteItemModal1</code>, added after it in Tree view so it renders on top of everything).</p>
+  <p>One new top-level control, containing everything else nested inside it &mdash; the modal shell, the header, the note, the gallery, and the card template all paste in as one tree. In Tree view, select the <code>ViewItem</code> screen itself (or right-click <code>DeleteItemModal1</code> and choose "Paste after" if your version of Studio supports it), so this lands as the very last child of the screen, above everything else in paint order.</p>
 
-  <h3>4a. <code>ThursdayPickerModal1</code> &mdash; Insert &rarr; Layout container (Group Container), dropped at screen root, dragged below <code>DeleteItemModal1</code> in Tree view</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Fill: =RGBA(53, 61, 63, 0.84)
-Height: =Parent.Height
-Width: =Parent.Width
-LayoutDirection: =LayoutDirection.Vertical
-LayoutAlignItems: =LayoutAlignItems.Center
-LayoutJustifyContent: =LayoutJustifyContent.Center
-Visible: =varShowThursdayPicker</pre></div>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- ThursdayPickerModal1:
+    Control: GroupContainer@1.5.0
+    Variant: AutoLayout
+    Properties:
+      Fill: =RGBA(53, 61, 63, 0.84)
+      Height: =Parent.Height
+      Width: =Parent.Width
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      Visible: =varShowThursdayPicker
+    Children:
+      - conThuModalCard1:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(244, 246, 243, 1)
+            Width: =420
+            Height: =560
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =4
+            DropShadow: =DropShadow.Regular
+            RadiusBottomLeft: =16
+            RadiusBottomRight: =16
+            RadiusTopLeft: =16
+            RadiusTopRight: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+          Children:
+            - conThuModalHeader1:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Height: =32
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  Width: =Parent.Width
+                Children:
+                  - lblThuModalTitle1:
+                      Control: ModernText@1.0.0
+                      Properties:
+                        Text: ="Pick a Thursday"
+                        Color: =RGBA(22, 33, 28, 1)
+                        Font: =Font.'Lato Black'
+                        FontWeight: =FontWeight.Bold
+                        Size: =16
+                  - btnThuModalClose1:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        Icon: ="Dismiss"
+                        Layout: =ButtonLayout.IconOnly
+                        Appearance: =ButtonAppearance.Subtle
+                        OnSelect: =Set(varShowThursdayPicker, false)
+            - lblThuModalNote1:
+                Control: Label@2.5.1
+                Properties:
+                  Text: ="Only Thursdays are shown — releases only go out on a Thursday."
+                  Color: =RGBA(91, 105, 97, 1)
+                  Font: =Font.'Open Sans'
+                  Size: =9
+                  Height: =16
+                  Width: =Parent.Width
+            - galThursdayOptions1:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  Items: =colThursdayOptions
+                  Height: =480
+                  Width: =Parent.Width
+                  TemplateSize: =78
+                Children:
+                  - conThuCard1:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        Fill: |-
+                          =If(
+                              ThisItem.ThursdayDate = varPlannedPublishDate, RGBA(227, 239, 232, 1),
+                              ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(255, 243, 214, 1),
+                              RGBA(255, 255, 255, 1)
+                          )
+                        BorderColor: |-
+                          =If(
+                              ThisItem.ThursdayDate = varPlannedPublishDate, RGBA(11, 74, 54, 1),
+                              ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(255, 186, 8, 1),
+                              RGBA(223, 229, 224, 1)
+                          )
+                        BorderThickness: =If(ThisItem.ThursdayDate = varPlannedPublishDate || ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, 2, 1)
+                        DropShadow: =DropShadow.None
+                        Height: =70
+                        Width: =Parent.TemplateWidth - 8
+                        RadiusBottomLeft: =12
+                        RadiusBottomRight: =12
+                        RadiusTopLeft: =12
+                        RadiusTopRight: =12
+                        Y: =4
+                      Children:
+                        - recThuCardHit1:
+                            Control: Rectangle@2.3.0
+                            Properties:
+                              Fill: =RGBA(0, 0, 0, 0)
+                              Height: =Parent.Height
+                              Width: =Parent.Width
+                              HoverFill: =RGBA(0, 0, 0, 0.02)
+                              OnSelect: |-
+                                =Set(varPlannedPublishDate, ThisItem.ThursdayDate);
+                                Set(varUnsavedChanges, true);
+                                Set(varErrPublishDate, false);
+                                Set(varShowThursdayPicker, false);
+                                Reset(dpkPublishDate1)
+                        - lblThuRelative1:
+                            Control: ModernText@1.0.0
+                            Properties:
+                              Text: |-
+                                =With(
+                                    {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
+                                    If(
+                                        _weeks = 0, "This week",
+                                        _weeks <= 8, _weeks & "wk ahead",
+                                        Round(_weeks / 4.345, 0) & "mo ahead"
+                                    )
+                                )
+                              Color: =RGBA(11, 74, 54, 1)
+                              Fill: =RGBA(227, 239, 232, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Bold
+                              Size: =9
+                              Align: =Align.Center
+                              Height: =20
+                              Width: =60
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              X: =12
+                              Y: =25
+                        - lblThuDate1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Text: |-
+                                =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy") &
+                                If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, "   ★ This week's release", "")
+                              Color: =RGBA(22, 33, 28, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Bold
+                              Size: =10
+                              Height: =20
+                              Width: =Parent.Width - 260
+                              X: =86
+                              Y: =10
+                        - pillThuLoad1:
+                            Control: ModernText@1.0.0
+                            Properties:
+                              Text: =ThisItem.ItemCount & " item" & If(ThisItem.ItemCount <> 1, "s", "")
+                              Color: |-
+                                =If(
+                                    ThisItem.ItemCount >= 5, RGBA(163, 45, 45, 1),
+                                    ThisItem.ItemCount >= 3, RGBA(160, 100, 10, 1),
+                                    RGBA(46, 125, 89, 1)
+                                )
+                              Fill: |-
+                                =If(
+                                    ThisItem.ItemCount >= 5, RGBA(251, 230, 226, 1),
+                                    ThisItem.ItemCount >= 3, RGBA(250, 237, 216, 1),
+                                    RGBA(228, 243, 234, 1)
+                                )
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Bold
+                              Size: =9
+                              Align: =Align.Center
+                              Height: =20
+                              Width: =90
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              X: =86
+                              Y: =36
+                        - iconThuCheck1:
+                            Control: ModernIcon@1.1.1
+                            Properties:
+                              Icon: ="Checkmark"
+                              IconColor: =RGBA(11, 74, 54, 1)
+                              Visible: =ThisItem.ThursdayDate = varPlannedPublishDate
+                              Height: =18
+                              Width: =18
+                              X: =Parent.Width - 30
+                              Y: =26</pre></div>
 
-  <h3>4b. Inside it, <code>conThuModalCard1</code> &mdash; Group Container</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Fill: =RGBA(244, 246, 243, 1)
-Width: =420
-Height: =560
-LayoutDirection: =LayoutDirection.Vertical
-LayoutGap: =4
-DropShadow: =DropShadow.Regular
-RadiusBottomLeft: =16
-RadiusBottomRight: =16
-RadiusTopLeft: =16
-RadiusTopRight: =16
-PaddingBottom: =16
-PaddingLeft: =16
-PaddingRight: =16
-PaddingTop: =16</pre></div>
+  <div class="note">Every rounded control above is either <code>GroupContainer</code>, <code>ModernText</code>, or <code>Classic/Button</code> with <code>DisplayMode.View</code> &mdash; the three confirmed-working options for <code>Radius*</code> properties in this app. <code>recThuCardHit1</code> is a bare <code>Rectangle</code> with no radius at all, which is fine, it's an invisible click target fully covered by <code>conThuCard1</code>'s already-rounded corners.</div>
 
-  <h3>4c. Inside the card, header row <code>conThuModalHeader1</code> &mdash; Group Container, horizontal</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Height: =32
-LayoutDirection: =LayoutDirection.Horizontal
-LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-LayoutAlignItems: =LayoutAlignItems.Center
-Width: =Parent.Width</pre></div>
-
-  <p>Two children inside <code>conThuModalHeader1</code>:</p>
-  <p><code>lblThuModalTitle1</code> (Modern Text):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Text: ="Pick a Thursday"
-Color: =RGBA(22, 33, 28, 1)
-Font: =Font.'Lato Black'
-FontWeight: =FontWeight.Bold
-Size: =16</pre></div>
-
-  <p><code>btnThuModalClose1</code> (Modern Button, icon only):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Icon: ="Dismiss"
-Layout: =ButtonLayout.IconOnly
-Appearance: =ButtonAppearance.Subtle
-OnSelect: =Set(varShowThursdayPicker, false)</pre></div>
-
-  <h3>4d. Below the header, still inside the card, <code>lblThuModalNote1</code> (Label)</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Text: ="Only Thursdays are shown — releases only go out on a Thursday."
-Color: =RGBA(91, 105, 97, 1)
-Font: =Font.'Open Sans'
-Size: =9
-Height: =16
-Width: =Parent.Width</pre></div>
-
-  <h3>4e. Below that, the list itself: <code>galThursdayOptions1</code> &mdash; Insert &rarr; Gallery &rarr; Blank vertical gallery</h3>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Items: =colThursdayOptions
-Height: =480
-Width: =Parent.Width
-TemplateSize: =78</pre></div>
-
-  <p><strong>Inside the gallery template, five children</strong> (add all five inside the one gallery item template &mdash; Studio repeats all of them per row automatically):</p>
-
-  <p><code>conThuCard1</code> (Group Container, wraps the whole row):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Fill: =If(
-    ThisItem.ThursdayDate = varPlannedPublishDate, RGBA(227, 239, 232, 1),
-    ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(255, 243, 214, 1),
-    RGBA(255, 255, 255, 1)
-)
-BorderColor: =If(
-    ThisItem.ThursdayDate = varPlannedPublishDate, RGBA(11, 74, 54, 1),
-    ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, RGBA(255, 186, 8, 1),
-    RGBA(223, 229, 224, 1)
-)
-BorderThickness: =If(ThisItem.ThursdayDate = varPlannedPublishDate || ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, 2, 1)
-DropShadow: =DropShadow.None
-Height: =70
-Width: =Parent.TemplateWidth - 8
-RadiusBottomLeft: =12
-RadiusBottomRight: =12
-RadiusTopLeft: =12
-RadiusTopRight: =12
-Y: =4</pre></div>
-
-  <p><code>recThuCardHit1</code> (Rectangle, invisible full-card click target, same pattern as <code>Selector</code> on Main):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Fill: =RGBA(0, 0, 0, 0)
-Height: =Parent.Height
-Width: =Parent.Width
-HoverFill: =RGBA(0, 0, 0, 0.02)
-OnSelect: |-
-    =Set(varPlannedPublishDate, ThisItem.ThursdayDate);
-    Set(varUnsavedChanges, true);
-    Set(varErrPublishDate, false);
-    Set(varShowThursdayPicker, false);
-    Reset(dpkPublishDate1)</pre></div>
-
-  <p><code>lblThuRelative1</code> (Modern Text, the small "1wk ahead" chip):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Text: |-
-    =With(
-        {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
-        If(
-            _weeks = 0, "This week",
-            _weeks <= 8, _weeks & "wk ahead",
-            Round(_weeks / 4.345, 0) & "mo ahead"
-        )
-    )
-Color: =RGBA(11, 74, 54, 1)
-Fill: =RGBA(227, 239, 232, 1)
-Font: =Font.'Open Sans'
-FontWeight: =FontWeight.Bold
-Size: =9
-Align: =Align.Center
-Height: =20
-Width: =60
-RadiusBottomLeft: =8
-RadiusBottomRight: =8
-RadiusTopLeft: =8
-RadiusTopRight: =8
-X: =12
-Y: =25</pre></div>
-
-  <p><code>lblThuDate1</code> (Label, the date text + "this week's release" tag):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Text: |-
-    =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy") &
-    If(ThisItem.ThursdayDate = First(colThursdayOptions).ThursdayDate, "   ★ This week's release", "")
-Color: =RGBA(22, 33, 28, 1)
-Font: =Font.'Open Sans'
-FontWeight: =FontWeight.Bold
-Size: =10
-Height: =20
-Width: =Parent.Width - 260
-X: =86
-Y: =10</pre></div>
-
-  <p><code>pillThuLoad1</code> (Modern Text, the item-count pill, colour-coded):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Text: =ThisItem.ItemCount & " item" & If(ThisItem.ItemCount <> 1, "s", "")
-Color: =If(ThisItem.ItemCount >= 5, RGBA(163, 45, 45, 1), ThisItem.ItemCount >= 3, RGBA(160, 100, 10, 1), RGBA(46, 125, 89, 1))
-Fill: =If(ThisItem.ItemCount >= 5, RGBA(251, 230, 226, 1), ThisItem.ItemCount >= 3, RGBA(250, 237, 216, 1), RGBA(228, 243, 234, 1))
-Font: =Font.'Open Sans'
-FontWeight: =FontWeight.Bold
-Size: =9
-Align: =Align.Center
-Height: =20
-Width: =90
-RadiusBottomLeft: =10
-RadiusBottomRight: =10
-RadiusTopLeft: =10
-RadiusTopRight: =10
-X: =86
-Y: =36</pre></div>
-
-  <p><code>iconThuCheck1</code> (Modern Icon, only shows on the currently-picked row):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Icon: ="Checkmark"
-IconColor: =RGBA(11, 74, 54, 1)
-Visible: =ThisItem.ThursdayDate = varPlannedPublishDate
-Height: =18
-Width: =18
-X: =Parent.Width - 30
-Y: =26</pre></div>
-
-  <div class="warn">Radius only goes on <code>GroupContainer</code>/<code>ModernText</code>/<code>ModernButton</code> in this app, never on <code>Rectangle</code> or classic <code>Label</code> &mdash; every control above follows that, already checked against the known-bad-patterns list before writing this.</div>
+  <p>If your version of Studio doesn't accept a paste this deep in one go, paste <code>ThursdayPickerModal1</code> down through <code>galThursdayOptions1</code> first (stop before <code>Children:</code> under the gallery), confirm that lands, then select <code>galThursdayOptions1</code> in Tree view and paste just the <code>conThuCard1</code> block (from <code>- conThuCard1:</code> down) as its item template.</p>
 
   <h2 id="s5">5. Test everything</h2>
   <ul class="step-list">
