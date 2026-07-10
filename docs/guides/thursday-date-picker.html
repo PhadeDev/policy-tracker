@@ -544,6 +544,464 @@ Reset(cmb_Owner1)</pre></div>
 
   <div class="note"><strong>Design note on the 10-day rule inside the picker:</strong> deliberately doesn't block clicking a red-zone Thursday, and deliberately doesn't add a second "mark as urgent" checkbox inside the modal. The real gate already exists and works &mdash; the yellow banner that replaces the top bar and blocks Save until <code>ckbHighPriority1</code> is ticked. The picker's red border/tag use the exact same condition that banner already checks, so they can never disagree with each other; a second override control inside the modal would just be a second copy of that rule to keep in sync, which is the same class of drift that caused the Owner bug earlier in this project.</div>
 
+  <h2 id="s6">6. Same design, applied to the Duplicate modal</h2>
+  <p>Built from the user's own tweaked version of <code>ThursdayPickerModal1</code> (not the original mockup-generated one), applied to the existing "Duplicate Entry" modal, which previously used a plain dropdown. The underlying data-building logic (<code>colThursdays</code>, the 52-week loop that hides Thursdays within 10 days unless the item is High Priority) is unchanged &mdash; only its output gained one field, and the modal around it is rebuilt.</p>
+
+  <p><strong>What's different from the main picker, on purpose:</strong></p>
+  <ul class="step-list">
+    <li>No red "too soon" state here. Unlike the main picker, this list is already built to exclude risky dates entirely unless the item being duplicated is High Priority &mdash; there's nothing left to warn about once a date has made it into the list.</li>
+    <li>Selecting a card doesn't close the modal. Duplicate still needs an explicit Cancel/Duplicate step, so tapping a card only marks it selected (green ring) via a new variable, <code>varSelectedDuplicateDate</code>, instead of the immediate-commit behaviour the main picker uses.</li>
+    <li>The gold tag reads "EARLIEST AVAILABLE" instead of "this/next week's release" &mdash; different meaning here, it's the first free slot to duplicate into, not the item's own release date.</li>
+    <li>Duplicate is disabled until a date is actually picked, not just while the save is in flight.</li>
+  </ul>
+
+  <p><strong>Step 1: <code>btnDuplicate1</code>, full replacement</strong> (only the <code>OnSelect</code> changed &mdash; <code>ItemCount</code> added to each collected row, and a sensible default selection set before the modal opens):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- btnDuplicate1:
+    Control: ModernButton@1.0.0
+    Properties:
+      AccessibleLabel: ="Duplicate entry"
+      Align: =Align.Center
+      BasePaletteColor: =RGBA(11, 74, 54, 1)
+      FontWeight: =""
+      Height: =38
+      Icon: ="Copy"
+      OnSelect: |-
+        =ClearCollect(
+            colUpcomingEntries,
+            AddColumns(
+                Filter(
+                    'Policy Proof Tracker',
+                    'Planned Publish Date' >= Today() &&
+                    'Planned Publish Date' <= DateAdd(Today(), 365, "Days")
+                ),
+                EntryDateKey,
+                Date(Year('Planned Publish Date'), Month('Planned Publish Date'), Day('Planned Publish Date'))
+            )
+        );
+        Set(
+            varDaysToNextThursday,
+            If(Mod(5 - Weekday(Today()) + 7, 7) = 0, 7, Mod(5 - Weekday(Today()) + 7, 7))
+        );
+        ClearCollect(
+            colUpcomingCounts,
+            GroupBy(colUpcomingEntries, EntryDateKey, GroupedEntries)
+        );
+        Clear(colThursdays);
+        ForAll(
+            Sequence(52),
+            If(
+                varSelectedRelease.'High Priority' ||
+                varDaysToNextThursday + (Value - 1) * 7 >= 10,
+                With(
+                    {thurDate: DateAdd(Today(), varDaysToNextThursday + (Value - 1) * 7, "Days")},
+                    With(
+                        {matchedGroup: LookUp(colUpcomingCounts, EntryDateKey = thurDate)},
+                        With(
+                            {cnt: If(IsBlank(matchedGroup), 0, CountRows(matchedGroup.GroupedEntries))},
+                            Collect(
+                                colThursdays,
+                                {
+                                    ThursdayDate: thurDate,
+                                    ThursdayLabel: Text(thurDate, "dddd d mmmm yyyy") &
+                                        If(
+                                            cnt = 0, " - clear",
+                                            cnt = 1, " - 1 entry already scheduled",
+                                            " - " & Text(cnt, "0") & " entries already scheduled"
+                                        ),
+                                    ItemCount: cnt
+                                }
+                            )
+                        )
+                    )
+                )
+            )
+        );
+        Set(varSelectedDuplicateDate, First(colThursdays).ThursdayDate);
+        Set(varShowDuplicateModal1, true)
+      PaddingBottom: =5
+      PaddingLeft: =12
+      PaddingRight: =12
+      PaddingTop: =5
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      Text: =""
+      Tooltip: ="Duplicate Entry"</pre></div>
+
+  <p><strong>Step 2: <code>DuplicateModal1</code>, full replacement</strong> (paste over the entire existing modal, from <code>DuplicateModal1:</code> down):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- DuplicateModal1:
+    Control: GroupContainer@1.5.0
+    Variant: AutoLayout
+    Properties:
+      Fill: =RGBA(53, 61, 63, 0.84)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      Visible: =varShowDuplicateModal1
+      Width: =Parent.Width
+    Children:
+      - conDupModalCard1:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.Regular
+            Fill: =RGBA(244, 246, 243, 1)
+            FillPortions: =0
+            Height: =640
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =8
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            RadiusBottomLeft: =16
+            RadiusBottomRight: =16
+            RadiusTopLeft: =16
+            RadiusTopRight: =16
+            Width: =420
+          Children:
+            - conDupModalHeader1:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  FillPortions: =0
+                  Height: =32
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  Width: =Parent.Width
+                Children:
+                  - lblDupModalTitle1:
+                      Control: ModernText@1.0.0
+                      Properties:
+                        Color: =RGBA(22, 33, 28, 1)
+                        Font: =Font.'Lato Black'
+                        FontWeight: =FontWeight.Bold
+                        Size: =16
+                        Text: ="Duplicate Entry"
+                  - btnDupModalClose1:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        Appearance: =ButtonAppearance.Subtle
+                        Icon: ="Dismiss"
+                        Layout: =ButtonLayout.IconOnly
+                        OnSelect: =Set(varShowDuplicateModal1, false)
+            - lblDupInstruction1:
+                Control: Label@2.5.1
+                Properties:
+                  FillPortions: =0
+                  Color: =RGBA(22, 33, 28, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =18
+                  Size: =10
+                  Text: ="Select the Thursday to duplicate this entry to:"
+                  Width: =Parent.Width
+            - lblDupNote1:
+                Control: Label@2.5.1
+                Properties:
+                  AutoHeight: =true
+                  FillPortions: =0
+                  Color: =RGBA(91, 105, 97, 1)
+                  Font: =Font.'Open Sans'
+                  Size: =9
+                  Text: =If(varSelectedRelease.'High Priority', "High Priority is active - all upcoming Thursdays are shown.", "Thursdays within 10 days are hidden. Mark this entry as High Priority to override and show all dates.")
+                  Width: =Parent.Width
+            - galDupThursdays1:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  FillPortions: =1
+                  Items: =colThursdays
+                  TemplateSize: =78
+                  Width: =Parent.Width
+                Children:
+                  - conDupCard1:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: |-
+                          =If(
+                              ThisItem.ThursdayDate = varSelectedDuplicateDate, RGBA(11, 74, 54, 1),
+                              ThisItem.ThursdayDate = First(colThursdays).ThursdayDate, RGBA(255, 186, 8, 1),
+                              RGBA(223, 229, 224, 1)
+                          )
+                        BorderThickness: |-
+                          =If(
+                              ThisItem.ThursdayDate = varSelectedDuplicateDate, 2,
+                              ThisItem.ThursdayDate = First(colThursdays).ThursdayDate, 2,
+                              1
+                          )
+                        DropShadow: =DropShadow.None
+                        Fill: |-
+                          =If(
+                              ThisItem.ThursdayDate = varSelectedDuplicateDate, RGBA(227, 239, 232, 1),
+                              ThisItem.ThursdayDate = First(colThursdays).ThursdayDate, RGBA(255, 243, 214, 1),
+                              RGBA(255, 255, 255, 1)
+                          )
+                        Height: =70
+                        RadiusBottomLeft: =12
+                        RadiusBottomRight: =12
+                        RadiusTopLeft: =12
+                        RadiusTopRight: =12
+                        Width: =Parent.TemplateWidth - 8
+                        Y: =4
+                      Children:
+                        - conDupCardContent1:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              Height: =Parent.Height
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =12
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              Width: =Parent.Width
+                            Children:
+                              - conDupChip1:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Fill: =If(ThisItem.ThursdayDate = First(colThursdays).ThursdayDate, RGBA(255, 186, 8, 1), RGBA(227, 239, 232, 1))
+                                    FillPortions: =0
+                                    Height: =50
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                    Width: =56
+                                  Children:
+                                    - lblDupChipBig1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =If(ThisItem.ThursdayDate = First(colThursdays).ThursdayDate, RGBA(80, 50, 0, 1), RGBA(11, 74, 54, 1))
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =24
+                                          Text: |-
+                                            =With(
+                                                {_weeks: RoundDown(DateDiff(Today(), ThisItem.ThursdayDate, "Days") / 7, 0)},
+                                                If(
+                                                    _weeks = 0, "This",
+                                                    _weeks <= 8, _weeks & "wk",
+                                                    Round(_weeks / 4.345, 0) & "mo"
+                                                )
+                                            )
+                                          Width: =Parent.Width
+                                          Y: =6
+                                    - lblDupChipSmall1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =If(ThisItem.ThursdayDate = First(colThursdays).ThursdayDate, RGBA(80, 50, 0, 1), RGBA(11, 74, 54, 1))
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =14
+                                          Size: =7
+                                          Text: =If(DateDiff(Today(), ThisItem.ThursdayDate, "Days") < 7, "week", "ahead")
+                                          Width: =Parent.Width
+                                          Y: =30
+                              - conDupTextCol1:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =Parent.Height
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =2
+                                    LayoutMinWidth: =190
+                                    PaddingTop: =5
+                                    Width: =175
+                                  Children:
+                                    - pillDupEarliestTag1:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Align: =Align.Center
+                                          AutoHeight: =true
+                                          Color: =RGBA(80, 50, 0, 1)
+                                          Fill: =RGBA(255, 186, 8, 1)
+                                          FillPortions: =0
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =18
+                                          RadiusBottomLeft: =9
+                                          RadiusBottomRight: =9
+                                          RadiusTopLeft: =9
+                                          RadiusTopRight: =9
+                                          Size: =8
+                                          Text: ="EARLIEST AVAILABLE"
+                                          Visible: =ThisItem.ThursdayDate = First(colThursdays).ThursdayDate
+                                          Width: =Parent.Width
+                                    - lblDupDate1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          AutoHeight: =true
+                                          Color: =RGBA(22, 33, 28, 1)
+                                          FillPortions: =0
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =20
+                                          Size: =10
+                                          Text: =Text(ThisItem.ThursdayDate, "dddd, d mmmm yyyy")
+                                          Width: =Parent.Width
+                              - pillDupLoad1:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    Align: =Align.Center
+                                    AutoHeight: =true
+                                    Color: |-
+                                      =If(
+                                          ThisItem.ItemCount >= 5, RGBA(163, 45, 45, 1),
+                                          ThisItem.ItemCount >= 3, RGBA(160, 100, 10, 1),
+                                          RGBA(46, 125, 89, 1)
+                                      )
+                                    Fill: |-
+                                      =If(
+                                          ThisItem.ItemCount >= 5, RGBA(251, 230, 226, 1),
+                                          ThisItem.ItemCount >= 3, RGBA(250, 237, 216, 1),
+                                          RGBA(228, 243, 234, 1)
+                                      )
+                                    FillPortions: =1
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =20
+                                    LayoutMinWidth: =25
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                    Size: =9
+                                    Text: =If(ThisItem.ItemCount = 0, "Clear", ThisItem.ItemCount & " item" & If(ThisItem.ItemCount <> 1, "s", ""))
+                                    Width: =88
+                              - iconDupCheck1:
+                                  Control: ModernIcon@1.1.1
+                                  Properties:
+                                    FillPortions: =0
+                                    Height: =18
+                                    Icon: ="Checkmark"
+                                    IconColor: =RGBA(11, 74, 54, 1)
+                                    Visible: =ThisItem.ThursdayDate = varSelectedDuplicateDate
+                                    Width: =18
+                        - recDupCardHit1:
+                            Control: Rectangle@2.3.0
+                            Properties:
+                              Fill: =RGBA(0, 0, 0, 0)
+                              Height: =Parent.Height
+                              HoverFill: =RGBA(0, 0, 0, 0.08)
+                              OnSelect: =Set(varSelectedDuplicateDate, ThisItem.ThursdayDate)
+                              Width: =Parent.Width
+            - conDupButtonRow1:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  FillPortions: =0
+                  Height: =44
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  Width: =Parent.Width
+                Children:
+                  - btnDuplicateCancel1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        FillPortions: =0
+                        BorderColor: =ColorFade(Self.Fill, -15%)
+                        Color: =RGBA(50, 50, 50, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        Fill: =RGBA(200, 200, 200, 1)
+                        Font: =Font.'Open Sans'
+                        HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(170, 170, 170, 1)
+                        OnSelect: =Set(varShowDuplicateModal1, false)
+                        PressedBorderColor: =Self.Fill
+                        PressedColor: =Self.Fill
+                        PressedFill: =Self.Color
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Text: ="Cancel"
+                        Width: =140
+                  - btnDuplicateConfirm1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        FillPortions: =0
+                        BorderColor: =ColorFade(Self.Fill, -15%)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisplayMode: =If(varDuplicating || IsBlank(varSelectedDuplicateDate), DisplayMode.Disabled, DisplayMode.Edit)
+                        Fill: =RGBA(11, 74, 54, 1)
+                        Font: =Font.'Open Sans'
+                        HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(9, 60, 44, 1)
+                        OnSelect: |-
+                          =Set(varDuplicating, true);
+                          Set(
+                              varNewDuplicate,
+                              Patch(
+                                  'Policy Proof Tracker',
+                                  Defaults('Policy Proof Tracker'),
+                                  {
+                                      Title: varSelectedRelease.Title,
+                                      'Document Type': varSelectedRelease.'Document Type',
+                                      'Item summary': varSelectedRelease.'Item summary',
+                                      Owner: varSelectedRelease.Owner,
+                                      Audience: varSelectedRelease.Audience,
+                                      'External consultation details': varSelectedRelease.'External consultation details',
+                                      'External consultation required': varSelectedRelease.'External consultation required',
+                                      Remarks: varSelectedRelease.Remarks,
+                                      'Title for Newsletter': varSelectedRelease.'Title for Newsletter',
+                                      'High Priority': varSelectedRelease.'High Priority',
+                                      'Reason for High Priority': varSelectedRelease.'Reason for High Priority',
+                                      'Top Item': varSelectedRelease.'Top Item',
+                                      'Planned Publish Date': varSelectedDuplicateDate,
+                                      Published: false,
+                                      'Published Date': Blank(),
+                                      'Approved by Pillar Lead (Ready to Release)': false,
+                                      'Approved For Release By': Blank(),
+                                      EmailSent: false
+                                  }
+                              )
+                          );
+                          Set(varDuplicating, false);
+                          If(
+                              IsEmpty(Errors('Policy Proof Tracker', varNewDuplicate)),
+                              Set(varShowDuplicateModal1, false);
+                              ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+                              Notify(
+                                  "Duplicated to " & LookUp(colThursdays, ThursdayDate = varSelectedDuplicateDate).ThursdayLabel & ". Find it on the main screen.",
+                                  NotificationType.Success
+                              ),
+                              Notify(
+                                  "Error: " & First(Errors('Policy Proof Tracker', varNewDuplicate)).Message,
+                                  NotificationType.Error
+                              )
+                          )
+                        PressedBorderColor: =Self.Fill
+                        PressedColor: =Self.Fill
+                        PressedFill: =Self.Color
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Text: ="Duplicate"
+                        Width: =140</pre></div>
+
+  <div class="note">Every control in this section states <code>FillPortions</code> explicitly wherever its parent is <code>Variant: AutoLayout</code> and it has its own <code>Height</code>/<code>Width</code> &mdash; four of them (<code>conDupTextCol1</code>, <code>pillDupEarliestTag1</code>, <code>lblDupDate1</code>, <code>iconDupCheck1</code>) were initially left matching your tweaked <code>ThursdayPickerModal1</code> exactly, which doesn't set it on those same four, but the mandatory linter on this repo treats the omission as an error regardless of precedent, so all four now have <code>FillPortions: =0</code> added. Doesn't change what they do &mdash; none of the four were ever meant to stretch &mdash; just makes it explicit instead of relying on default behaviour.</div>
+
+  <div class="test">Test: open an existing item, click Duplicate. The earliest available Thursday should be pre-selected (green ring) with no clicking required. Item counts should show on each card. Clicking a different card should move the selection without closing the modal. Cancel should close with no changes. Duplicate should create the copy on the chosen date with the same success/error notification as before.</div>
+
 </main>
 <script>
 function copyBlock(btn) {
