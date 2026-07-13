@@ -60,6 +60,7 @@
   <div class="progress-summary">
     <div class="progress-card"><div class="count">3</div><div class="label">Race condition, confirmed broken</div></div>
     <div class="progress-card"><div class="count">3</div><div class="label">Visual polish</div></div>
+    <div class="progress-card"><div class="count">1</div><div class="label">Performance, real trade-off</div></div>
   </div>
 
   <div class="toc">
@@ -70,6 +71,7 @@
     <a href="#f4"><span class="toc-num">4.</span> Skeleton cards don't appear on tab switch, blue spinner still flashes there</a>
     <a href="#f5"><span class="toc-num">5.</span> Skeleton cards missing a header, duplicates rendering blank</a>
     <a href="#f6"><span class="toc-num">6.</span> ViewItem: links panel still flickers and resets after ticking a box</a>
+    <a href="#f7"><span class="toc-num">7.</span> Links panel goes blank and reloads every single open, even with items 1 and 6 applied</a>
   </div>
 
   <h2 id="f1">1. Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh <span class="sev sev-critical">RACE CONDITION, CONFIRMED BROKEN NOW</span></h2>
@@ -796,6 +798,114 @@ If(
   <p>On "can we preload this instead of piecemeal" &mdash; this is the closest practical answer without a bigger rebuild: every field on the left now populates as fast as this formula can possibly run, with zero dependency on either slow operation. The right-side links panel and the Thursday-picker collection still load in the background afterward (Power Fx can't truly run them in parallel within one formula), but they can no longer delay or interfere with anything on the left. A further step &mdash; a single "screen ready" flag gating the whole form behind one skeleton state, similar to Main's, so nothing renders partially at all &mdash; is possible but bigger than today's fix; say if you want that scoped out separately.</p>
 
   <div class="test">Test: open an existing item and tick Top Item immediately, before anything else has visibly loaded. It should stick on the first click. Then watch the right side while it settles &mdash; the "Add Document Link" panel may still take a moment to populate (that's the real, separate <code>Refresh(PolicyLinks)</code> network call, not fixable without removing that refresh), but the left side and your click should never flicker or reset again.</div>
+
+  <h2 id="f7">7. Links panel goes blank and reloads every single open, even with items 1 and 6 applied <span class="sev sev-critical">REAL NETWORK CALL, NOT A RACE THIS TIME &mdash; TRADE-OFF, READ BEFORE PASTING</span></h2>
+  <p>Everything else now loads instantly, which is exactly what exposed this: the links panel briefly shows, goes fully blank for about a second, then reloads with the same content. That's not a race condition like items 1 and 6 &mdash; it's <code>Refresh(PolicyLinks)</code> in the last block of <code>OnVisible</code>, a genuine full-table re-fetch of the entire <code>PolicyLinks</code> list from SharePoint, on every single open, before <code>BuildLinksForSource</code> even filters down to this one item's links. That round trip is real, and no amount of reordering removes it &mdash; it has to actually finish before the panel can show anything.</p>
+
+  <p><strong>The fix is to stop doing that refresh at all</strong>, not hide it better. <code>BuildLinksForSource</code> just runs <code>Filter(PolicyLinks, ...)</code> against Power Apps' own already-cached copy of the list &mdash; which stays fresh in-session already, because both places that actually change links (<code>frmLink_2.OnSuccess</code> when you save a new link, and the delete-link modal) already call <code>Refresh(PolicyLinks)</code> themselves right after the change. Removing the redundant refresh here means <code>BuildLinksForSource</code> runs against memory instead of the network, which is what makes it feel instant.</p>
+
+  <div class="warn"><strong>The actual trade-off, not hidden:</strong> if a link gets added or deleted by someone else, in a different session, between when your local cache last refreshed and when you open this item, you won't see that change until something in your own session triggers a fresh <code>Refresh(PolicyLinks)</code> (reopening the app, or editing links yourself). For a small internal tool where it's rare for two people to touch the same item's links at the same moment, this is very likely the right trade &mdash; instant response on every single click, at the cost of a rare stale-by-a-few-minutes edge case. If that trade-off doesn't sit right with you, don't paste this one and the panel will keep taking ~1 second on every open instead.</p></div>
+
+  <p>Built directly on top of item 6's version, which you've already pasted &mdash; the only change is deleting one line, <code>Refresh(PolicyLinks);</code>, from the final block. Byte-diffed to confirm nothing else moved.</p>
+
+  <p><strong><code>ViewItem.OnVisible</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Table({DisplayName: User().FullName, Mail: User().Email}),
+        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+    )
+);
+Set(
+    varPlannedPublishDate,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.'Planned Publish Date'),
+        DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"),
+        varSelectedRelease.'Planned Publish Date'
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email}));
+        Set(varPlannedPublishDate, varDeepLinkItem.'Planned Publish Date'),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1);
+Set(varShowThursdayPicker, false);
+ClearCollect(
+    colThursdayOptions,
+    ForAll(
+        Sequence(104),
+        With(
+            {_thu: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")},
+            {
+                ThursdayDate: _thu,
+                ItemCount: CountRows(
+                    Filter(
+                        'Policy Proof Tracker',
+                        Year('Planned Publish Date') = Year(_thu) &&
+                        Month('Planned Publish Date') = Month(_thu) &&
+                        Day('Planned Publish Date') = Day(_thu)
+                    )
+                )
+            }
+        )
+    )
+);
+If(
+    !IsBlank(varSelectedRelease.ID),
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
+
+  <p>Note the deep-link branch (opening <code>ViewItem</code> via a direct link/QR code) still keeps its own <code>Refresh(PolicyLinks)</code> untouched &mdash; that's a rarer, one-off entry point rather than the repeated in-app click you're describing, so it wasn't in scope for this fix. Say if you want that trimmed too once you've confirmed this one feels right.</p>
+
+  <div class="test">Test: open several different existing items in a row, normally (not via deep link). The links panel should appear once and stay, no blank flash, no reload. Then add or delete a link on one item and confirm it still shows up correctly &mdash; that path still refreshes explicitly and isn't affected by this change.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
