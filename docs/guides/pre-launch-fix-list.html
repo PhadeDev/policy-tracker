@@ -72,6 +72,7 @@
     <a href="#f5"><span class="toc-num">5.</span> Skeleton cards missing a header, duplicates rendering blank</a>
     <a href="#f6"><span class="toc-num">6.</span> ViewItem: links panel still flickers and resets after ticking a box</a>
     <a href="#f7"><span class="toc-num">7.</span> Links panel goes blank and reloads every single open, even with items 1 and 6 applied</a>
+    <a href="#f8"><span class="toc-num">8.</span> Diagnostic only &mdash; confirm whether OnVisible is firing twice</a>
   </div>
 
   <h2 id="f1">1. Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh <span class="sev sev-critical">RACE CONDITION, CONFIRMED BROKEN NOW</span></h2>
@@ -906,6 +907,15 @@ If(
   <p>Note the deep-link branch (opening <code>ViewItem</code> via a direct link/QR code) still keeps its own <code>Refresh(PolicyLinks)</code> untouched &mdash; that's a rarer, one-off entry point rather than the repeated in-app click you're describing, so it wasn't in scope for this fix. Say if you want that trimmed too once you've confirmed this one feels right.</p>
 
   <div class="test">Test: open several different existing items in a row, normally (not via deep link). The links panel should appear once and stay, no blank flash, no reload. Then add or delete a link on one item and confirm it still shows up correctly &mdash; that path still refreshes explicitly and isn't affected by this change.</div>
+
+  <h2 id="f8">8. Diagnostic only &mdash; confirm whether OnVisible is firing twice <span class="sev sev-theory">NOT A FIX, TEMPORARY, REMOVE AFTER TESTING</span></h2>
+  <p>Item 7 didn't fix the flicker, and the <code>ScreenTransition.Fade</code>&rarr;<code>None</code> theory was tested and ruled out. The video evidence (same correct link data disappearing then reappearing unchanged, roughly a second apart) still points at <code>OnVisible</code> running twice per open rather than a data problem &mdash; but that's an inference from timing, not something either of us has actually seen happen. This step makes it visible directly instead of guessing again.</p>
+
+  <p><strong>Add these two lines to the very top of <code>ViewItem.OnVisible</code></strong>, before the existing <code>Set(varLoadingLinks, true);</code> line &mdash; don't remove or replace anything else in the formula, just insert this above it:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Notify("OnVisible fired, run #" & (varOnVisibleRunCount + 1), NotificationType.Information);
+Set(varOnVisibleRunCount, varOnVisibleRunCount + 1);</pre></div>
+
+  <div class="test">Test: open any existing item normally. Watch for toast notifications in the corner &mdash; one toast ("run #1") means <code>OnVisible</code> only fires once and the cause is elsewhere (likely the links <code>Gallery</code> itself, not the formula). Two toasts back to back ("run #1" then "run #2") confirms it's genuinely running twice, and narrows the next fix to finding what triggers the second run. Report back which you see, then remove these two lines afterward either way &mdash; they're diagnostic only, not meant to stay in the app.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
