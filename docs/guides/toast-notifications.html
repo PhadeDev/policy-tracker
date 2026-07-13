@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toast Notifications, Replacing Notify()</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
+    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    h3 { margin: 26px 0 10px; color: #f2f4f8; font-size: 1.05rem; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .88rem; }
+    th, td { border: 1px solid #2b3546; padding: 8px 10px; vertical-align: top; }
+    th { background: #182131; color: #b7e4c7; text-align: left; }
+    tr:nth-child(even) td { background: #121926; }
+    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
+    .sev { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+    .sev-bug { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
+    .sev-polish { background: #1a2a3a; color: #8dc3ff; border: 1px solid #2a4a6a; }
+    .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+    .toc a { display: block; padding: 4px 0; font-size: .9rem; }
+    .toc .toc-num { color: #8a94a6; display: inline-block; width: 22px; }
+    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Toast Notifications, Replacing Notify()</h1>
+  <p>Design decided from the mockups: option A (card with a coloured accent bar), sized up and moved to the top-left, overlapping the logo/title area on <code>Main</code> and the title on <code>ViewItem</code> &mdash; nothing clickable lives there, so covering it briefly when a toast fires doesn't block anything. Dismissible with an &times;, auto-hides after ~3 seconds either way. Mockup for reference: <a href="https://claude.ai/code/artifact/8d333939-ee60-48c3-a66e-7dd721d24f28" target="_blank" rel="noopener">toast style options</a> (option A).</p>
+
+  <div class="warn"><strong>Scope of this guide:</strong> covers <code>Main</code> and <code>ViewItem</code> only &mdash; the two screens I have current, verified files for. <code>Historic</code>, <code>Overview</code>, and <code>NewsletterPack</code> also call <code>Notify()</code> and would need the exact same treatment, but I don't have fresh exports for those today and I'm not going to guess control names on them after today. Once you're happy with how this works on these two screens, post a fresh export of the other three and I'll do the same pass on them.</p></div>
+
+  <div class="toc">
+    <strong>Jump to:</strong>
+    <a href="#s1"><span class="toc-num">1.</span> Why this works across screens (read this first)</a>
+    <a href="#s2"><span class="toc-num">2.</span> Add the ShowToast() helper function</a>
+    <a href="#s3"><span class="toc-num">3.</span> Build the toast on Main</a>
+    <a href="#s4"><span class="toc-num">4.</span> Build the toast on ViewItem</a>
+    <a href="#s5"><span class="toc-num">5.</span> Convert your first three Notify() calls</a>
+    <a href="#s6"><span class="toc-num">6.</span> Converting the rest</a>
+  </div>
+
+  <h2 id="s1">1. Why this works across screens</h2>
+  <p>The thing you were worried about &mdash; a "Saved" toast firing on Save &amp; Close, then the screen changing to <code>Main</code> before anyone sees it &mdash; isn't actually a problem, and doesn't need any screen-aware logic. Two facts about how this app already behaves make it work automatically:</p>
+  <ul>
+    <li><strong>Global variables survive <code>Navigate()</code>.</strong> <code>varToastVisible</code>/<code>varToastHeading</code>/<code>varToastMessage</code>/<code>varToastType</code> are app-wide state, not reset when the screen changes. Set them right before <code>Navigate(Main, ...)</code> and they're still set the instant <code>Main</code> appears.</li>
+    <li><strong>Timers reset fresh on whichever screen is active.</strong> The auto-hide countdown doesn't get cut short mid-transition &mdash; it starts counting from zero the moment the destination screen's own copy of the Timer becomes active, so the user gets a full, undamaged view of the toast wherever they land.</li>
+  </ul>
+  <p>So the rule is the same everywhere, no special-casing "Save" vs. "Save &amp; Close" vs. "Delete": <strong>call the toast before whatever happens next</strong>, whether that's staying put or navigating. Every button that saves or deletes already does exactly that in that order today &mdash; the data has to be handled before the screen can leave. The only real work is duplicating the toast's visuals and its Timer onto every screen that needs one, using the same variable names everywhere.</p>
+
+  <h2 id="s2">2. Add the ShowToast() helper function</h2>
+  <p>One small user-defined function, same pattern as the existing <code>BuildLinksForSource</code> &mdash; add it to <code>App</code>'s <code>Formulas</code> property (the same place <code>BuildLinksForSource</code> already lives), anywhere in that property, doesn't need to go in a specific spot:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ShowToast(Heading: Text, Message: Text, Type: Text): Boolean = {
+    Set(varToastHeading, Heading);
+    Set(varToastMessage, Message);
+    Set(varToastType, Type);
+    Set(varToastVisible, true);
+    true
+};</pre></div>
+  <p>Every place that currently calls <code>Notify(...)</code> becomes a single call like <code>ShowToast("Saved", "Your changes have been saved.", "success")</code> instead &mdash; one line, same shape everywhere, easy to scan for later. <code>Type</code> is just <code>"success"</code> or <code>"error"</code> for now (matching the two colours in the mockup); add more later if you want a distinct warning colour.</p>
+
+  <h2 id="s3">3. Build the toast on Main</h2>
+  <p>This is a new top-level child of the <code>Main</code> screen itself, <strong>not</strong> nested inside <code>ScreenContainer1</code> &mdash; the same pattern <code>Main</code> already uses for <code>MyItemsBG</code>/<code>MyItems</code>/<code>SearchOverlay</code>/<code>TypeFilterOverlay1</code>, which are also floating overlays positioned on top of everything. If it were nested inside <code>ScreenContainer1</code> (an <code>AutoLayout</code> container), it would get pushed into the flow after the header instead of floating over it.</p>
+
+  <p><strong>Select the <code>Main</code> screen itself in Tree view</strong> (not a control inside it), then paste this in &mdash; Studio will add it as a new top-level child, sitting on top of everything since it's last in the list:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- ToastNotification:
+    Control: GroupContainer@1.5.0
+    Variant: ManualLayout
+    Properties:
+      DropShadow: =DropShadow.Regular
+      Fill: =RGBA(255, 255, 255, 1)
+      Height: =56
+      RadiusBottomLeft: =10
+      RadiusBottomRight: =10
+      RadiusTopLeft: =10
+      RadiusTopRight: =10
+      Visible: =varToastVisible
+      Width: =430
+      X: =16
+      Y: =16
+    Children:
+      - ToastAccentBar:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =If(varToastType = "error", RGBA(194, 47, 47, 1), RGBA(11, 74, 54, 1))
+            Height: =Parent.Height
+            Width: =6
+      - ToastHeading:
+          Control: ModernText@1.0.0
+          Properties:
+            Color: =RGBA(22, 33, 28, 1)
+            Font: =Font.'Lato Black'
+            Height: =20
+            Size: =13
+            Text: =varToastHeading
+            Width: =Parent.Width - 60
+            X: =20
+            Y: =7
+      - ToastMessage:
+          Control: ModernText@1.0.0
+          Properties:
+            Color: =RGBA(91, 105, 97, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =11
+            Text: =varToastMessage
+            Width: =Parent.Width - 60
+            X: =20
+            Y: =28
+      - ToastClose:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =RGBA(91, 105, 97, 1)
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverFill: =RGBA(0, 0, 0, 0.05)
+            OnSelect: =Set(varToastVisible, false)
+            PressedFill: =RGBA(0, 0, 0, 0.08)
+            Size: =16
+            Text: ="&times;"
+            Width: =28
+            X: =Parent.Width - 34
+            Y: =6
+      - tmrToastHide:
+          Control: Timer@2.1.0
+          Properties:
+            AutoStart: =varToastVisible
+            Duration: =3000
+            OnTimerEnd: =Set(varToastVisible, false)
+            Repeat: =false
+            Start: =varToastVisible
+            Visible: =false</pre></div>
+  <p><code>X=16, Y=16</code> matches <code>ScreenContainer1</code>'s own padding, so the toast lines up flush with where the logo currently sits &mdash; it'll sit directly over the logo/"Policy Tracker"/V2 badge cluster when visible. Nudge <code>Width</code>/<code>Height</code> in the properties panel once you can see it live if it doesn't quite cover that whole cluster on your screen.</p>
+
+  <div class="test">Test: temporarily change <code>ToastNotification.Visible</code> to <code>=true</code> in the formula bar, confirm it sits over the logo area and looks right, then change it back to <code>=varToastVisible</code>.</div>
+
+  <h2 id="s4">4. Build the toast on ViewItem</h2>
+  <p>Same component, same idea &mdash; a new top-level child of the <code>ViewItem</code> screen, matching the existing pattern already used there for <code>DeleteItemModal1</code>/<code>DeleteLinkModal1</code>/<code>UnsavedChangesModal</code>/<code>DuplicateModal1</code>/<code>ThursdayPickerModal1</code>, all of which are also floating screen-level overlays.</p>
+
+  <p><strong>Select the <code>ViewItem</code> screen itself in Tree view</strong>, paste this in:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- ToastNotification:
+    Control: GroupContainer@1.5.0
+    Variant: ManualLayout
+    Properties:
+      DropShadow: =DropShadow.Regular
+      Fill: =RGBA(255, 255, 255, 1)
+      Height: =56
+      RadiusBottomLeft: =10
+      RadiusBottomRight: =10
+      RadiusTopLeft: =10
+      RadiusTopRight: =10
+      Visible: =varToastVisible
+      Width: =420
+      X: =16
+      Y: =20
+    Children:
+      - ToastAccentBar:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =If(varToastType = "error", RGBA(194, 47, 47, 1), RGBA(11, 74, 54, 1))
+            Height: =Parent.Height
+            Width: =6
+      - ToastHeading:
+          Control: ModernText@1.0.0
+          Properties:
+            Color: =RGBA(22, 33, 28, 1)
+            Font: =Font.'Lato Black'
+            Height: =20
+            Size: =13
+            Text: =varToastHeading
+            Width: =Parent.Width - 60
+            X: =20
+            Y: =7
+      - ToastMessage:
+          Control: ModernText@1.0.0
+          Properties:
+            Color: =RGBA(91, 105, 97, 1)
+            Font: =Font.'Open Sans'
+            Height: =20
+            Size: =11
+            Text: =varToastMessage
+            Width: =Parent.Width - 60
+            X: =20
+            Y: =28
+      - ToastClose:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =RGBA(91, 105, 97, 1)
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.'Open Sans'
+            Height: =28
+            HoverFill: =RGBA(0, 0, 0, 0.05)
+            OnSelect: =Set(varToastVisible, false)
+            PressedFill: =RGBA(0, 0, 0, 0.08)
+            Size: =16
+            Text: ="&times;"
+            Width: =28
+            X: =Parent.Width - 34
+            Y: =6
+      - tmrToastHide:
+          Control: Timer@2.1.0
+          Properties:
+            AutoStart: =varToastVisible
+            Duration: =3000
+            OnTimerEnd: =Set(varToastVisible, false)
+            Repeat: =false
+            Start: =varToastVisible
+            Visible: =false</pre></div>
+
+  <div class="warn"><strong>One real edge case, not fully solved:</strong> <code>ViewItem</code>'s top bar also has two conditional badges (High Priority / Top Newsletter Item) that appear around <code>X=191</code> and <code>X=435</code> when those flags are ticked. Most of the time neither is showing, so the toast at <code>X=16</code>&ndash;<code>436</code> has clear space. If a toast fires while <em>both</em> badges happen to be visible at once, it'll sit on top of the first one briefly. Rare enough not to be worth engineering around today &mdash; flagging it so it's not a surprise if you see it, not proposing a fix for it yet.</div>
+
+  <div class="test">Test: same as Main &mdash; temporarily force <code>Visible: =true</code>, check it sits cleanly over the "Policy Tracker" title without covering the Save/Close buttons on the right, then revert to <code>=varToastVisible</code>.</div>
+
+  <h2 id="s5">5. Convert your first three Notify() calls <span class="sev sev-bug">REAL EXAMPLES FROM YOUR CURRENT FILE</span></h2>
+  <p>These three cover exactly the cases you were asking about &mdash; a plain Save that stays on screen, a Save &amp; Close that navigates away, and a Delete that also navigates away. Same swap pattern each time: replace the <code>Notify(...)</code> line(s) with one <code>ShowToast(...)</code> call, keep everything else in the formula untouched.</p>
+
+  <p><strong><code>btnSave1</code> (plain Save, stays on <code>ViewItem</code>)</strong> &mdash; find these two lines:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Notify("Saved successfully!", NotificationType.Success),
+Notify("Save failed. Please check your connection and try again.", NotificationType.Error)</pre></div>
+  <p>Replace with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ShowToast("Saved", "Your changes have been saved.", "success"),
+ShowToast("Save failed", "Check your connection and try again.", "error")</pre></div>
+
+  <p><strong><code>btnSaveClose1</code> (Save &amp; Close, navigates to Main or Historic)</strong> &mdash; find:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Notify("Saved successfully!", NotificationType.Success);
+If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade)),
+Set(varSaving, false);
+Notify("Save failed. Please check your connection and try again.", NotificationType.Error)</pre></div>
+  <p>Replace with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ShowToast("Saved", "Your changes have been saved.", "success");
+If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade)),
+Set(varSaving, false);
+ShowToast("Save failed", "Check your connection and try again.", "error")</pre></div>
+  <p>The toast call stays <em>before</em> <code>Navigate(...)</code>, same position as the old <code>Notify()</code> was &mdash; that ordering is exactly what makes it show up correctly on the destination screen, per item 1 above.</p>
+
+  <p><strong><code>btnModalAction1</code> (Delete confirm, navigates to Main)</strong> &mdash; find:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Notify("Delete failed. The item may still exist. Please check and try again.", NotificationType.Error),
+UpdateContext({locDisplayDeletePopUp1: false});
+ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+Notify("Item deleted successfully.", NotificationType.Success);</pre></div>
+  <p>Replace with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ShowToast("Delete failed", "The item may still exist, please check and try again.", "error"),
+UpdateContext({locDisplayDeletePopUp1: false});
+ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+ShowToast("Item deleted", "The item was removed successfully.", "success");</pre></div>
+
+  <div class="test">Test all three: (1) edit a field, hit plain Save, confirm the toast appears over the title on ViewItem and you stay put. (2) Edit a field, hit Save &amp; Close, confirm the toast appears over the logo on Main, not on ViewItem. (3) Delete a test item, confirm the toast appears on Main after the delete completes.</div>
+
+  <h2 id="s6">6. Converting the rest <span class="sev sev-polish">SAME PATTERN, YOUR OWN PACE</span></h2>
+  <p><code>ViewItem</code> has 20 <code>Notify()</code> calls total, <code>Main</code> has 4 &mdash; the three above are the highest-traffic ones. For every remaining one, same swap:</p>
+  <table>
+    <tr><th>Old</th><th>New</th></tr>
+    <tr><td><code>Notify("some message", NotificationType.Success)</code></td><td><code>ShowToast("Heading", "some message", "success")</code></td></tr>
+    <tr><td><code>Notify("some message", NotificationType.Error)</code></td><td><code>ShowToast("Heading", "some message", "error")</code></td></tr>
+    <tr><td><code>Notify("some message", NotificationType.Warning)</code></td><td><code>ShowToast("Heading", "some message", "error")</code> &mdash; no separate warning colour yet, error accent reads close enough until you want a third colour</td></tr>
+  </table>
+  <p>Pick a short 1-2 word <code>Heading</code> that matches what the message is about (skim the existing message text for the gist &mdash; "Link saved successfully!" becomes heading <code>"Link saved"</code>, message <code>"The document link was saved."</code>, etc.). No need to do them all in one sitting &mdash; <code>Notify()</code> and <code>ShowToast()</code> can coexist in the app indefinitely while you convert call sites gradually, they don't interfere with each other.</p>
+
+  <div class="test">Test: after converting a batch, grep your own exported YAML for <code>Notify(</code> to see what's left &mdash; or just ask me to check next time you post a fresh export, and I'll list exactly which ones remain.</div>
+
+</main>
+<script>
+function copyBlock(btn) {
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) {
+      btn.classList.add('ok');
+      btn.textContent = 'Copied';
+    } else {
+      btn.classList.add('err');
+      btn.textContent = 'Select + Ctrl+C';
+    }
+    setTimeout(function () {
+      btn.classList.remove('ok', 'err');
+      btn.textContent = 'Copy';
+    }, 1600);
+  }
+
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  var legacyCopied = false;
+  try {
+    legacyCopied = document.execCommand('copy');
+  } catch (e) {
+    legacyCopied = false;
+  }
+
+  if (legacyCopied) {
+    showResult(true);
+    return;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () {
+      showResult(true);
+    }, function () {
+      showResult(false);
+    });
+  } else {
+    showResult(false);
+  }
+}
+</script>
+</body>
+</html>
