@@ -61,7 +61,7 @@
     <div class="progress-card"><div class="count">2</div><div class="label">Missing feature</div></div>
     <div class="progress-card"><div class="count">1</div><div class="label">Performance polish</div></div>
     <div class="progress-card"><div class="count">1</div><div class="label">Race condition, confirmed broken</div></div>
-    <div class="progress-card"><div class="count">1</div><div class="label">Visual polish</div></div>
+    <div class="progress-card"><div class="count">2</div><div class="label">Visual polish</div></div>
   </div>
 
   <div class="toc">
@@ -73,6 +73,7 @@
     <a href="#f5"><span class="toc-num">5.</span> Owner briefly shows the previous item's owner before catching up</a>
     <a href="#f6"><span class="toc-num">6.</span> Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh</a>
     <a href="#f7"><span class="toc-num">7.</span> Navy blue loading spinner on Main and StartScreen</a>
+    <a href="#f8"><span class="toc-num">8.</span> Skeleton-card loading state for Main, replaces the built-in spinner entirely</a>
   </div>
 
   <h2 id="f1">1. Invalid formula in ViewItem.OnVisible &mdash; do this one first, before anything else <span class="sev sev-critical">TOP PRIORITY, LIKELY ROOT CAUSE OF THE OWNER BUG TOO</span></h2>
@@ -477,6 +478,126 @@ If(
   <p><strong>Repeat the same change on <code>StartScreen</code></strong> (same property, same value).</p>
 
   <div class="test">Test: navigate to Main from a cold load (or force a refresh) and watch for the spinner while the gallery populates &mdash; it should now be the same dark green used everywhere else in the app instead of blue.</div>
+
+  <h2 id="f8">8. Skeleton-card loading state for Main, replaces the built-in spinner entirely <span class="sev sev-polish">VISUAL POLISH, MOCKUP APPROVED</span></h2>
+  <p>Goes further than item 7 &mdash; instead of just recolouring the built-in spinner, this turns it off and shows 2&ndash;3 pulsing grey placeholder cards, shaped like the real release cards, in the same spot while <code>Refresh('Policy Proof Tracker')</code> runs. Mockup approved: <a href="https://claude.ai/code/artifact/aae0c34d-d591-4c98-8488-afadc84e2116" target="_blank" rel="noopener">skeleton-card mockup</a> (option A on that page).</p>
+
+  <p>Four pieces, pasted as components rather than a full screen &mdash; existing <code>HeaderGallery</code> content, <code>Container1</code>, and everything downstream of it is untouched.</p>
+
+  <div class="warn"><b>Honesty check on validation:</b> ran this through <code>payaml-validate</code> before writing it up. Layers A (schema) and C (layout/FillPortions) pass clean. Layer B (property cross-check against your existing screens) flags every <code>Timer@2.1.0</code> property as "unproven" &mdash; not because anything's wrong, but because no screen in your app has ever used a <code>Timer</code> control yet, so the validator has nothing in the corpus to confirm against. Same situation as the <code>tmrDeepLinkNotFound</code> Timer already proposed in item 1 above, using the identical property set (<code>Start</code>/<code>Duration</code>/<code>Repeat</code>/<code>AutoStart</code>/<code>OnTimerEnd</code>/<code>Visible</code>), sourced from Microsoft's documented Timer schema, not guessed. Once either Timer is pasted in and re-exported, this flag clears itself for both.</div>
+
+  <p><strong>Step 1: <code>Main</code> screen, <code>OnVisible</code>, full replacement</strong> (adds the loading flag around the existing refresh, nothing else changes):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varMainLoading, true);
+Refresh('Policy Proof Tracker');
+Set(varMainLoading, false)</pre></div>
+
+  <p><strong>Step 2: select <code>GalleryContainer</code> in Tree view</strong> (the white panel that already holds <code>HeaderGallery</code>), Insert &rarr; search "Timer", drop it in as a child of <code>GalleryContainer</code>, rename it <code>tmrSkeletonPulse</code>, and set these properties:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Visible: =false
+AutoStart: =varMainLoading
+Repeat: =true
+Duration: =1300
+Start: =varMainLoading
+OnTimerEnd: =Set(varSkeletonPulse, 1 - varSkeletonPulse)</pre></div>
+  <p>This flips a single 0/1 variable every 1.3 seconds, only while <code>varMainLoading</code> is true. Every skeleton block below reads that same variable, so they all pulse together.</p>
+
+  <p><strong>Step 3: still inside <code>GalleryContainer</code>, paste this as a new component</strong> (select <code>GalleryContainer</code> in Tree view first, then paste &mdash; Studio adds it as a sibling of <code>HeaderGallery</code>):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- SkeletonLoadingStack:
+    Control: GroupContainer@1.5.0
+    Variant: AutoLayout
+    Properties:
+      Fill: =RGBA(0, 0, 0, 0)
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =10
+      PaddingTop: =20
+      Visible: =varMainLoading
+      Width: =Parent.Width
+      Y: =1
+    Children:
+      - SkeletonCard1:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            FillPortions: =0
+            Height: =100
+            Width: =Parent.Width - 92
+          Children:
+            - SkelAccentBar1:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =Parent.Height
+                  Width: =8
+            - SkelAvatar1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =25
+                  RadiusBottomLeft: =50
+                  RadiusBottomRight: =50
+                  RadiusTopLeft: =50
+                  RadiusTopRight: =50
+                  Text: =""
+                  Width: =25
+                  X: =25
+                  Y: =70
+            - SkelTitleBar1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =12
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =340
+                  X: =50
+                  Y: =24
+            - SkelSubtitleBar1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =9
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =220
+                  X: =50
+                  Y: =44
+            - SkelPill1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =16
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Text: =""
+                  Width: =46
+                  X: =Parent.Width - 90
+                  Y: =20</pre></div>
+  <p>Every shape inside <code>SkeletonCard1</code> reads the same <code>Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)</code> formula, so nothing needs a per-control timer binding &mdash; flip <code>varSkeletonPulse</code> once, every block darkens or lightens together. <code>FillPortions: =0</code> on <code>SkeletonCard1</code> matters: it's a <code>ManualLayout</code> container sitting inside an <code>AutoLayout</code> stack, and skipping this is exactly the bug that broke <code>ViewItem_1</code>'s layout earlier in this project (a <code>ManualLayout</code> child defaults to flexible height and ignores its own <code>Height</code> unless <code>FillPortions</code> is explicitly zeroed).</p>
+
+  <p><strong>Step 4: duplicate the card two more times.</strong> Right-click <code>SkeletonCard1</code> in Tree view &rarr; Duplicate, twice. No property edits needed on the copies &mdash; every value is either a fixed shape offset or the shared <code>varSkeletonPulse</code> formula, so three identical cards stacked by <code>SkeletonLoadingStack</code>'s <code>LayoutGap: =10</code> is enough to read as "a few rows loading," matching the mockup.</p>
+
+  <p><strong>Step 5: hide the real gallery while the skeleton shows.</strong> Select <code>HeaderGallery</code> in Tree view, add:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Visible: =!varMainLoading</pre></div>
+
+  <p>Item 7's spinner-colour fix still applies underneath this as a fallback (first paint, or if <code>LoadingSpinner</code> ever fires for some other data call on this screen) &mdash; do that one too, they're not mutually exclusive.</p>
+
+  <div class="test">Test: navigate to Main from a cold load. You should see three pulsing grey cards in the exact slot the real cards occupy, no spinner at all, then a clean swap to real data once the refresh completes. Compare directly against the "Simulate opening Main" button on the mockup link above &mdash; the pulse timing and shape should match.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
