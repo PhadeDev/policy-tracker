@@ -73,6 +73,7 @@
     <a href="#f6"><span class="toc-num">6.</span> ViewItem: links panel still flickers and resets after ticking a box</a>
     <a href="#f7"><span class="toc-num">7.</span> Links panel goes blank and reloads every single open, even with items 1 and 6 applied</a>
     <a href="#f8"><span class="toc-num">8.</span> Diagnostic only &mdash; confirm whether OnVisible is firing twice</a>
+    <a href="#f9"><span class="toc-num">9.</span> Root cause found: one card click fires two separate Navigate(ViewItem) calls</a>
   </div>
 
   <h2 id="f1">1. Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh <span class="sev sev-critical">RACE CONDITION, CONFIRMED BROKEN NOW</span></h2>
@@ -916,6 +917,31 @@ If(
 Set(varOnVisibleRunCount, varOnVisibleRunCount + 1);</pre></div>
 
   <div class="test">Test: open any existing item normally. Watch for toast notifications in the corner &mdash; one toast ("run #1") means <code>OnVisible</code> only fires once and the cause is elsewhere (likely the links <code>Gallery</code> itself, not the formula). Two toasts back to back ("run #1" then "run #2") confirms it's genuinely running twice, and narrows the next fix to finding what triggers the second run. Report back which you see, then remove these two lines afterward either way &mdash; they're diagnostic only, not meant to stay in the app.</div>
+
+  <h2 id="f9">9. Root cause found: one card click fires two separate <code>Navigate(ViewItem)</code> calls <span class="sev sev-critical">CONFIRMED VIA DIAGNOSTIC, EXACT LINE FOUND</span></h2>
+  <p>Two toasts confirmed it. Traced to the exact cause in <code>Main.yaml</code>: every card has an invisible full-card <code>Rectangle</code> named <code>Selector</code> sitting on top as the actual click target (X=46, Width=1194, matching the card exactly). Its <code>OnSelect</code> starts with <code>Select(Parent);</code> &mdash; inside a Gallery template, that line specifically re-triggers the Gallery row's own click handling, which is wired to <code>ReleaseGallery.OnSelect</code> (a separate, older handler: <code>Set(varSelectedRelease, ...); Navigate(ViewItem, ScreenTransition.Fade)</code>). <code>Select()</code> doesn't stop the calling formula &mdash; so after that line fires the Gallery's handler, <code>Selector.OnSelect</code> keeps running its own code afterward, which sets <code>varSelectedRelease</code> again, preloads the links, and calls <code>Navigate(ViewItem, ScreenTransition.Fade)</code> a second time. One click, two full navigations, two <code>OnVisible</code> runs &mdash; the second one repeats the whole load (including the ~1 second <code>colThursdayOptions</code> build from item 6), which is exactly the blank-then-reload you're seeing on the links panel.</p>
+
+  <p><strong>Fix: delete the <code>Select(Parent);</code> line from <code>Selector.OnSelect</code>, nothing else.</strong> Checked first: nothing anywhere in <code>Main.yaml</code> reads <code>ReleaseGallery.Selected</code>, so nothing relies on that line for row-highlighting or any other visible effect &mdash; it's pure duplicate-trigger, safe to remove outright. <code>Selector.OnSelect</code> already does everything <code>ReleaseGallery.OnSelect</code> does and more (it also preloads links), so nothing is lost.</p>
+
+  <p><strong>On <code>Main</code>, find the <code>Selector</code> control</strong> (inside <code>ReleaseGallery</code>'s row template &mdash; it's the full-card rectangle, not the Gallery itself), select its <code>OnSelect</code> property, and replace the whole thing with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectPolicy, "Filled");
+Set(varParentSaved, true);
+Set(varSelectedItem, ThisItem);
+Set(varSourceScreen, "Main");
+Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
+Set(varSelectedPerson, varSelectedRelease.Owner);
+
+// Load links immediately
+Set(varLoadingLinks, true);
+BuildLinksForSource(ThisItem.ID);
+Set(varLoadingLinks, false);
+
+// Navigate to ViewItem
+Navigate(ViewItem, ScreenTransition.Fade);</pre></div>
+
+  <p>Identical to what's there now, minus the first line (<code>Select(Parent);</code>) and its blank line. Once this is in, you can also remove the two diagnostic lines from item 8 &mdash; the toast count should drop to one, and the links panel should stop blanking.</p>
+
+  <div class="test">Test: remove item 8's diagnostic lines from <code>ViewItem.OnVisible</code> first. Then click into several different items from Main. The links panel should appear once and never blank or reload. If you want the diagnostic toast back briefly to double-check it's down to one run, re-add item 8's two lines temporarily, confirm, then remove them again.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
