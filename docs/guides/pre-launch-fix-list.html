@@ -60,6 +60,8 @@
     <div class="progress-card"><div class="count">1</div><div class="label">Data loss, confirmed broken</div></div>
     <div class="progress-card"><div class="count">2</div><div class="label">Missing feature</div></div>
     <div class="progress-card"><div class="count">1</div><div class="label">Performance polish</div></div>
+    <div class="progress-card"><div class="count">1</div><div class="label">Race condition, confirmed broken</div></div>
+    <div class="progress-card"><div class="count">1</div><div class="label">Visual polish</div></div>
   </div>
 
   <div class="toc">
@@ -69,6 +71,8 @@
     <a href="#f3"><span class="toc-num">3.</span> Overview cards don't sort Top Item to the top</a>
     <a href="#f4"><span class="toc-num">4.</span> Consultation Only items never appear on Main once their date passes</a>
     <a href="#f5"><span class="toc-num">5.</span> Owner briefly shows the previous item's owner before catching up</a>
+    <a href="#f6"><span class="toc-num">6.</span> Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh</a>
+    <a href="#f7"><span class="toc-num">7.</span> Navy blue loading spinner on Main and StartScreen</a>
   </div>
 
   <h2 id="f1">1. Invalid formula in ViewItem.OnVisible &mdash; do this one first, before anything else <span class="sev sev-critical">TOP PRIORITY, LIKELY ROOT CAUSE OF THE OWNER BUG TOO</span></h2>
@@ -384,6 +388,95 @@ Reset(cmb_Owner1)</pre></div>
   <p>Both the normal load path and the deep-link path now build <code>varOwnerDefault</code> as a plain <code>Table({DisplayName:, Mail:})</code> straight from data already on the record, same two-field shape the existing Save logic already uses elsewhere on this screen (<code>Set(varOwnerDefault, Table({DisplayName: cmb_Owner1.Selected.DisplayName, Mail: cmb_Owner1.Selected.Mail}))</code>), so nothing downstream needs to change, only where the value comes from.</p>
 
   <div class="test">Test: open one item, note the owner, close, open a different item with a different owner. Owner should now show correctly straight away with no visible flash of the previous person.</div>
+
+  <h2 id="f6">6. Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh <span class="sev sev-critical">RACE CONDITION, CONFIRMED BROKEN NOW</span></h2>
+  <p>Matches what you saw directly: open an existing item, click Top Item, it unticks itself; click again, unticks again; eventually it sticks. Close without saving and reopen the same item and it can briefly show ticked, then flip back to unticked a moment later once the links pane finishes loading.</p>
+
+  <p>Root cause is ordering, not the checkbox itself. <code>ckbTopItem1.Default</code> reads <code>varSelectedRelease.'Top Item'</code>, which is already correct the instant the screen opens &mdash; but the block of <code>Reset(...)</code> calls that actually pushes that value onto the visible controls (<code>Reset(ckbTopItem1)</code> and 15 others) sits at the very end of <code>OnVisible</code>, <strong>after</strong> <code>Refresh(PolicyLinks)</code>. That's an unscoped refresh of the entire PolicyLinks list, and Power Fx runs each <code>;</code>-chained statement one at a time, waiting for the previous one to finish &mdash; so every <code>Reset()</code>, including Top Item's, sits blocked behind that network round trip on every single visit.</p>
+
+  <p>If you click Top Item while that refresh is still in flight, you see your click land, then the queued <code>Reset(ckbTopItem1)</code> finally fires once the refresh completes and snaps it straight back to the old SharePoint value, discarding what you just did. Same mechanism explains the delayed "flicker" on reopen and the general feeling that fields populate a little late &mdash; they're not slow themselves, they're stuck in a queue behind an unrelated large-list refresh.</p>
+
+  <p>The fix doesn't touch the links loading logic at all &mdash; it just moves the <code>Reset(...)</code> block to run immediately after <code>varSelectedRelease</code> is finalized, <strong>before</strong> the links refresh starts, so form fields are never gated behind link data again. This full replacement builds directly on top of item 5 above (same <code>Table()</code>-based Owner fix, same <code>varDeepLinkNotFound</code> handling from item 1) &mdash; if you've already pasted this property once for items 1 or 5, this is the same property again with just the one block moved.</p>
+
+  <p><strong><code>ViewItem.OnVisible</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Table({DisplayName: User().FullName, Mail: User().Email}),
+        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email})),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1);
+If(
+    !IsBlank(varSelectedRelease.ID),
+    Refresh(PolicyLinks);
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+)</pre></div>
+
+  <p>Only one thing moved: the 16 <code>Reset(...)</code> lines now run right after the deep-link block resolves, before the <code>Refresh(PolicyLinks)</code> / <code>BuildLinksForSource</code> block instead of after it. The links pane (<code>LinksGallery_1</code> / the empty-state placeholder) is unaffected &mdash; both still key off <code>varLoadingLinks</code> exactly as before, they just no longer hold every other field hostage while they load.</p>
+
+  <div class="test">Test: open an existing item and immediately click Top Item once, before the links pane has finished appearing on the right. It should stick on the first click, no unticking. Then close without saving and reopen the same item &mdash; the checkbox should show the correct state immediately, with no flash or delayed flip.</div>
+
+  <h2 id="f7">7. Navy blue loading spinner on Main and StartScreen <span class="sev sev-polish">VISUAL POLISH</span></h2>
+  <p><code>Main.yaml</code> and <code>StartScreen.yaml</code> both still have the screen's built-in <code>LoadingSpinnerColor</code> set to <code>RGBA(56, 96, 178, 1)</code>, a steel/navy blue left over from before the app's green branding was settled. Every other screen (<code>ViewItem</code>, <code>NewsletterPack</code>) was already updated to the app's real accent, <code>RGBA(11, 74, 54, 1)</code>. This is the spinner you're seeing on Main whenever a gallery's data source is loading &mdash; it's the built-in Power Apps data-refresh spinner, not a custom control, so a one-line property change on each screen fixes it everywhere it appears.</p>
+
+  <p><strong>On <code>Main</code>, click the screen itself in Tree view (not a control inside it), find <code>LoadingSpinnerColor</code> in the properties list, and replace it with:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=RGBA(11, 74, 54, 1)</pre></div>
+
+  <p><strong>Repeat the same change on <code>StartScreen</code></strong> (same property, same value).</p>
+
+  <div class="test">Test: navigate to Main from a cold load (or force a refresh) and watch for the spinner while the gallery populates &mdash; it should now be the same dark green used everywhere else in the app instead of blue.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
