@@ -74,6 +74,7 @@
     <a href="#f7"><span class="toc-num">7.</span> Links panel goes blank and reloads every single open, even with items 1 and 6 applied</a>
     <a href="#f8"><span class="toc-num">8.</span> Diagnostic only &mdash; confirm whether OnVisible is firing twice</a>
     <a href="#f9"><span class="toc-num">9.</span> Root cause found: one card click fires two separate Navigate(ViewItem) calls</a>
+    <a href="#f10"><span class="toc-num">10.</span> Real preloading: skip the reload entirely when the links were already fetched before navigating</a>
   </div>
 
   <h2 id="f1">1. Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh <span class="sev sev-critical">RACE CONDITION, CONFIRMED BROKEN NOW</span></h2>
@@ -942,6 +943,44 @@ Navigate(ViewItem, ScreenTransition.Fade);</pre></div>
   <p>Identical to what's there now, minus the first line (<code>Select(Parent);</code>) and its blank line. Once this is in, you can also remove the two diagnostic lines from item 8 &mdash; the toast count should drop to one, and the links panel should stop blanking.</p>
 
   <div class="test">Test: remove item 8's diagnostic lines from <code>ViewItem.OnVisible</code> first. Then click into several different items from Main. The links panel should appear once and never blank or reload. If you want the diagnostic toast back briefly to double-check it's down to one run, re-add item 8's two lines temporarily, confirm, then remove them again.</div>
+
+  <h2 id="f10">10. Real preloading: skip the reload entirely when the links were already fetched before navigating <span class="sev sev-bug">BIGGER CHANGE, THREE SMALL ANCHORED EDITS &mdash; NOT A FULL PASTE THIS TIME</span></h2>
+  <p>You weren't wrong about the old behaviour &mdash; item 9 just proved it. <code>Selector.OnSelect</code> on <code>Main</code> already calls <code>BuildLinksForSource(ThisItem.ID)</code> and populates <code>colLinks</code> correctly <em>before</em> it navigates. But <code>ViewItem.OnVisible</code> has no way to know that already happened, so its very first line unconditionally sets <code>varLoadingLinks</code> back to <code>true</code>, hides the panel, and makes you sit through the rest of the formula (including the <code>colThursdayOptions</code> build) before showing you data that was ready from the moment you clicked. This teaches <code>OnVisible</code> to check first.</p>
+
+  <p>Because your files have changed with almost every item on this page today, these are given as three small, precisely anchored edits &mdash; find the exact text named, not a whole-property paste over something that might have moved since I last saw it.</p>
+
+  <p><strong>Edit 1 &mdash; <code>Formulas.txt</code> (the <code>BuildLinksForSource</code> user-defined function, on <code>App</code>'s <code>Formulas</code> property):</strong> find the line that just says <code>true</code>, immediately before the function's closing <code>};</code>. Add one line directly above it:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varLinksSourceID, SourceID);</pre></div>
+  <p>This tags which item's links are currently sitting in <code>colLinks</code>, automatically, everywhere this function is already called &mdash; <code>Selector.OnSelect</code> on Main, both places in <code>ViewItem.OnVisible</code>, and the add/delete-link handlers. No other call site needs touching for this part.</p>
+
+  <p><strong>Edit 2 &mdash; <code>ViewItem.OnVisible</code>, the very first line.</strong> Find <code>Set(varLoadingLinks, true);</code> at the top of the formula (before <code>Set(varSaving, false);</code>) and replace <em>only that one line</em> with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varLoadingLinks, varLinksSourceID &lt;&gt; varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));</pre></div>
+  <p>If the links already loaded for this exact item (tagged by edit 1), this evaluates to <code>false</code> and the panel never hides at all. Anything else &mdash; a different item, a brand new entry, or any of the few navigation paths that don't preload (search results, the older gallery click-through) &mdash; falls back to the normal loading behaviour, unchanged.</p>
+
+  <p><strong>Edit 3 &mdash; <code>ViewItem.OnVisible</code>, the final block near the bottom.</strong> Find this exact block (the last <code>If</code> in the formula):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varSelectedRelease.ID),
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
+  <p>Replace it with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varSelectedRelease.ID),
+    If(
+        varLinksSourceID &lt;&gt; varSelectedRelease.ID,
+        BuildLinksForSource(varSelectedRelease.ID)
+    );
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
+  <p>Skips the redundant rebuild when the data's already correct (harmless either way, but no reason to re-filter <code>PolicyLinks</code> twice for nothing).</p>
+
+  <div class="note"><strong>Why not just always skip loading in OnVisible:</strong> only the card <code>Selector</code> on Main preloads before navigating. The "+ New Entry" button, search results, and a couple of older call sites don't &mdash; this fix specifically only skips the wait when the preload genuinely already happened for this exact item, so those other paths behave exactly as before, just without the double-load bug from item 9.</p></div>
+
+  <div class="test">Test: click into several different items from Main, one after another. Links should now appear with the item, no visible loading gap at all &mdash; genuinely instant, not just "loads once instead of twice." Then try the same via search results (if you use that path) and confirm it still shows a brief normal load there, since that path was never covered by the preload.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
