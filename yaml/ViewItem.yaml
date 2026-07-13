@@ -73,14 +73,6 @@ Screens:
             );
             Set(varLoading, false)
         );
-        If(
-            !IsBlank(varSelectedRelease.ID),
-            Refresh(PolicyLinks);
-            BuildLinksForSource(varSelectedRelease.ID);
-            Set(varLoadingLinks, false),
-            Clear(colLinks);
-            Set(varLoadingLinks, false)
-        );
         Reset(txtTitle1);
         Reset(drpDocType1);
         Reset(dpkPublishDate1);
@@ -97,7 +89,15 @@ Screens:
         Reset(radApproval1);
         Reset(ckbPublished1);
         Reset(dpkPublishedDate1);
-        Reset(cmb_Owner1)
+        Reset(cmb_Owner1);
+        If(
+            !IsBlank(varSelectedRelease.ID),
+            Refresh(PolicyLinks);
+            BuildLinksForSource(varSelectedRelease.ID);
+            Set(varLoadingLinks, false),
+            Clear(colLinks);
+            Set(varLoadingLinks, false)
+        );
     Children:
       - conScreen1:
           Control: GroupContainer@1.5.0
@@ -1224,7 +1224,7 @@ Screens:
                               DropShadow: =DropShadow.None
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
-                              Height: =400
+                              Height: =550
                               LayoutDirection: =LayoutDirection.Vertical
                               LayoutGap: =10
                               PaddingBottom: =18
@@ -1262,6 +1262,16 @@ Screens:
                                     Size: =12
                                     Text: ="Top Item"
                                     Width: =Parent.Width - 36
+                              - Label3:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Text: ="Newsletter Title:"
+                                    Width: =175
                               - txtNewsletterTitle1:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
@@ -1270,7 +1280,7 @@ Screens:
                                     Default: =Coalesce(varSelectedRelease.'Title for Newsletter', "")
                                     DelayOutput: =true
                                     Font: =Font.'Open Sans'
-                                    HintText: ="Title for Newsletter"
+                                    HintText: =
                                     HoverBorderColor: =RGBA(11, 74, 54, 1)
                                     OnChange: =Set(varUnsavedChanges, true)
                                     PaddingLeft: =10
@@ -1279,6 +1289,16 @@ Screens:
                                     RadiusTopLeft: =8
                                     RadiusTopRight: =8
                                     Width: =Parent.Width - 36
+                              - Label3_1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Text: ="Audience:"
+                                    Width: =175
                               - txtAudience1:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
@@ -1287,7 +1307,7 @@ Screens:
                                     Default: =Coalesce(varSelectedRelease.Audience, "")
                                     DelayOutput: =true
                                     Font: =Font.'Open Sans'
-                                    HintText: ="Audience"
+                                    HintText: =
                                     HoverBorderColor: =RGBA(11, 74, 54, 1)
                                     OnChange: =Set(varUnsavedChanges, true)
                                     PaddingLeft: =10
@@ -1296,6 +1316,16 @@ Screens:
                                     RadiusTopLeft: =8
                                     RadiusTopRight: =8
                                     Width: =Parent.Width - 36
+                              - Label3_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Text: ="Summary:"
+                                    Width: =175
                               - txtSummary1:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
@@ -1303,11 +1333,13 @@ Screens:
                                     BorderThickness: =1
                                     Default: =Coalesce(varSelectedRelease.'Item summary', "")
                                     DelayOutput: =true
+                                    EnableSpellCheck: =true
                                     FillPortions: =1
                                     Font: =Font.'Open Sans'
                                     Height: =90
-                                    HintText: ="Item Summary"
+                                    HintText: =
                                     HoverBorderColor: =RGBA(11, 74, 54, 1)
+                                    LayoutMinHeight: =150
                                     Mode: =TextMode.MultiLine
                                     OnChange: =Set(varUnsavedChanges, true)
                                     PaddingLeft: =10
@@ -1500,7 +1532,7 @@ Screens:
                                     Default: =Coalesce(PlainText(varSelectedRelease.Remarks), "")
                                     DelayOutput: =true
                                     Font: =Font.'Open Sans'
-                                    Height: =90
+                                    Height: =150
                                     HintText: ="Remarks"
                                     HoverBorderColor: =RGBA(11, 74, 54, 1)
                                     Mode: =TextMode.MultiLine
@@ -2715,12 +2747,23 @@ Screens:
                         PaddingRight: =24
                       Children:
                         - btnCancelModal1_2:
-                            Control: Button@0.0.45
+                            Control: ModernButton@1.0.0
                             Properties:
-                              Appearance: ='ButtonCanvas.Appearance'.Outline
+                              Align: =Align.Center
+                              Appearance: =ButtonAppearance.Outline
+                              FontWeight: =""
                               OnSelect: |-
                                 =UpdateContext({locDisplayDiscardPopUp: false})
-                              Text: ="Cancel"
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =5
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Text: ="No, Cancel"
+                              VerticalAlign: =VerticalAlign.Middle
                         - btnModalAction1_2:
                             Control: ModernButton@1.0.0
                             Properties:
@@ -2736,14 +2779,14 @@ Screens:
                                 Set(varShowLinkModal, false);
                                 If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
                               PaddingBottom: =5
-                              PaddingLeft: =12
-                              PaddingRight: =12
+                              PaddingLeft: =5
+                              PaddingRight: =5
                               PaddingTop: =5
                               RadiusBottomLeft: =4
                               RadiusBottomRight: =4
                               RadiusTopLeft: =4
                               RadiusTopRight: =4
-                              Text: ="Discard"
+                              Text: ="Yes, Discard"
                               VerticalAlign: =VerticalAlign.Middle
       - tmrDeepLinkNotFound:
           Control: Timer@2.1.0

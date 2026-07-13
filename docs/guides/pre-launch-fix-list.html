@@ -58,7 +58,7 @@
   <div class="warn"><strong>Incident, 2026-07-13, corrected twice now &mdash; here's the actual timeline:</strong> item 1's original formula was built from old, unverified guide text and broke <code>ViewItem.OnVisible</code> when pasted in. The first "fix" for that was built from a local file that turned out to be a stale 2026-07-09 export &mdash; it was missing an entire block (<code>varPlannedPublishDate</code>, <code>varShowThursdayPicker</code>, the 104-week <code>colThursdayOptions</code> collection) that had been added since, from a Thursday-date-picker feature this file was never re-synced against. That's the "variables missing" you hit. You recovered by hand from your own posted copy in issue #27, which was the right move. The formula below is now rebuilt against <em>that exact file</em> &mdash; issue #27's <code>2-ViewItem.txt</code>, byte-diffed line by line &mdash; with only the one intended change on top (<code>Reset(...)</code> block moved earlier). It also turns out the <code>cmb_Owner1</code> reset and <code>Table()</code>-based Owner fix I dismissed as "speculative" earlier today were real and correctly applied &mdash; that was wrong of me to claim, sorry. Local files in this repo have now been re-synced to issue #27 so this doesn't happen a third time.</div>
 
   <div class="progress-summary">
-    <div class="progress-card"><div class="count">1</div><div class="label">Race condition, confirmed broken</div></div>
+    <div class="progress-card"><div class="count">2</div><div class="label">Race condition, confirmed broken</div></div>
     <div class="progress-card"><div class="count">2</div><div class="label">Visual polish</div></div>
   </div>
 
@@ -67,6 +67,7 @@
     <a href="#f1"><span class="toc-num">1.</span> Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh</a>
     <a href="#f2"><span class="toc-num">2.</span> Navy blue loading spinner on Main and StartScreen</a>
     <a href="#f3"><span class="toc-num">3.</span> Skeleton-card loading state for Main, replaces the built-in spinner entirely</a>
+    <a href="#f4"><span class="toc-num">4.</span> Skeleton cards don't appear on tab switch, blue spinner still flashes there</a>
   </div>
 
   <h2 id="f1">1. Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh <span class="sev sev-critical">RACE CONDITION, CONFIRMED BROKEN NOW</span></h2>
@@ -309,6 +310,100 @@ OnTimerEnd: =Set(varSkeletonPulse, 1 - varSkeletonPulse)</pre></div>
   <p>Item 2's spinner-colour fix still applies underneath this as a fallback (first paint, or if <code>LoadingSpinner</code> ever fires for some other data call on this screen) &mdash; do that one too, they're not mutually exclusive.</p>
 
   <div class="test">Test: navigate to Main from a cold load. You should see three pulsing grey cards in the exact slot the real cards occupy, no spinner at all, then a clean swap to real data once the refresh completes. Compare directly against the "Simulate opening Main" button on the mockup link above &mdash; the pulse timing and shape should match.</div>
+
+  <h2 id="f4">4. Skeleton cards don't appear on tab switch, blue spinner still flashes there <span class="sev sev-critical">SCOPE GAP IN ITEM 3, CONFIRMED AGAINST YOUR LATEST FILES</span></h2>
+  <p>You did item 3 exactly right &mdash; checked your latest <code>Main.yaml</code> from issue #27 directly and <code>tmrSkeletonPulse</code>, <code>SkeletonLoadingStack</code>, and <code>HeaderGallery.Visible: =!varMainLoading</code> are all there, correct, matching the guide. The gap is mine: item 3 only ever set <code>varMainLoading</code> inside <code>Main.OnVisible</code>, which fires once when you navigate <em>onto</em> Main. It does not fire when you click Future/Issues/etc. while you're already sitting on Main &mdash; so on every tab click, <code>varMainLoading</code> just never moves, the skeleton never shows, and the real gallery never hides.</p>
+
+  <p>Separately, and this is what you're actually seeing as the leftover blue: all four dashboard tab buttons (<code>Button2</code>, <code>Button2_1</code>, <code>Button2_2</code>, <code>Button2_3</code>) and the "My items only" toggle (<code>MyItems</code>) each call <code>Refresh('Policy Proof Tracker')</code> directly in their own <code>OnSelect</code>/<code>OnChange</code> &mdash; a real network round-trip, on every single click, completely independent of <code>OnVisible</code>. That's a genuine live data fetch, which is exactly why it's brief but real ("a fraction of a second"), and it's what's actually producing the flash you're seeing &mdash; item 2's screen-level colour fix doesn't reach it because this isn't the screen's own spinner, it's tied to these five controls' own data calls.</p>
+
+  <p><strong>Fix: wrap the same <code>varMainLoading</code> flag around each of these five controls' existing <code>Refresh()</code> call</strong>, same pattern as <code>OnVisible</code>. Nothing else in any of these formulas changes &mdash; every line below except the two new <code>Set(varMainLoading, ...)</code> lines is copied verbatim from your issue #27 <code>1-Main.txt</code>.</p>
+
+  <p><strong><code>Button2</code> (Due Next 4 Weeks / "Current" tab), <code>OnSelect</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varMainLoading, true);
+Refresh('Policy Proof Tracker');
+Set(varSelectedState, "Current");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' >= Today() &&
+        'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery);
+Set(varMainLoading, false)</pre></div>
+
+  <p><strong><code>Button2_1</code> (Future Releases tab), <code>OnSelect</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varMainLoading, true);
+Refresh('Policy Proof Tracker');
+Set(varSelectedState, "Future");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' > DateAdd(Today(), 28, "Days") &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery);
+Set(varMainLoading, false)</pre></div>
+
+  <p><strong><code>Button2_2</code> (Issues tab), <code>OnSelect</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varMainLoading, true);
+Refresh('Policy Proof Tracker');
+Set(varSelectedState, "UnapprovedHistoric");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' < Today() &&
+        Published = false &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery);
+Set(varMainLoading, false)</pre></div>
+
+  <p><strong><code>Button2_3</code> (Previously Published / "Historic" tab), <code>OnSelect</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varMainLoading, true);
+Refresh('Policy Proof Tracker');
+Set(varSelectedState, "Historic");
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") &&
+        'Planned Publish Date' < Today() &&
+        Published = true &&
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);
+Reset(HeaderGallery);
+Set(varMainLoading, false)</pre></div>
+
+  <p><strong><code>MyItems</code> toggle ("My items only" switch), <code>OnChange</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varMainLoading, true);
+Refresh('Policy Proof Tracker');
+Set(varFilterOwner, Self.Value);
+Set(
+    colTypeCounts,
+    Filter(
+        'Policy Proof Tracker',
+        (
+            (varSelectedState = "Current" && 'Planned Publish Date' >= Today() && 'Planned Publish Date' <= DateAdd(Today(), 28, "Days")) ||
+            (varSelectedState = "Future" && 'Planned Publish Date' > DateAdd(Today(), 28, "Days")) ||
+            (varSelectedState = "UnapprovedHistoric" && 'Planned Publish Date' < Today() && Published = false) ||
+            (varSelectedState = "Historic" && 'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") && 'Planned Publish Date' < Today() && Published = true)
+        ) &&
+        (Self.Value = false || Owner.Email = User().Email)
+    )
+);
+Set(varMainLoading, false)</pre></div>
+
+  <div class="note"><strong>Optional belt-and-braces, unverified:</strong> if any blue flash remains after the five pastes above, it's likely <code>HeaderGallery</code>'s own built-in loading indicator, which some data-bound controls carry independently of the screen's <code>LoadingSpinnerColor</code>. Try selecting <code>HeaderGallery</code> in Tree view and checking whether a <code>LoadingSpinnerColor</code> property is offered in its properties panel &mdash; if it is, set it to <code>RGBA(11, 74, 54, 1)</code> too. Flagging this as a "check if it exists" rather than a guaranteed paste, since no screen in your app has used this property on a Gallery before and I'm not going to hand you an unverified property block again today.</div>
+
+  <div class="test">Test: from Main, click through all four tabs and the "My items only" toggle in quick succession. Each click should show the three pulsing skeleton cards briefly, no blue flash, then real data. This is the actual everyday interaction you described &mdash; more important to get right than the cold-load case in item 3's test.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
