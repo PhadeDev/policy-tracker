@@ -55,6 +55,8 @@
   <h1>Pre-Launch Fix List, Everything Outstanding</h1>
   <p>3 items on the page today, added 2026-07-13: the Top Item reset race, the navy spinner colour, and the skeleton-card loading state for Main. Everything from the previous round (the OnVisible/Owner fix, the Close-button data-loss fix, Overview sort, Consultation Only visibility, the Owner-flash fix) has been cleared off this page at your request &mdash; see the collapsed list at the bottom if you need to double check exactly what that covered.</p>
 
+  <div class="warn"><strong>Incident, 2026-07-13:</strong> item 1's formula below was originally built from old, never-independently-verified guide text instead of your app's real state, and broke <code>ViewItem.OnVisible</code> when pasted in. It has been rebuilt from scratch, verbatim, off your actual last confirmed GitHub export (<code>yaml/ViewItem.yaml</code>, 2026-07-09) with only the one genuinely-intended change applied on top &mdash; the <code>Reset(...)</code> block moved earlier. If you already recovered using the formula given directly in chat, this is the same thing; no need to paste twice. The speculative <code>cmb_Owner1</code> / <code>varDeepLinkNotFound</code> changes from the old guide are removed entirely &mdash; that fix was never confirmed real and is not included below. If Owner or the deep-link "not found" case still misbehave, they need to be re-diagnosed fresh, not assumed fixed.</div>
+
   <div class="progress-summary">
     <div class="progress-card"><div class="count">1</div><div class="label">Race condition, confirmed broken</div></div>
     <div class="progress-card"><div class="count">2</div><div class="label">Visual polish</div></div>
@@ -76,7 +78,7 @@
 
   <p>The fix doesn't touch the links loading logic at all &mdash; it just moves the <code>Reset(...)</code> block to run immediately after <code>varSelectedRelease</code> is finalized, <strong>before</strong> the links refresh starts, so form fields are never gated behind link data again.</p>
 
-  <div class="note"><strong>Note:</strong> this is a full replacement of the whole <code>OnVisible</code> property, so pasting it lands you in the same correct end state no matter what's currently in that box &mdash; it can't partially apply or revert anything. It also carries the <code>Owner</code>/deep-link fixes from the previous round (removed from this page today, believed already applied) baked in, so if those somehow didn't stick, this paste covers them again for free.</div>
+  <div class="note"><strong>Sourcing on this version:</strong> every line below except the block-move is copied verbatim from <code>yaml/ViewItem.yaml</code> as exported from your GitHub issue #10 on 2026-07-09 &mdash; not guide text, not guessed. The one edit is exactly the fix this item describes: the 16 <code>Reset(...)</code> lines moved from the end of the formula to right after the deep-link block, before the final <code>Refresh(PolicyLinks)</code> block. Nothing else in the formula was touched.</div>
 
   <p><strong><code>ViewItem.OnVisible</code>, full replacement:</strong></p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
@@ -91,8 +93,8 @@ Set(
     varOwnerDefault,
     If(
         IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
-        Table({DisplayName: User().FullName, Mail: User().Email}),
-        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+        Office365Users.SearchUserV2({searchTerm: User().Email, isSearchTermRequired: true, top: 1}).value,
+        Office365Users.SearchUserV2({searchTerm: varSelectedRelease.Owner.Email, isSearchTermRequired: true, top: 1}).value
     )
 );
 If(
@@ -102,20 +104,20 @@ If(
     Set(varLoading, true);
     Refresh('Policy Proof Tracker');
     Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
-    If(
-        !IsBlank(varDeepLinkItem),
-        Set(varSelectedRelease, varDeepLinkItem);
-        Set(varSelectPolicy, "Filled");
-        Set(varParentSaved, true);
-        Set(varSelectedItem, varDeepLinkItem);
-        Set(varSourceScreen, "Main");
-        Set(varSelectedPerson, varDeepLinkItem.Owner);
-        Refresh(PolicyLinks);
-        BuildLinksForSource(varDeepLinkItem.ID);
-        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email})),
-        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
-        Set(varDeepLinkNotFound, true)
-    );
+   If(
+    !IsBlank(varDeepLinkItem),
+    Set(varSelectedRelease, varDeepLinkItem);
+    Set(varSelectPolicy, "Filled");
+    Set(varParentSaved, true);
+    Set(varSelectedItem, varDeepLinkItem);
+    Set(varSourceScreen, "Main");
+    Set(varSelectedPerson, varDeepLinkItem.Owner);
+    Refresh(PolicyLinks);
+    BuildLinksForSource(varDeepLinkItem.ID);
+    Set(varOwnerDefault, Office365Users.SearchUserV2({searchTerm: varDeepLinkItem.Owner.Email, isSearchTermRequired: true, top: 1}).value),
+    Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+    Navigate(Main, ScreenTransition.Fade)
+);
     Set(varLoading, false)
 );
 Reset(txtTitle1);
@@ -134,7 +136,6 @@ Reset(ckbPillarLead1);
 Reset(radApproval1);
 Reset(ckbPublished1);
 Reset(dpkPublishedDate1);
-Reset(cmb_Owner1);
 If(
     !IsBlank(varSelectedRelease.ID),
     Refresh(PolicyLinks);
@@ -144,9 +145,9 @@ If(
     Set(varLoadingLinks, false)
 )</pre></div>
 
-  <p>Only one thing moved versus the previous round's version: the 16 <code>Reset(...)</code> lines now run right after the deep-link block resolves, before the <code>Refresh(PolicyLinks)</code> / <code>BuildLinksForSource</code> block instead of after it. The links pane (<code>LinksGallery_1</code> / the empty-state placeholder) is unaffected &mdash; both still key off <code>varLoadingLinks</code> exactly as before, they just no longer hold every other field hostage while they load.</p>
+  <p>Only one thing moved: the 16 <code>Reset(...)</code> lines now run right after the deep-link block resolves, before the <code>Refresh(PolicyLinks)</code> / <code>BuildLinksForSource</code> block instead of after it. The links pane (<code>LinksGallery_1</code> / the empty-state placeholder) is unaffected &mdash; both still key off <code>varLoadingLinks</code> exactly as before, they just no longer hold every other field hostage while they load. This version keeps the real, currently-live deep-link handling (a direct <code>Navigate(Main, ...)</code> inside <code>OnVisible</code>, which Studio does accept despite an older guide claiming otherwise) rather than any unverified rewrite of it.</p>
 
-  <div class="test">Test: open an existing item and immediately click Top Item once, before the links pane has finished appearing on the right. It should stick on the first click, no unticking. Then close without saving and reopen the same item &mdash; the checkbox should show the correct state immediately, with no flash or delayed flip. While you're in there, also re-check Owner (should show the real owner, not you) and the deep-link "item not found" case, since this formula carries both of those fixes too.</div>
+  <div class="test">Test: open an existing item and immediately click Top Item once, before the links pane has finished appearing on the right. It should stick on the first click, no unticking. Then close without saving and reopen the same item &mdash; the checkbox should show the correct state immediately, with no flash or delayed flip.</div>
 
   <h2 id="f2">2. Navy blue loading spinner on Main and StartScreen <span class="sev sev-polish">VISUAL POLISH</span></h2>
   <p><code>Main.yaml</code> and <code>StartScreen.yaml</code> both still have the screen's built-in <code>LoadingSpinnerColor</code> set to <code>RGBA(56, 96, 178, 1)</code>, a steel/navy blue left over from before the app's green branding was settled. Every other screen (<code>ViewItem</code>, <code>NewsletterPack</code>) was already updated to the app's real accent, <code>RGBA(11, 74, 54, 1)</code>. This is the spinner you're seeing on Main whenever a gallery's data source is loading &mdash; it's the built-in Power Apps data-refresh spinner, not a custom control, so a one-line property change on each screen fixes it everywhere it appears.</p>
@@ -295,14 +296,14 @@ OnTimerEnd: =Set(varSkeletonPulse, 1 - varSkeletonPulse)</pre></div>
   <details class="done-list">
     <summary>Removed 2026-07-13 at your request &mdash; believed fixed, not independently re-verified against a fresh export (click to expand)</summary>
     <ul>
-      <li>Invalid <code>Navigate()</code> call inside <code>ViewItem.OnVisible</code>'s deep-link "not found" branch, replaced with a <code>varDeepLinkNotFound</code> + Timer pattern</li>
       <li>Close button (<code>btnClose1</code>) discarding unsaved edits with no warning &mdash; confirm formula swap landed on the modal's actual X icon (<code>btnCloseModal1_2</code>), not just the main Close button</li>
       <li>Overview cards not sorting Top Item to the top</li>
       <li>Consultation Only items disappearing from Main once their date passes</li>
-      <li>Owner briefly showing the previous item's owner before catching up, fixed by reading <code>varSelectedRelease.Owner</code> directly instead of a fresh Office365Users call</li>
     </ul>
     <p style="margin-top:10px;font-size:.85rem;">If any of these turn out to still be live when you're back in the editor, tell me which one and I'll re-add it rather than you having to redescribe the whole bug from scratch.</p>
   </details>
+
+  <div class="warn"><strong>Re-opened 2026-07-13, status unknown &mdash; do not treat as fixed:</strong> two items that were on the "believed fixed" list above have been pulled off it after the incident today exposed that their original guide entries were speculative, not confirmed against a real export. <strong>The invalid <code>Navigate()</code>-inside-<code>OnVisible</code> theory</strong> &mdash; your real, currently-live formula (see item 1 above) already has a direct <code>Navigate(Main, ...)</code> call inside <code>OnVisible</code> and it's what's actually running today, so the "Studio rejects this" claim in the old guide does not hold up against your real app; no fix needed here unless you're seeing an actual error in Studio. <strong>The Owner-flash fix</strong> (<code>cmb_Owner1</code> reset, <code>Table()</code>-based <code>varOwnerDefault</code>) was never confirmed to match a real control name in your app and is not in any formula on this page anymore &mdash; if Owner still flashes the wrong person briefly when you open an item, that needs a fresh look from scratch, not a re-application of the old fix.</div>
 
 </main>
 <script>
