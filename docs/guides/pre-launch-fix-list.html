@@ -58,8 +58,8 @@
   <div class="warn"><strong>Incident, 2026-07-13, corrected twice now &mdash; here's the actual timeline:</strong> item 1's original formula was built from old, unverified guide text and broke <code>ViewItem.OnVisible</code> when pasted in. The first "fix" for that was built from a local file that turned out to be a stale 2026-07-09 export &mdash; it was missing an entire block (<code>varPlannedPublishDate</code>, <code>varShowThursdayPicker</code>, the 104-week <code>colThursdayOptions</code> collection) that had been added since, from a Thursday-date-picker feature this file was never re-synced against. That's the "variables missing" you hit. You recovered by hand from your own posted copy in issue #27, which was the right move. The formula below is now rebuilt against <em>that exact file</em> &mdash; issue #27's <code>2-ViewItem.txt</code>, byte-diffed line by line &mdash; with only the one intended change on top (<code>Reset(...)</code> block moved earlier). It also turns out the <code>cmb_Owner1</code> reset and <code>Table()</code>-based Owner fix I dismissed as "speculative" earlier today were real and correctly applied &mdash; that was wrong of me to claim, sorry. Local files in this repo have now been re-synced to issue #27 so this doesn't happen a third time.</div>
 
   <div class="progress-summary">
-    <div class="progress-card"><div class="count">2</div><div class="label">Race condition, confirmed broken</div></div>
-    <div class="progress-card"><div class="count">2</div><div class="label">Visual polish</div></div>
+    <div class="progress-card"><div class="count">3</div><div class="label">Race condition, confirmed broken</div></div>
+    <div class="progress-card"><div class="count">3</div><div class="label">Visual polish</div></div>
   </div>
 
   <div class="toc">
@@ -68,6 +68,8 @@
     <a href="#f2"><span class="toc-num">2.</span> Navy blue loading spinner on Main and StartScreen</a>
     <a href="#f3"><span class="toc-num">3.</span> Skeleton-card loading state for Main, replaces the built-in spinner entirely</a>
     <a href="#f4"><span class="toc-num">4.</span> Skeleton cards don't appear on tab switch, blue spinner still flashes there</a>
+    <a href="#f5"><span class="toc-num">5.</span> Skeleton cards missing a header, duplicates rendering blank</a>
+    <a href="#f6"><span class="toc-num">6.</span> ViewItem: links panel still flickers and resets after ticking a box</a>
   </div>
 
   <h2 id="f1">1. Top Item (and every other field) can lose your click &mdash; Reset was waiting on the links refresh <span class="sev sev-critical">RACE CONDITION, CONFIRMED BROKEN NOW</span></h2>
@@ -404,6 +406,396 @@ Set(varMainLoading, false)</pre></div>
   <div class="note"><strong>Optional belt-and-braces, unverified:</strong> if any blue flash remains after the five pastes above, it's likely <code>HeaderGallery</code>'s own built-in loading indicator, which some data-bound controls carry independently of the screen's <code>LoadingSpinnerColor</code>. Try selecting <code>HeaderGallery</code> in Tree view and checking whether a <code>LoadingSpinnerColor</code> property is offered in its properties panel &mdash; if it is, set it to <code>RGBA(11, 74, 54, 1)</code> too. Flagging this as a "check if it exists" rather than a guaranteed paste, since no screen in your app has used this property on a Gallery before and I'm not going to hand you an unverified property block again today.</div>
 
   <div class="test">Test: from Main, click through all four tabs and the "My items only" toggle in quick succession. Each click should show the three pulsing skeleton cards briefly, no blue flash, then real data. This is the actual everyday interaction you described &mdash; more important to get right than the cold-load case in item 3's test.</div>
+
+  <h2 id="f5">5. Skeleton cards missing a header, duplicates rendering blank <span class="sev sev-polish">VISUAL POLISH</span></h2>
+  <p>From your screenshots: one card shows correctly, the two duplicated ones render as blank white boxes with no shapes, and there's nothing mimicking the "Thursday, 16th July 2026 &middot; 1 item" header bar that sits above each group of real cards. The blank duplicates are most likely a Studio "Duplicate" quirk, not a formula problem &mdash; rather than debug that blind, this is a full replacement with three cards spelled out explicitly (no duplicating) plus one placeholder header bar. The header bar is a generic grey shape, not real text &mdash; the skeleton can't know the real date/count before data has loaded, so it mimics the <em>shape</em> of the header (title-width bar + count pill) rather than faking real content.</p>
+
+  <p><strong>Delete <code>SkeletonLoadingStack</code> entirely</strong> (Tree view &rarr; right-click &rarr; Delete), then select <code>GalleryContainer</code> and paste this in its place:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- SkeletonLoadingStack:
+    Control: GroupContainer@1.5.0
+    Variant: AutoLayout
+    Properties:
+      Fill: =RGBA(0, 0, 0, 0)
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =10
+      PaddingTop: =20
+      Visible: =varMainLoading
+      Width: =Parent.Width
+      Y: =1
+    Children:
+      - SkelHeaderBar1:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(244, 246, 243, 1)
+            FillPortions: =0
+            Height: =40
+            Width: =Parent.Width - 92
+          Children:
+            - SkelHeaderTitle1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =14
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =180
+                  X: =14
+                  Y: =13
+            - SkelHeaderPill1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =20
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Text: =""
+                  Width: =54
+                  X: =Parent.Width - 70
+                  Y: =10
+      - SkeletonCard1:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            FillPortions: =0
+            Height: =100
+            Width: =Parent.Width - 92
+          Children:
+            - SkelAccentBar1:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =Parent.Height
+                  Width: =8
+            - SkelAvatar1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =25
+                  RadiusBottomLeft: =50
+                  RadiusBottomRight: =50
+                  RadiusTopLeft: =50
+                  RadiusTopRight: =50
+                  Text: =""
+                  Width: =25
+                  X: =25
+                  Y: =70
+            - SkelTitleBar1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =12
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =340
+                  X: =50
+                  Y: =24
+            - SkelSubtitleBar1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =9
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =220
+                  X: =50
+                  Y: =44
+            - SkelPill1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =16
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Text: =""
+                  Width: =46
+                  X: =Parent.Width - 90
+                  Y: =20
+      - SkeletonCard2:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            FillPortions: =0
+            Height: =100
+            Width: =Parent.Width - 92
+          Children:
+            - SkelAccentBar2:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =Parent.Height
+                  Width: =8
+            - SkelAvatar2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =25
+                  RadiusBottomLeft: =50
+                  RadiusBottomRight: =50
+                  RadiusTopLeft: =50
+                  RadiusTopRight: =50
+                  Text: =""
+                  Width: =25
+                  X: =25
+                  Y: =70
+            - SkelTitleBar2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =12
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =340
+                  X: =50
+                  Y: =24
+            - SkelSubtitleBar2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =9
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =220
+                  X: =50
+                  Y: =44
+            - SkelPill2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =16
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Text: =""
+                  Width: =46
+                  X: =Parent.Width - 90
+                  Y: =20
+      - SkeletonCard3:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            FillPortions: =0
+            Height: =100
+            Width: =Parent.Width - 92
+          Children:
+            - SkelAccentBar3:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =Parent.Height
+                  Width: =8
+            - SkelAvatar3:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =25
+                  RadiusBottomLeft: =50
+                  RadiusBottomRight: =50
+                  RadiusTopLeft: =50
+                  RadiusTopRight: =50
+                  Text: =""
+                  Width: =25
+                  X: =25
+                  Y: =70
+            - SkelTitleBar3:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =12
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =340
+                  X: =50
+                  Y: =24
+            - SkelSubtitleBar3:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =9
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: =""
+                  Width: =220
+                  X: =50
+                  Y: =44
+            - SkelPill3:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderThickness: =0
+                  DisplayMode: =DisplayMode.View
+                  Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                  Height: =16
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Text: =""
+                  Width: =46
+                  X: =Parent.Width - 90
+                  Y: =20</pre></div>
+
+  <p>Validated with <code>payaml-validate</code> before publishing &mdash; all three layers pass clean, no unproven flags (unlike the Timer in item 3, every control type here is already proven elsewhere in your corpus).</p>
+
+  <div class="test">Test: trigger the loading state (cold navigate to Main, or a tab click). You should see one header-shaped bar, then three full cards, all pulsing together, no blank boxes.</div>
+
+  <h2 id="f6">6. ViewItem: links panel still flickers and resets after ticking a box &mdash; a second, different slow operation was still blocking Reset() <span class="sev sev-critical">CONFIRMED, SAME BUG CLASS AS ITEM 1</span></h2>
+  <p>Item 1's Reset-reorder fix is confirmed correctly pasted in your current file &mdash; checked directly, <code>Reset(...)</code> does run before the <code>Refresh(PolicyLinks)</code> block. But your live <code>OnVisible</code> has grown a second slow operation since item 1 was written, sitting <strong>before</strong> <code>Reset(...)</code>: a <code>ClearCollect(colThursdayOptions, ForAll(Sequence(104), ...))</code>, from the Thursday date-picker feature. That's 104 separate <code>Filter</code>+<code>CountRows</code> passes over the whole <code>Policy Proof Tracker</code> list, run unconditionally on every single open &mdash; even though <code>colThursdayOptions</code> is only ever read by the date-picker popover, which isn't even visible until you click to open it. <code>Reset(...)</code> now waits on this instead of on <code>Refresh(PolicyLinks)</code> &mdash; same bug, different cause, which is exactly the "still doing it" you're seeing.</p>
+
+  <p>Checked first: nothing in the <code>Reset(...)</code> list depends on <code>colThursdayOptions</code> or <code>varShowThursdayPicker</code> (only the picker popover itself reads them, confirmed via a direct search of your file). Safe to move that whole block to run <strong>after</strong> <code>Reset(...)</code> instead of before it &mdash; that's the only change below, byte-diffed against your current file to confirm it's a pure reorder, nothing added or removed.</p>
+
+  <p><strong><code>ViewItem.OnVisible</code>, full replacement:</strong></p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, true);
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Table({DisplayName: User().FullName, Mail: User().Email}),
+        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+    )
+);
+Set(
+    varPlannedPublishDate,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.'Planned Publish Date'),
+        DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"),
+        varSelectedRelease.'Planned Publish Date'
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email}));
+        Set(varPlannedPublishDate, varDeepLinkItem.'Planned Publish Date'),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1);
+Set(varShowThursdayPicker, false);
+ClearCollect(
+    colThursdayOptions,
+    ForAll(
+        Sequence(104),
+        With(
+            {_thu: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")},
+            {
+                ThursdayDate: _thu,
+                ItemCount: CountRows(
+                    Filter(
+                        'Policy Proof Tracker',
+                        Year('Planned Publish Date') = Year(_thu) &&
+                        Month('Planned Publish Date') = Month(_thu) &&
+                        Day('Planned Publish Date') = Day(_thu)
+                    )
+                )
+            }
+        )
+    )
+);
+If(
+    !IsBlank(varSelectedRelease.ID),
+    Refresh(PolicyLinks);
+    BuildLinksForSource(varSelectedRelease.ID);
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
+
+  <p>On "can we preload this instead of piecemeal" &mdash; this is the closest practical answer without a bigger rebuild: every field on the left now populates as fast as this formula can possibly run, with zero dependency on either slow operation. The right-side links panel and the Thursday-picker collection still load in the background afterward (Power Fx can't truly run them in parallel within one formula), but they can no longer delay or interfere with anything on the left. A further step &mdash; a single "screen ready" flag gating the whole form behind one skeleton state, similar to Main's, so nothing renders partially at all &mdash; is possible but bigger than today's fix; say if you want that scoped out separately.</p>
+
+  <div class="test">Test: open an existing item and tick Top Item immediately, before anything else has visibly loaded. It should stick on the first click. Then watch the right side while it settles &mdash; the "Add Document Link" panel may still take a moment to populate (that's the real, separate <code>Refresh(PolicyLinks)</code> network call, not fixable without removing that refresh), but the left side and your click should never flicker or reset again.</div>
 
   <details class="done-list">
     <summary>Confirmed done, removed from this page (click to expand)</summary>
