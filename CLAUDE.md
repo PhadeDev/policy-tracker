@@ -2,6 +2,8 @@
 
 Power Apps canvas app. Consult `/var/home/Phaderon/PowerApps/` (the "Power Apps Bible") for general Power Apps rules, known-bad patterns, and control reference — check `reference/database.html` there first.
 
+**This is the only local clone of this repo.** A second, abandoned clone used to exist at `~/PowerApps-Apps/policy-tracker/` (stuck a week+ stale, from the brief paste-as-new-screen phase) and caused a real wrong-answer incident when a session read from it instead of this one — it was deleted 2026-07-14. If you ever see a `policy-tracker` folder anywhere other than here, treat it as suspicious, not as an alternate source of truth.
+
 ## Before writing any "full replacement" formula for OnVisible, a button OnSelect, or anything else already built
 
 **The files in `yaml/` on disk go stale fast.** The user builds live in Studio and only exports back to a GitHub issue when asked — local files can lag behind by hours or days, and the app keeps growing features (e.g. a whole Thursday date-picker block got added to `ViewItem.OnVisible` between two sessions with no warning). Pasting a "full replacement" built from a stale file will silently delete whatever was added since, and it will look like data loss to the user, not like a stale-cache bug.
