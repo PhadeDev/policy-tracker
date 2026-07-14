@@ -34,3 +34,11 @@ BuildLinksForSource(SourceID: Number): Boolean = {
     );
     true
 };
+
+ShowToast(Heading: Text, Message: Text, Type: Text): Boolean = {
+    Set(varToastHeading, Heading);
+    Set(varToastMessage, Message);
+    Set(varToastType, Type);
+    Set(varToastVisible, true);
+    true
+};

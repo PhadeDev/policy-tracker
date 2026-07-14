@@ -15,6 +15,14 @@ Power Apps canvas app. Consult `/var/home/Phaderon/PowerApps/` (the "Power Apps 
 
 For small, well-isolated edits (a single line, a clearly-scoped block), prefer giving anchored "find this exact text, change to this" instructions over a full-property paste — smaller surface area for staleness to matter.
 
+## Write proposed changes into the local files immediately, don't just say them in chat
+
+The user applies changes by hand in Studio and often doesn't re-export for a while. A local file that's current-but-unconfirmed is far more useful than one that's clean-but-stale. So: whenever you propose a formula/property change for any screen, `Formulas.txt`, or `OnStart.txt`, write it directly into the actual file under `yaml/` right away, in the same turn.
+
+**Mark it as proposed, not confirmed applied, using the git commit message** (Power Fx doesn't reliably preserve inline comments through a Studio round-trip, so don't rely on those) — prefix the commit with `PROPOSED:`, e.g. `PROPOSED: add ShowToast() to Formulas.txt`. Once the user confirms they've actually pasted it into Studio, commit again (never rewrite history) noting `CONFIRMED APPLIED` for that same change. `git log` is then an honest audit trail of proposed-vs-applied state, not just a snapshot of "what we think is true."
+
+Before trusting any local file as the app's real current state, check whether its latest relevant commit says `PROPOSED` or `CONFIRMED APPLIED` — a `PROPOSED`-only file is still a guess, just a much more current one than an old GitHub export, and still needs the same "diff against a fresh export before a full-property paste" discipline above.
+
 ## Validation
 
 Run `~/Projects/payaml-validate/validate.sh <file>` on any YAML before handing it over. Run `python3 ~/PowerApps/tools/audit-guide.py <path>` on any guide HTML before publishing — both are also wired as PostToolUse hooks, but check manually too.
