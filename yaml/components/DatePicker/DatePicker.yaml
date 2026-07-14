@@ -1,0 +1,1241 @@
+ComponentDefinitions:
+  cmpCalendar:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      ComponentHeight:
+        PropertyKind: Output
+        DisplayName: Component Height
+        Description: Total height of the component.
+        DataType: Number
+      DarkMode:
+        PropertyKind: Input
+        DisplayName: Dark Mode
+        Description: Enable dark theme.
+        DataType: Boolean
+        Default: =false
+      FederalHolidays:
+        PropertyKind: Output
+        DisplayName: Federal Holidays
+        Description: Table of US federal holidays for the displayed year and adjacent years.
+        DataType: Table
+      OnCancel:
+        PropertyKind: Event
+        DisplayName: On Cancel
+        Description: Triggered when the Cancel button is pressed.
+        ReturnType: None
+        Default: =
+      OnChange:
+        PropertyKind: Event
+        DisplayName: On Change
+        Description: Triggered when a date is selected.
+        ReturnType: None
+        Default: =
+        Parameters:
+          - SelectedDate:
+              Description: The date that was selected
+              DataType: DateAndTime
+              Default: =DateTime(2000, 1, 1, 0, 0, 0)
+      OnClose:
+        PropertyKind: Event
+        DisplayName: On Close
+        Description: Triggered when the close button is pressed.
+        ReturnType: None
+        Default: =
+      OnConfirm:
+        PropertyKind: Event
+        DisplayName: On Confirm
+        Description: Triggered when the OK button is pressed.
+        ReturnType: None
+        Default: =
+      SelectedDate:
+        PropertyKind: Output
+        DisplayName: Selected Date
+        Description: The currently selected date (single select mode).
+        DataType: DateAndTime
+      SelectedDates:
+        PropertyKind: Output
+        DisplayName: Selected Dates
+        Description: Table of all selected dates (multi-select mode).
+        DataType: Table
+      SelectedEndDate:
+        PropertyKind: Output
+        DisplayName: Selected End Date
+        Description: The end date of the selected range (range select mode).
+        DataType: DateAndTime
+      Selection:
+        PropertyKind: Input
+        DisplayName: Selection
+        Description: Date selection defaults, constraints, and highlights.
+        DataType: Record
+        Default: |-
+          ={
+              DefaultDate: Today(),                              // Initial selected date
+              DefaultEndDate: Today() + 7,                       // Initial end date (range mode)
+              DefaultSelection: Table({Value:Date(1899, 1, 1)}), // Initial dates (multi-select mode)
+              MinDate: Date(1900, 1, 1),                         // Earliest selectable date
+              MaxDate: Date(2100, 12, 31),                       // Latest selectable date
+              BlockDates: Table({Value:Date(1899, 1, 1)}),       // Specific dates to block (strikethrough)
+              DisableWeekends: false,                            // Block Sat/Sun (faded, not clickable)
+              BlockFederalHolidays: false,                      // Block US holidays (strikethrough)
+              HighlightDates: Table({Value:Date(1899, 1, 1)}),   // Dates to highlight (highlightFill color)
+              HighlightFederalHolidays: true                     // Highlight US holidays (federalHolidayFill color)
+          }
+      Settings:
+        PropertyKind: Input
+        DisplayName: Settings
+        Description: Display and behavior settings for the calendar.
+        DataType: Record
+        Default: |-
+          ={
+              Title: "Select Date",                 // Header title text
+              DateFormatting: "ddd dd mmm yy",      // Date display format in header
+              FirstDayOfWeek: "Sunday",             // Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday
+              TodayStyle: "circle",                 // circle|bold|none - how to highlight today
+              ShowHeader: true,                     // Show title and selected date
+              ShowFooter: true,                     // Show Cancel/OK buttons
+              ShowCloseButton: true,                // Show X button in header
+              ShowPadding: true,                    // Show adjacent month dates
+              ShowTodayButton: true,                // Show "go to today" button
+              SelectRange: false,                   // Enable start/end date range selection
+              SelectMultiple: false,                // Enable multi-date selection
+              AllowEmptySelection: true,            // Allow deselecting by clicking selected date
+              ShowLegend: true                      // Show color legend below calendar grid
+          }
+      Theme:
+        PropertyKind: Input
+        DisplayName: Theme
+        Description: Color theme configuration for light and dark modes.
+        DataType: Table
+        Default: |-
+          =Table(
+              {
+                  // DARK MODE
+                  mode:"Dark",
+                  selectionFill:RGBA(59, 130, 246, 1),       // Selected date circle
+                  selectionColour:RGBA(255, 255, 255, 1),   // Text on selected date
+                  todayBorderColour:RGBA(59, 130, 246, 1),  // Today ring color
+                  buttonColour:RGBA(59, 130, 246, 1),       // Cancel/button text
+                  containerFill:RGBA(30, 41, 59, 1),        // Card background
+                  backgroundFill:RGBA(51, 65, 85, 1),       // Range fill background
+                  titleColour:RGBA(248, 250, 252, 1),       // Header/title text
+                  textColour:RGBA(203, 213, 225, 1),        // Day numbers
+                  noteColour:RGBA(148, 163, 184, 1),        // Day headers (S,M,T...) & disabled
+                  lineColour:RGBA(71, 85, 105, 1),          // Borders/dividers
+                  highlightFill:RGBA(251, 191, 36, 0.3),    // HighlightDates circle
+                  federalHolidayFill:RGBA(248, 113, 113, 0.3), // Federal holiday circle
+                  hoverFill:RGBA(59, 130, 246, 0.15),       // Hover state
+                  pressFill:RGBA(59, 130, 246, 0.25),       // Press state
+                  adjacentColour:RGBA(148, 163, 184, 0.4),  // Adjacent month dates
+                  rangeFill:RGBA(59, 130, 246, 0.2),        // Range selection fill
+                  disabledFill:RGBA(51, 65, 85, 0.5),       // Disabled state (unused)
+                  nextIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E",
+                  prevIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E",
+                  upIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 15l-6-6-6 6'/%3E%3C/svg%3E",
+                  downIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E",
+                  closeIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E",
+                  todayIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3Ccircle cx='12' cy='15' r='2'/%3E%3C/svg%3E"
+              },
+              {
+                  // LIGHT MODE
+                  mode:"Light",
+                  selectionFill:RGBA(30, 64, 175, 1),        // Selected date circle
+                  selectionColour:RGBA(255, 255, 255, 1),    // Text on selected date
+                  todayBorderColour:RGBA(30, 64, 175, 1),    // Today ring color
+                  buttonColour:RGBA(30, 64, 175, 1),         // Cancel/button text
+                  containerFill:RGBA(255, 255, 255, 1),      // Card background
+                  backgroundFill:RGBA(226, 232, 240, 1),     // Range fill background
+                  titleColour:RGBA(15, 23, 42, 1),           // Header/title text
+                  textColour:RGBA(51, 65, 85, 1),            // Day numbers
+                  noteColour:RGBA(100, 116, 139, 1),         // Day headers (S,M,T...) & disabled
+                  lineColour:RGBA(203, 213, 225, 1),         // Borders/dividers
+                  highlightFill:RGBA(251, 191, 36, 0.25),    // HighlightDates circle
+                  federalHolidayFill:RGBA(239, 68, 68, 0.2), // Federal holiday circle
+                  hoverFill:RGBA(30, 64, 175, 0.1),          // Hover state
+                  pressFill:RGBA(30, 64, 175, 0.15),         // Press state
+                  adjacentColour:RGBA(148, 163, 184, 0.5),   // Adjacent month dates
+                  rangeFill:RGBA(30, 64, 175, 0.15),         // Range selection fill
+                  disabledFill:RGBA(241, 245, 249, 1),       // Disabled state (unused)
+                  nextIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E3A5F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E",
+                  prevIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E3A5F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E",
+                  upIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E3A5F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 15l-6-6-6 6'/%3E%3C/svg%3E",
+                  downIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E3A5F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E",
+                  closeIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E3A5F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E",
+                  todayIcon:"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E3A5F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3Ccircle cx='12' cy='15' r='2'/%3E%3C/svg%3E"
+              }
+          )
+      _CurrentTheme:
+        PropertyKind: Output
+        DisplayName: Current Theme
+        Description: Internal - resolved theme based on DarkMode setting.
+        DataType: Record
+      _Month:
+        PropertyKind: Output
+        DisplayName: Current Month
+        Description: Internal - current displayed month with fallback.
+        DataType: Number
+      _Year:
+        PropertyKind: Output
+        DisplayName: Current Year
+        Description: Internal - current displayed year with fallback.
+        DataType: Number
+    Properties:
+      ComponentHeight: =cntCalendar.Height + cntCalendar.Y * 2
+      FederalHolidays: |-
+        =With(
+            {
+                _py: Self._Year - 1,
+                _cy: Self._Year,
+                _ny: Self._Year + 1
+            },
+            Table(
+                // PREVIOUS YEAR - Fixed date holidays (observed)
+                {HolidayName: "New Year's Day", HolidayDate: With({_d: Date(_py, 1, 1)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _py},
+                {HolidayName: "Juneteenth", HolidayDate: With({_d: Date(_py, 6, 19)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _py},
+                {HolidayName: "Independence Day", HolidayDate: With({_d: Date(_py, 7, 4)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _py},
+                {HolidayName: "Veterans Day", HolidayDate: With({_d: Date(_py, 11, 11)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _py},
+                {HolidayName: "Christmas Day", HolidayDate: With({_d: Date(_py, 12, 25)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _py},
+                // PREVIOUS YEAR - Nth weekday holidays
+                {HolidayName: "MLK Day", HolidayDate: With({_f: Date(_py, 1, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 14), HolidayYear: _py},
+                {HolidayName: "Presidents Day", HolidayDate: With({_f: Date(_py, 2, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 14), HolidayYear: _py},
+                {HolidayName: "Memorial Day", HolidayDate: With({_l: Date(_py, 6, 1) - 1}, _l - Mod(Weekday(_l) - 2 + 7, 7)), HolidayYear: _py},
+                {HolidayName: "Labor Day", HolidayDate: With({_f: Date(_py, 9, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7)), HolidayYear: _py},
+                {HolidayName: "Columbus Day", HolidayDate: With({_f: Date(_py, 10, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 7), HolidayYear: _py},
+                {HolidayName: "Thanksgiving", HolidayDate: With({_f: Date(_py, 11, 1)}, _f + Mod(5 - Weekday(_f) + 7, 7) + 21), HolidayYear: _py},
+                // CURRENT YEAR - Fixed date holidays (observed)
+                {HolidayName: "New Year's Day", HolidayDate: With({_d: Date(_cy, 1, 1)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _cy},
+                {HolidayName: "Juneteenth", HolidayDate: With({_d: Date(_cy, 6, 19)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _cy},
+                {HolidayName: "Independence Day", HolidayDate: With({_d: Date(_cy, 7, 4)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _cy},
+                {HolidayName: "Veterans Day", HolidayDate: With({_d: Date(_cy, 11, 11)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _cy},
+                {HolidayName: "Christmas Day", HolidayDate: With({_d: Date(_cy, 12, 25)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _cy},
+                // CURRENT YEAR - Nth weekday holidays
+                {HolidayName: "MLK Day", HolidayDate: With({_f: Date(_cy, 1, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 14), HolidayYear: _cy},
+                {HolidayName: "Presidents Day", HolidayDate: With({_f: Date(_cy, 2, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 14), HolidayYear: _cy},
+                {HolidayName: "Memorial Day", HolidayDate: With({_l: Date(_cy, 6, 1) - 1}, _l - Mod(Weekday(_l) - 2 + 7, 7)), HolidayYear: _cy},
+                {HolidayName: "Labor Day", HolidayDate: With({_f: Date(_cy, 9, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7)), HolidayYear: _cy},
+                {HolidayName: "Columbus Day", HolidayDate: With({_f: Date(_cy, 10, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 7), HolidayYear: _cy},
+                {HolidayName: "Thanksgiving", HolidayDate: With({_f: Date(_cy, 11, 1)}, _f + Mod(5 - Weekday(_f) + 7, 7) + 21), HolidayYear: _cy},
+                // NEXT YEAR - Fixed date holidays (observed)
+                {HolidayName: "New Year's Day", HolidayDate: With({_d: Date(_ny, 1, 1)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _ny},
+                {HolidayName: "Juneteenth", HolidayDate: With({_d: Date(_ny, 6, 19)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _ny},
+                {HolidayName: "Independence Day", HolidayDate: With({_d: Date(_ny, 7, 4)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _ny},
+                {HolidayName: "Veterans Day", HolidayDate: With({_d: Date(_ny, 11, 11)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _ny},
+                {HolidayName: "Christmas Day", HolidayDate: With({_d: Date(_ny, 12, 25)}, Switch(Weekday(_d), 1, _d + 1, 7, _d - 1, _d)), HolidayYear: _ny},
+                // NEXT YEAR - Nth weekday holidays
+                {HolidayName: "MLK Day", HolidayDate: With({_f: Date(_ny, 1, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 14), HolidayYear: _ny},
+                {HolidayName: "Presidents Day", HolidayDate: With({_f: Date(_ny, 2, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 14), HolidayYear: _ny},
+                {HolidayName: "Memorial Day", HolidayDate: With({_l: Date(_ny, 6, 1) - 1}, _l - Mod(Weekday(_l) - 2 + 7, 7)), HolidayYear: _ny},
+                {HolidayName: "Labor Day", HolidayDate: With({_f: Date(_ny, 9, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7)), HolidayYear: _ny},
+                {HolidayName: "Columbus Day", HolidayDate: With({_f: Date(_ny, 10, 1)}, _f + Mod(2 - Weekday(_f) + 7, 7) + 7), HolidayYear: _ny},
+                {HolidayName: "Thanksgiving", HolidayDate: With({_f: Date(_ny, 11, 1)}, _f + Mod(5 - Weekday(_f) + 7, 7) + 21), HolidayYear: _ny}
+            )
+        )
+      Height: =540
+      OnReset: |-
+        =// Set year and month for default date
+        Set(varCalendarYear, Year(Self.Selection.DefaultDate));
+        Set(varCalendarMonth, Month(Self.Selection.DefaultDate));
+
+        // Set output and helper variables 
+        Set(varCalendarSelDate, Self.Selection.DefaultDate);
+        Set(varCalendarEndDate, If(Self.Settings.SelectRange, Self.Selection.DefaultEndDate, Blank()));
+        Set(varCalendarThisDate, If(Self.Settings.SelectRange, Self.Selection.DefaultDate, Blank()));
+        Set(varCalendarLastDate, Blank());
+        Set(varCalendarShowYears, false);
+        Set(varCalendarShowMonths, false);
+
+        // Setup multi select collection
+        If(
+            Self.Settings.SelectMultiple,
+            ClearCollect(colCalendarSelected, Self.Selection.DefaultSelection);
+            Set(varCalendarSelDate, Blank()),
+            Clear(colCalendarSelected)
+        );
+
+        // Reset year select gallery
+        Reset(galCalendarYears);
+      SelectedDate: =varCalendarSelDate
+      SelectedDates: =colCalendarSelected
+      SelectedEndDate: =varCalendarEndDate
+      Width: =320
+      _CurrentTheme: =LookUp(Self.Theme, mode = If(Self.DarkMode, "Dark", "Light"))
+      _Month: =Coalesce(varCalendarMonth, Month(Self.Selection.DefaultDate))
+      _Year: =Coalesce(varCalendarYear, Year(Self.Selection.DefaultDate))
+    Children:
+      - cntCalendar:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =cmpCalendar._CurrentTheme.containerFill
+            Height: =Parent.Height - Self.Y * 2
+            RadiusBottomLeft: =16
+            RadiusBottomRight: =16
+            RadiusTopLeft: =16
+            RadiusTopRight: =16
+            Width: =Parent.Width - Self.X * 2
+            X: =5
+            Y: =5
+          Children:
+            - cntCalendarHeader:
+                Control: GroupContainer@1.4.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =If(Self.Visible, Max(lblCalendarHeaderDate.Y + lblCalendarHeaderDate.Height + 10, cntCalendarHeaderToday.Y + cntCalendarHeaderToday.Height + 10), 0)
+                  Visible: =cmpCalendar.Settings.ShowHeader
+                  Width: =Parent.Width
+                Children:
+                  - shpCalendarHeaderDivider:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =cmpCalendar._CurrentTheme.lineColour
+                        Height: =1
+                        Width: =Parent.Width
+                        Y: =Parent.Height - 1
+                  - lblCalendarHeaderTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        Color: =cmpCalendar._CurrentTheme.noteColour
+                        Font: =Font.'Open Sans'
+                        PaddingLeft: =20
+                        Size: =10
+                        Text: =Upper(cmpCalendar.Settings.Title)
+                        Width: =cntCalendarHeaderClose.X - cntCalendarHeaderToday.Width - 10
+                        Y: =12
+                  - lblCalendarHeaderDate:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        Color: =If(Self.Text = "No date selected", cmpCalendar._CurrentTheme.noteColour, cmpCalendar._CurrentTheme.titleColour)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Semibold
+                        Italic: =Self.Text = "No date selected"
+                        PaddingLeft: =20
+                        PaddingRight: =10
+                        Size: =16
+                        Text: |-
+                          =Coalesce(
+                              If(
+                                  cmpCalendar.Settings.SelectRange,
+                                  Text(varCalendarSelDate, cmpCalendar.Settings.DateFormatting) & If(!IsBlank(varCalendarEndDate), " - " & Text(varCalendarEndDate, cmpCalendar.Settings.DateFormatting)),
+                                  If(
+                                      cmpCalendar.Settings.SelectMultiple,
+                                      CountRows(colCalendarSelected) & " dates selected",
+                                      Text(varCalendarSelDate, cmpCalendar.Settings.DateFormatting)
+                                  )
+                              ),
+                              "No date selected"
+                          )
+                        Width: =cntCalendarHeaderToday.X - 10
+                        Y: =lblCalendarHeaderTitle.Y + lblCalendarHeaderTitle.Height
+                  - cntCalendarHeaderToday:
+                      Control: GroupContainer@1.4.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =36
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =cmpCalendar.Settings.ShowTodayButton
+                        Width: =36
+                        X: =If(cmpCalendar.Settings.ShowCloseButton, cntCalendarHeaderClose.X - Self.Width - 5, Parent.Width - Self.Width - 10)
+                        Y: =10
+                      Children:
+                        - imgCalendarHeaderToday:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Parent.Height
+                              Image: =cmpCalendar._CurrentTheme.todayIcon
+                              PaddingBottom: =8
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              PaddingTop: =8
+                              Width: =Parent.Width
+                        - btnCalendarHeaderToday:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderThickness: =0
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =0
+                              Height: =Parent.Height
+                              HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                              OnSelect: =Set(varCalendarYear, Year(Today()));Set(varCalendarMonth, Month(Today()))
+                              PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                              Text: =""
+                              Tooltip: ="Go to Today"
+                              Width: =Parent.Width
+                  - cntCalendarHeaderClose:
+                      Control: GroupContainer@1.4.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =36
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =cmpCalendar.Settings.ShowCloseButton
+                        Width: =36
+                        X: =Parent.Width - Self.Width - 10
+                        Y: =10
+                      Children:
+                        - imgCalendarHeaderClose:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Parent.Height
+                              Image: =cmpCalendar._CurrentTheme.closeIcon
+                              PaddingBottom: =8
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              PaddingTop: =8
+                              Width: =Parent.Width
+                        - btnCalendarHeaderClose:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderThickness: =0
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =0
+                              Height: =Parent.Height
+                              HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                              OnSelect: =cmpCalendar.OnClose()
+                              PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                              Text: =""
+                              Tooltip: ="Close"
+                              Width: =Parent.Width
+            - cntCalendarInner:
+                Control: GroupContainer@1.4.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =Parent.Height - cntCalendarHeader.Height - cntCalendarLegend.Height - cntCalendarFooter.Height
+                  Width: =Parent.Width
+                  Y: =cntCalendarHeader.Height
+                Children:
+                  - cntCalendarOptions:
+                      Control: GroupContainer@1.4.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =40
+                        Width: =Parent.Width - 20
+                        X: =10
+                        Y: =10
+                      Children:
+                        - cntCalendarOptionsMonth:
+                            Control: GroupContainer@1.4.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =Parent.Height
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Width: =lblCalendarOptionsMonth.Width + imgCalendarOptionsArrow.Width
+                            Children:
+                              - lblCalendarOptionsMonth:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =cmpCalendar._CurrentTheme.textColour
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =Parent.Height
+                                    PaddingLeft: =10
+                                    Size: =12
+                                    Text: =Text(Date(cmpCalendar._Year, cmpCalendar._Month, 1), "mmmm yyyy")
+                                    Width: =180
+                              - imgCalendarOptionsArrow:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: =If(varCalendarShowYears || varCalendarShowMonths, cmpCalendar._CurrentTheme.upIcon, cmpCalendar._CurrentTheme.downIcon)
+                                    PaddingBottom: =10
+                                    PaddingTop: =10
+                                    Width: =30
+                                    X: =lblCalendarOptionsMonth.Width
+                              - btnCalendarOptionsMonth:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FocusedBorderThickness: =0
+                                    Height: =Parent.Height
+                                    HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                                    OnSelect: |-
+                                      =If(
+                                          varCalendarShowYears || varCalendarShowMonths,
+                                          Set(varCalendarShowYears, false); Set(varCalendarShowMonths, false),
+                                          Set(varCalendarShowYears, true); Reset(galCalendarYears)
+                                      )
+                                    PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                                    Text: =""
+                                    Width: =Parent.Width
+                        - cntCalendarOptionsPrev:
+                            Control: GroupContainer@1.4.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =Parent.Height
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!varCalendarShowYears && !varCalendarShowMonths
+                              Width: =Self.Height
+                              X: =cntCalendarOptionsNext.X - Self.Width - 5
+                            Children:
+                              - imgCalendarOptionsPrev:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: =cmpCalendar._CurrentTheme.prevIcon
+                                    PaddingBottom: =10
+                                    PaddingTop: =10
+                                    Width: =Parent.Width
+                              - btnCalendarOptionsPrev:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FocusedBorderThickness: =0
+                                    Height: =Parent.Height
+                                    HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                                    OnSelect: |-
+                                      =Set(varCalendarYear, If(cmpCalendar._Month = 1, cmpCalendar._Year - 1, cmpCalendar._Year));
+                                      Set(varCalendarMonth, If(cmpCalendar._Month = 1, 12, cmpCalendar._Month - 1))
+                                    PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                                    Text: =""
+                                    Tooltip: ="Previous month"
+                                    Width: =Parent.Width
+                        - cntCalendarOptionsNext:
+                            Control: GroupContainer@1.4.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =Parent.Height
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!varCalendarShowYears && !varCalendarShowMonths
+                              Width: =Self.Height
+                              X: =Parent.Width - Self.Width
+                            Children:
+                              - imgCalendarOptionsNext:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: =cmpCalendar._CurrentTheme.nextIcon
+                                    PaddingBottom: =10
+                                    PaddingTop: =10
+                                    Width: =Parent.Width
+                              - btnCalendarOptionsNext:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FocusedBorderThickness: =0
+                                    Height: =Parent.Height
+                                    HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                                    OnSelect: |-
+                                      =Set(varCalendarYear, If(cmpCalendar._Month = 12, cmpCalendar._Year + 1, cmpCalendar._Year));
+                                      Set(varCalendarMonth, If(cmpCalendar._Month = 12, 1, cmpCalendar._Month + 1))
+                                    PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                                    Text: =""
+                                    Tooltip: ="Next month"
+                                    Width: =Parent.Width
+                  - galCalendarDays:
+                      Control: Gallery@2.15.0
+                      Variant: BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0
+                      Properties:
+                        Height: =36
+                        Items: |-
+                          =With(
+                              {
+                                  _days: ["S", "M", "T", "W", "T", "F", "S"],
+                                  _offset: Switch(
+                                      Lower(cmpCalendar.Settings.FirstDayOfWeek),
+                                      "monday", 1,
+                                      "tuesday", 2,
+                                      "wednesday", 3,
+                                      "thursday", 4,
+                                      "friday", 5,
+                                      "saturday", 6,
+                                      0
+                                  )
+                              },
+                              ForAll(
+                                  Sequence(7),
+                                  {Value: Index(_days, Mod(Value - 1 + _offset, 7) + 1).Value}
+                              )
+                          )
+                        ShowScrollbar: =false
+                        TemplateSize: =Self.Width / 7
+                        Visible: =!varCalendarShowYears && !varCalendarShowMonths
+                        Width: =Parent.Width - 20
+                        X: =10
+                        Y: =cntCalendarOptions.Y + cntCalendarOptions.Height + 5
+                      Children:
+                        - lblCalendarDay:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              Color: =cmpCalendar._CurrentTheme.noteColour
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.TemplateHeight
+                              Size: =11
+                              Text: =ThisItem.Value
+                              Width: =Parent.TemplateWidth
+                  - cntCalendarGrid:
+                      Control: GroupContainer@1.4.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height - Self.Y - 10
+                        Visible: =!varCalendarShowYears && !varCalendarShowMonths
+                        Width: =Parent.Width
+                        Y: =galCalendarDays.Y + galCalendarDays.Height
+                      Children:
+                        - galCalendarRangeRight:
+                            Control: Gallery@2.15.0
+                            Variant: Vertical
+                            Properties:
+                              Height: =galCalendarRows.Height
+                              Items: =Sequence(6)
+                              ShowScrollbar: =false
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height / 6
+                              Visible: =cmpCalendar.Settings.SelectRange && !IsBlank(varCalendarEndDate)
+                              Width: =12
+                              X: =Parent.Width - Self.Width
+                              Y: =galCalendarRows.Y
+                            Children:
+                              - shpCalendarRangeRight:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    Fill: =cmpCalendar._CurrentTheme.backgroundFill
+                                    Height: =Min(Parent.TemplateHeight, galCalendarRows.Width / 7) * 0.85
+                                    Visible: |-
+                                      =With(
+                                          {
+                                              _start: Switch(
+                                                  Lower(cmpCalendar.Settings.FirstDayOfWeek),
+                                                  "monday", StartOfWeek.Monday,
+                                                  "tuesday", StartOfWeek.Tuesday,
+                                                  "wednesday", StartOfWeek.Wednesday,
+                                                  "thursday", StartOfWeek.Thursday,
+                                                  "friday", StartOfWeek.Friday,
+                                                  "saturday", StartOfWeek.Saturday,
+                                                  StartOfWeek.Sunday
+                                              ),
+                                              _firstOfMonth: Date(cmpCalendar._Year, cmpCalendar._Month, 1)
+                                          },
+                                          With(
+                                              {
+                                                  _padDays: Weekday(_firstOfMonth, _start) - 1
+                                              },
+                                              With(
+                                                  {
+                                                      _allDates: ForAll(
+                                                          Sequence(42),
+                                                          DateAdd(_firstOfMonth, Value - _padDays - 1)
+                                                      )
+                                                  },
+                                                  With(
+                                                      {
+                                                          _rowDates: LastN(FirstN(_allDates, 7 * ThisItem.Value), 7)
+                                                      },
+                                                      Last(_rowDates).Value > varCalendarSelDate &&
+                                                      Last(_rowDates).Value < varCalendarEndDate &&
+                                                      !IsBlank(varCalendarSelDate) && 
+                                                      !IsBlank(varCalendarEndDate)
+                                                  )
+                                              )
+                                          )
+                                      )
+                                    Width: =Parent.TemplateWidth + 2
+                                    Y: =Parent.TemplateHeight / 2 - Self.Height / 2
+                        - galCalendarRows:
+                            Control: Gallery@2.15.0
+                            Variant: Vertical
+                            Properties:
+                              Height: =Parent.Height
+                              Items: =Sequence(6)
+                              ShowScrollbar: =false
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height / 6
+                              Width: =Parent.Width - 20
+                              X: =10
+                            Children:
+                              - galCalendarCells:
+                                  Control: Gallery@2.15.0
+                                  Variant: BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0
+                                  Properties:
+                                    Height: =Parent.TemplateHeight
+                                    Items: |-
+                                      =With(
+                                          {
+                                              _start: Switch(
+                                                  Lower(cmpCalendar.Settings.FirstDayOfWeek),
+                                                  "monday", StartOfWeek.Monday,
+                                                  "tuesday", StartOfWeek.Tuesday,
+                                                  "wednesday", StartOfWeek.Wednesday,
+                                                  "thursday", StartOfWeek.Thursday,
+                                                  "friday", StartOfWeek.Friday,
+                                                  "saturday", StartOfWeek.Saturday,
+                                                  StartOfWeek.Sunday
+                                              ),
+                                              _firstOfMonth: Date(cmpCalendar._Year, cmpCalendar._Month, 1)
+                                          },
+                                          With(
+                                              {
+                                                  _padDays: Weekday(_firstOfMonth, _start) - 1
+                                              },
+                                              With(
+                                                  {
+                                                      _allDates: ForAll(
+                                                          Sequence(42),
+                                                          {
+                                                              Date: DateAdd(_firstOfMonth, Value - _padDays - 1),
+                                                              Index: Value
+                                                          }
+                                                      )
+                                                  },
+                                                  LastN(FirstN(_allDates, 7 * ThisItem.Value), 7)
+                                              )
+                                          )
+                                      )
+                                    ShowScrollbar: =false
+                                    TemplateSize: =Self.Width / 7
+                                    Width: =Parent.TemplateWidth
+                                  Children:
+                                    - shpCalendarCellRangeFill:
+                                        Control: Rectangle@2.3.0
+                                        Properties:
+                                          Fill: =cmpCalendar._CurrentTheme.backgroundFill
+                                          Height: =cntCalendarCell.Height
+                                          Visible: =ThisItem.Date >= varCalendarSelDate && ThisItem.Date <= varCalendarEndDate && cmpCalendar.Settings.SelectRange && cntCalendarCell.Visible && !IsBlank(varCalendarEndDate)
+                                          Width: =If(ThisItem.Date = varCalendarEndDate, Parent.TemplateWidth / 2, Parent.TemplateWidth - Self.X) + 2
+                                          X: |-
+                                            =Switch(
+                                                true,
+                                                ThisItem.Date = varCalendarSelDate, cntCalendarCell.X + cntCalendarCell.Width / 2,
+                                                ThisItem.Date = varCalendarEndDate, 0,
+                                                0
+                                            )
+                                          Y: =cntCalendarCell.Y
+                                    - shpCalendarCellHighlight:
+                                        Control: Circle@2.3.0
+                                        Properties:
+                                          Fill: |-
+                                            =If(
+                                                // Federal holiday - show even if blocked
+                                                cmpCalendar.Selection.HighlightFederalHolidays && ThisItem.Date in cmpCalendar.FederalHolidays.HolidayDate,
+                                                cmpCalendar._CurrentTheme.federalHolidayFill,
+                                                // Other disabled dates - no fill
+                                                If(
+                                                    ThisItem.Date < cmpCalendar.Selection.MinDate ||
+                                                    ThisItem.Date > cmpCalendar.Selection.MaxDate ||
+                                                    ThisItem.Date in cmpCalendar.Selection.BlockDates.Value ||
+                                                    (cmpCalendar.Selection.DisableWeekends && Weekday(ThisItem.Date) in [1, 7]),
+                                                    RGBA(0, 0, 0, 0),
+                                                    cmpCalendar._CurrentTheme.highlightFill
+                                                )
+                                            )
+                                          Height: =cntCalendarCell.Height
+                                          Visible: |-
+                                            =(
+                                                (CountRows(cmpCalendar.Selection.HighlightDates) > 0 && 
+                                                 Not(Date(1899,1,1) in cmpCalendar.Selection.HighlightDates.Value) &&
+                                                 ThisItem.Date in cmpCalendar.Selection.HighlightDates.Value) ||
+                                                (cmpCalendar.Selection.HighlightFederalHolidays && ThisItem.Date in cmpCalendar.FederalHolidays.HolidayDate)
+                                            ) && 
+                                            cntCalendarCell.Visible && 
+                                            Not(ThisItem.Date in [varCalendarSelDate, varCalendarEndDate])
+                                          Width: =cntCalendarCell.Width
+                                          X: =cntCalendarCell.X
+                                          Y: =cntCalendarCell.Y
+                                    - cntCalendarCell:
+                                        Control: GroupContainer@1.4.0
+                                        Variant: ManualLayout
+                                        Properties:
+                                          BorderColor: |-
+                                            =If(
+                                                ThisItem.Date = Today() && Lower(cmpCalendar.Settings.TodayStyle) = "circle",
+                                                cmpCalendar._CurrentTheme.todayBorderColour,
+                                                cmpCalendar._CurrentTheme.lineColour
+                                            )
+                                          BorderThickness: |-
+                                            =If(
+                                                ThisItem.Date = Today() && Lower(cmpCalendar.Settings.TodayStyle) = "circle",
+                                                2,
+                                                0
+                                            )
+                                          DropShadow: =DropShadow.None
+                                          Fill: |-
+                                            =Switch(
+                                                true,
+                                                // Multi-select: date in collection
+                                                cmpCalendar.Settings.SelectMultiple && ThisItem.Date in colCalendarSelected,
+                                                cmpCalendar._CurrentTheme.selectionFill,
+                                                // Single or range: selected date
+                                                !IsBlank(varCalendarSelDate) &&
+                                                (
+                                                    ThisItem.Date = varCalendarSelDate ||
+                                                    (cmpCalendar.Settings.SelectRange && ThisItem.Date = varCalendarEndDate)
+                                                ), 
+                                                cmpCalendar._CurrentTheme.selectionFill,
+                                                // Default
+                                                RGBA(0, 0, 0, 0)
+                                            )
+                                          Height: =Min(Parent.TemplateWidth, Parent.TemplateHeight) * 0.85
+                                          RadiusBottomLeft: =100
+                                          RadiusBottomRight: =100
+                                          RadiusTopLeft: =100
+                                          RadiusTopRight: =100
+                                          Visible: =Month(ThisItem.Date) = cmpCalendar._Month || cmpCalendar.Settings.ShowPadding
+                                          Width: =Self.Height
+                                          X: =Parent.TemplateWidth / 2 - Self.Width / 2
+                                          Y: =Parent.TemplateHeight / 2 - Self.Height / 2
+                                        Children:
+                                          - lblCalendarCellDay:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                Color: |-
+                                                  =If(
+                                                      Parent.Fill = cmpCalendar._CurrentTheme.selectionFill, 
+                                                      cmpCalendar._CurrentTheme.selectionColour, 
+                                                      If(
+                                                          Month(ThisItem.Date) <> cmpCalendar._Month,
+                                                          cmpCalendar._CurrentTheme.adjacentColour,
+                                                          If(
+                                                              ThisItem.Date < cmpCalendar.Selection.MinDate || 
+                                                              ThisItem.Date > cmpCalendar.Selection.MaxDate ||
+                                                              ThisItem.Date in cmpCalendar.Selection.BlockDates.Value ||
+                                                              (cmpCalendar.Selection.DisableWeekends && Weekday(ThisItem.Date) in [1, 7]) ||
+                                                              (cmpCalendar.Selection.BlockFederalHolidays && ThisItem.Date in cmpCalendar.FederalHolidays.HolidayDate),
+                                                              cmpCalendar._CurrentTheme.noteColour,
+                                                              cmpCalendar._CurrentTheme.textColour
+                                                          )
+                                                      )
+                                                  )
+                                                Font: =Font.'Open Sans'
+                                                FontWeight: |-
+                                                  =If(
+                                                      ThisItem.Date = Today(),
+                                                      FontWeight.Bold,
+                                                      FontWeight.Normal
+                                                  )
+                                                Height: =Parent.Height
+                                                Size: =12
+                                                Strikethrough: |-
+                                                  =(ThisItem.Date in cmpCalendar.Selection.BlockDates.Value) ||
+                                                  (cmpCalendar.Selection.BlockFederalHolidays && (ThisItem.Date in cmpCalendar.FederalHolidays.HolidayDate))
+                                                Text: =Day(ThisItem.Date)
+                                                Width: =Parent.Width
+                                          - btnCalendarCellDay:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisabledFill: =RGBA(0, 0, 0, 0)
+                                                DisplayMode: |-
+                                                  =If(
+                                                      ThisItem.Date < cmpCalendar.Selection.MinDate ||
+                                                      ThisItem.Date > cmpCalendar.Selection.MaxDate ||
+                                                      ThisItem.Date in cmpCalendar.Selection.BlockDates ||
+                                                      (cmpCalendar.Selection.DisableWeekends && Weekday(ThisItem.Date) in [1, 7]) ||
+                                                      (cmpCalendar.Selection.BlockFederalHolidays && ThisItem.Date in cmpCalendar.FederalHolidays.HolidayDate),
+                                                      DisplayMode.Disabled, 
+                                                      DisplayMode.Edit
+                                                  )
+                                                Fill: =RGBA(0, 0, 0, 0)
+                                                FocusedBorderThickness: =0
+                                                Height: =Parent.Height
+                                                HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                                                OnSelect: |-
+                                                  =If(
+                                                      cmpCalendar.Settings.SelectRange,
+                                                      // Range selection logic
+                                                      Switch(
+                                                          true,
+                                                          IsBlank(varCalendarThisDate),
+                                                          Set(varCalendarSelDate, ThisItem.Date),
+                                                          ThisItem.Date < varCalendarThisDate,
+                                                          Set(varCalendarSelDate, ThisItem.Date);
+                                                          Set(varCalendarEndDate, varCalendarThisDate),
+                                                          Set(varCalendarSelDate, varCalendarThisDate);
+                                                          Set(varCalendarEndDate, ThisItem.Date)
+                                                      ),
+                                                      If(
+                                                          cmpCalendar.Settings.SelectMultiple,
+                                                          // Multi-select toggle
+                                                          If(
+                                                              ThisItem.Date in colCalendarSelected,
+                                                              RemoveIf(colCalendarSelected, Value = ThisItem.Date),
+                                                              Collect(colCalendarSelected, {Value: ThisItem.Date})
+                                                          ),
+                                                          // Single select
+                                                          If(
+                                                              cmpCalendar.Settings.AllowEmptySelection && varCalendarSelDate = ThisItem.Date,
+                                                              Set(varCalendarSelDate, Blank()),
+                                                              Set(varCalendarSelDate, ThisItem.Date)
+                                                          )
+                                                      )
+                                                  );
+                                                  Set(varCalendarLastDate, varCalendarThisDate);
+                                                  Set(varCalendarThisDate, ThisItem.Date);
+                                                  cmpCalendar.OnChange(ThisItem.Date)
+                                                PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                                                RadiusBottomLeft: =100
+                                                RadiusBottomRight: =100
+                                                RadiusTopLeft: =100
+                                                RadiusTopRight: =100
+                                                Text: =""
+                                                Tooltip: |-
+                                                  =
+                                                      LookUp(cmpCalendar.FederalHolidays, HolidayDate = ThisItem.Date, HolidayName)
+                                                Width: =Parent.Width
+                        - galCalendarRangeLeft:
+                            Control: Gallery@2.15.0
+                            Variant: Vertical
+                            Properties:
+                              Height: =galCalendarRows.Height
+                              Items: =Sequence(6)
+                              ShowScrollbar: =false
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height / 6
+                              Visible: =cmpCalendar.Settings.SelectRange && !IsBlank(varCalendarEndDate)
+                              Width: =galCalendarRows.X + 1
+                              Y: =galCalendarRows.Y
+                            Children:
+                              - shpCalendarRangeLeft:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    Fill: =cmpCalendar._CurrentTheme.backgroundFill
+                                    Height: =Min(Parent.TemplateHeight, galCalendarRows.Width / 7) * 0.85
+                                    Visible: |-
+                                      =With(
+                                          {
+                                              _start: Switch(
+                                                  Lower(cmpCalendar.Settings.FirstDayOfWeek),
+                                                  "monday", StartOfWeek.Monday,
+                                                  "tuesday", StartOfWeek.Tuesday,
+                                                  "wednesday", StartOfWeek.Wednesday,
+                                                  "thursday", StartOfWeek.Thursday,
+                                                  "friday", StartOfWeek.Friday,
+                                                  "saturday", StartOfWeek.Saturday,
+                                                  StartOfWeek.Sunday
+                                              ),
+                                              _firstOfMonth: Date(cmpCalendar._Year, cmpCalendar._Month, 1)
+                                          },
+                                          With(
+                                              {
+                                                  _padDays: Weekday(_firstOfMonth, _start) - 1
+                                              },
+                                              With(
+                                                  {
+                                                      _allDates: ForAll(
+                                                          Sequence(42),
+                                                          DateAdd(_firstOfMonth, Value - _padDays - 1)
+                                                      )
+                                                  },
+                                                  With(
+                                                      {
+                                                          _rowDates: LastN(FirstN(_allDates, 7 * ThisItem.Value), 7)
+                                                      },
+                                                      (
+                                                          Last(_rowDates).Value > varCalendarSelDate &&
+                                                          First(_rowDates).Value > varCalendarSelDate &&
+                                                          First(_rowDates).Value < varCalendarEndDate
+                                                      ) &&
+                                                      !IsBlank(varCalendarSelDate) && 
+                                                      !IsBlank(varCalendarEndDate)
+                                                  )
+                                              )
+                                          )
+                                      )
+                                    Width: =Parent.TemplateWidth + 2
+                                    Y: =Parent.TemplateHeight / 2 - Self.Height / 2
+                  - cntCalendarYears:
+                      Control: GroupContainer@1.4.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height - Self.Y - 10
+                        Visible: =varCalendarShowYears
+                        Width: =Parent.Width
+                        Y: =galCalendarDays.Y
+                      Children:
+                        - galCalendarYears:
+                            Control: Gallery@2.15.0
+                            Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                            Properties:
+                              Default: |-
+                                ={Year: cmpCalendar._Year}
+                              Height: =Parent.Height
+                              Items: |-
+                                =SortByColumns(
+                                    ForAll(
+                                        Sequence(100),
+                                        {Year: Year(Today()) - 50 + Value}
+                                    ),
+                                    "Year",
+                                    SortOrder.Ascending
+                                )
+                              ShowScrollbar: =false
+                              TemplateSize: =90
+                              Width: =Parent.Width
+                              WrapCount: =3
+                            Children:
+                              - cntCalendarYearItem:
+                                  Control: GroupContainer@1.4.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(ThisItem.Year = cmpCalendar._Year, cmpCalendar._CurrentTheme.selectionFill, RGBA(0, 0, 0, 0))
+                                    Height: =Parent.TemplateHeight - 16
+                                    RadiusBottomLeft: =8
+                                    RadiusBottomRight: =8
+                                    RadiusTopLeft: =8
+                                    RadiusTopRight: =8
+                                    Width: =Parent.TemplateWidth - 16
+                                    X: =8
+                                    Y: =8
+                                  Children:
+                                    - lblCalendarYearItem:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =If(ThisItem.Year = cmpCalendar._Year, cmpCalendar._CurrentTheme.selectionColour, cmpCalendar._CurrentTheme.textColour)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =If(ThisItem.Year = cmpCalendar._Year, FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =Parent.Height
+                                          Size: =14
+                                          Text: =ThisItem.Year
+                                          Width: =Parent.Width
+                                    - btnCalendarYearItem:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderThickness: =0
+                                          Fill: =RGBA(0, 0, 0, 0)
+                                          FocusedBorderThickness: =0
+                                          Height: =Parent.Height
+                                          HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                                          OnSelect: |-
+                                            =Set(varCalendarYear, ThisItem.Year);
+                                            Set(varCalendarShowYears, false);
+                                            Set(varCalendarShowMonths, true)
+                                          PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                                          Text: =""
+                                          Width: =Parent.Width
+                  - cntCalendarMonths:
+                      Control: GroupContainer@1.4.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height - Self.Y - 10
+                        Visible: =varCalendarShowMonths
+                        Width: =Parent.Width
+                        Y: =galCalendarDays.Y
+                      Children:
+                        - lblCalendarMonthsHeader:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              Color: =cmpCalendar._CurrentTheme.textColour
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Semibold
+                              Size: =14
+                              Text: =cmpCalendar._Year
+                              Width: =Parent.Width
+                        - galCalendarMonths:
+                            Control: Gallery@2.15.0
+                            Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                            Properties:
+                              Height: =Parent.Height - lblCalendarMonthsHeader.Height
+                              Items: |-
+                                =ForAll(
+                                    Sequence(12),
+                                    {
+                                        Month: Value,
+                                        MonthName: Text(Date(2000, Value, 1), "mmm")
+                                    }
+                                )
+                              ShowScrollbar: =false
+                              TemplateSize: =(Self.Height) / 4
+                              Width: =Parent.Width
+                              WrapCount: =3
+                              Y: =lblCalendarMonthsHeader.Height
+                            Children:
+                              - cntCalendarMonthItem:
+                                  Control: GroupContainer@1.4.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(ThisItem.Month = cmpCalendar._Month && cmpCalendar._Year = varCalendarYear, cmpCalendar._CurrentTheme.selectionFill, RGBA(0, 0, 0, 0))
+                                    Height: =Parent.TemplateHeight - 16
+                                    RadiusBottomLeft: =8
+                                    RadiusBottomRight: =8
+                                    RadiusTopLeft: =8
+                                    RadiusTopRight: =8
+                                    Width: =Parent.TemplateWidth - 16
+                                    X: =8
+                                    Y: =8
+                                  Children:
+                                    - lblCalendarMonthItem:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =If(ThisItem.Month = cmpCalendar._Month && cmpCalendar._Year = varCalendarYear, cmpCalendar._CurrentTheme.selectionColour, cmpCalendar._CurrentTheme.textColour)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =If(ThisItem.Month = cmpCalendar._Month && cmpCalendar._Year = varCalendarYear, FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =Parent.Height
+                                          Size: =14
+                                          Text: =ThisItem.MonthName
+                                          Width: =Parent.Width
+                                    - btnCalendarMonthItem:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderThickness: =0
+                                          Fill: =RGBA(0, 0, 0, 0)
+                                          FocusedBorderThickness: =0
+                                          Height: =Parent.Height
+                                          HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                                          OnSelect: |-
+                                            =Set(varCalendarMonth, ThisItem.Month);
+                                            Set(varCalendarShowMonths, false)
+                                          PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                                          Text: =""
+                                          Width: =Parent.Width
+            - cntCalendarLegend:
+                Control: GroupContainer@1.4.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =If(Self.Visible, 30, 0)
+                  Visible: =Coalesce(cmpCalendar.Settings.ShowLegend, true) && !varCalendarShowYears && !varCalendarShowMonths
+                  Width: =Parent.Width
+                  Y: =cntCalendarHeader.Height + cntCalendarInner.Height
+                Children:
+                  - shpCalendarLegendDivider:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =cmpCalendar._CurrentTheme.lineColour
+                        Height: =1
+                        Width: =Parent.Width
+                  - galCalendarLegend:
+                      Control: Gallery@2.15.0
+                      Variant: BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0
+                      Properties:
+                        Height: =Parent.Height - 1
+                        Items: |-
+                          =Filter(
+                              Table(
+                                  {Idx: 1, Label: "Holiday"},
+                                  {Idx: 2, Label: "Weekend"},
+                                  {Idx: 3, Label: "Highlight"},
+                                  {Idx: 4, Label: "Selected"}
+                              ),
+                              Switch(
+                                  Idx,
+                                  1, cmpCalendar.Selection.BlockFederalHolidays || cmpCalendar.Selection.HighlightFederalHolidays,
+                                  2, cmpCalendar.Selection.DisableWeekends,
+                                  3, CountRows(cmpCalendar.Selection.HighlightDates) > 0 && Not(Date(1899,1,1) in cmpCalendar.Selection.HighlightDates.Value),
+                                  4, true
+                              )
+                          )
+                        ShowScrollbar: =false
+                        TemplateSize: =Self.Width / Max(CountRows(Self.AllItems), 1)
+                        Width: =Parent.Width - 20
+                        X: =10
+                        Y: =1
+                      Children:
+                        - shpCalendarLegendDot:
+                            Control: Circle@2.3.0
+                            Properties:
+                              Fill: |-
+                                =Switch(
+                                    ThisItem.Idx,
+                                    1, cmpCalendar._CurrentTheme.federalHolidayFill,
+                                    2, cmpCalendar._CurrentTheme.noteColour,
+                                    3, cmpCalendar._CurrentTheme.highlightFill,
+                                    4, cmpCalendar._CurrentTheme.selectionFill
+                                )
+                              Height: =8
+                              Width: =8
+                              X: =5
+                              Y: =Parent.TemplateHeight / 2 - Self.Height / 2
+                        - lblCalendarLegendLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =cmpCalendar._CurrentTheme.noteColour
+                              Font: =Font.'Open Sans'
+                              Height: =Parent.TemplateHeight
+                              PaddingLeft: =4
+                              Size: =9
+                              Text: =If(ThisItem.Idx = 1, If(cmpCalendar.Selection.BlockFederalHolidays, "Holiday (blocked)", "Holiday"), ThisItem.Label)
+                              Width: =Parent.TemplateWidth - shpCalendarLegendDot.X - shpCalendarLegendDot.Width - 4
+                              X: =shpCalendarLegendDot.X + shpCalendarLegendDot.Width
+            - cntCalendarFooter:
+                Control: GroupContainer@1.4.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =If(Self.Visible, 52, 0)
+                  Visible: =cmpCalendar.Settings.ShowFooter
+                  Width: =Parent.Width
+                  Y: =cntCalendarHeader.Height + cntCalendarInner.Height + cntCalendarLegend.Height
+                Children:
+                  - shpCalendarFooterDivider:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =cmpCalendar._CurrentTheme.lineColour
+                        Height: =1
+                        Width: =Parent.Width
+                  - btnCalendarCancel:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Color: =cmpCalendar._CurrentTheme.buttonColour
+                        Fill: =RGBA(0, 0, 0, 0)
+                        FocusedBorderThickness: =0
+                        Font: =Font.'Open Sans'
+                        Height: =36
+                        HoverFill: =cmpCalendar._CurrentTheme.hoverFill
+                        OnSelect: =cmpCalendar.OnCancel()
+                        PressedFill: =cmpCalendar._CurrentTheme.pressFill
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =12
+                        Text: ="Cancel"
+                        Width: =80
+                        X: =Parent.Width - btnCalendarOK.Width - Self.Width - 30
+                        Y: =8
+                  - btnCalendarOK:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Color: =cmpCalendar._CurrentTheme.selectionColour
+                        Fill: =cmpCalendar._CurrentTheme.buttonColour
+                        FocusedBorderThickness: =0
+                        Font: =Font.'Open Sans'
+                        Height: =36
+                        HoverFill: =ColorFade(cmpCalendar._CurrentTheme.buttonColour, -10%)
+                        OnSelect: =cmpCalendar.OnConfirm()
+                        PressedFill: =ColorFade(cmpCalendar._CurrentTheme.buttonColour, -20%)
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =12
+                        Text: ="OK"
+                        Width: =60
+                        X: =Parent.Width - Self.Width - 15
+                        Y: =8

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preload — Instant Due Next 4 Weeks Tab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
+    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .88rem; }
+    th, td { border: 1px solid #2b3546; padding: 8px 10px; vertical-align: top; }
+    th { background: #182131; color: #b7e4c7; text-align: left; }
+    tr:nth-child(even) td { background: #121926; }
+    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
+    .sev { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+    .sev-bug { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
+    .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+    .toc a { display: block; padding: 4px 0; font-size: .9rem; }
+    .toc .toc-num { color: #8a94a6; display: inline-block; width: 22px; }
+    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Preload — Instant Due Next 4 Weeks Tab</h1>
+  <p>The biggest, most invasive guide of this batch &mdash; touches <code>Main.OnVisible</code>, <code>HeaderGallery.Items</code>, <code>ViewItem.OnVisible</code>, and every write action that could change what's due in the next 4 weeks. Read it start to finish before pasting anything; the pieces depend on each other.</p>
+
+  <div class="note"><strong>Scope, deliberately narrow:</strong> only the "Due Next 4 Weeks" tab (<code>varSelectedState = "Current"</code>) gets preloaded &mdash; items <em>and</em> every one of their links, fetched once when Main loads. Future Releases, Issues, and Historic all keep working exactly as they do today, live-fetched on click, no change. If this works well, the same pattern can extend to Future/Issues later &mdash; not attempted here.</p></div>
+
+  <div class="toc">
+    <strong>Jump to:</strong>
+    <a href="#s1"><span class="toc-num">1.</span> The cache-building function</a>
+    <a href="#s2"><span class="toc-num">2.</span> Build the cache when Main loads</a>
+    <a href="#s3"><span class="toc-num">3.</span> Read from the cache instead of the live table</a>
+    <a href="#s4"><span class="toc-num">4.</span> Skip the network entirely when opening a preloaded item</a>
+    <a href="#s5"><span class="toc-num">5.</span> Keep the cache honest after every write</a>
+    <a href="#s6"><span class="toc-num">6.</span> The trade-off, stated plainly</a>
+  </div>
+
+  <h2 id="s1">1. The cache-building function</h2>
+  <p>One user-defined function, same pattern as <code>BuildLinksForSource</code> and <code>ShowToast</code> &mdash; add to <code>Formulas.txt</code> (on <code>App</code>'s <code>Formulas</code> property):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>RefreshActiveCache(): Boolean = {
+    ClearCollect(
+        colActiveItems,
+        Filter(
+            'Policy Proof Tracker',
+            'Planned Publish Date' >= Today() &&
+            'Planned Publish Date' <= DateAdd(Today(), 28, "Days")
+        )
+    );
+    ClearCollect(
+        colActiveLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id in colActiveItems.ID),
+            FileExt,
+            With(
+                {FileParamStart: Find("file=", LinkUrl, 1)},
+                With(
+                    {
+                        FileNamePart: If(
+                            FileParamStart > 0,
+                            With(
+                                {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                                Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                            ),
+                            If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+                        )
+                    },
+                    Switch(
+                        true,
+                        Right(FileNamePart, 5) = ".docx", "docx",
+                        Right(FileNamePart, 4) = ".doc", "doc",
+                        Right(FileNamePart, 5) = ".xlsx", "xlsx",
+                        Right(FileNamePart, 4) = ".xls", "xls",
+                        Right(FileNamePart, 5) = ".pptx", "pptx",
+                        Right(FileNamePart, 4) = ".ppt", "ppt",
+                        Right(FileNamePart, 4) = ".pdf", "pdf",
+                        ""
+                    )
+                )
+            )
+        )
+    );
+    Set(varActiveCacheReady, true);
+    true
+};</pre></div>
+  <p><code>colActiveItems</code> is every item due in the next 4 weeks, unfiltered by owner/type &mdash; those toggles apply on top of this locally (step 3), so switching them doesn't need a fresh network call either. <code>colActiveLinks</code> is every link belonging to any of those items, fetched in one combined query via <code>PolicyTrackerSource.Id in colActiveItems.ID</code> rather than one fetch per item. The <code>FileExt</code> column logic is copied verbatim from <code>BuildLinksForSource</code>, so <code>colActiveLinks</code> has exactly the same shape as the per-item <code>colLinks</code> your link cards already expect &mdash; nothing downstream needs to know whether its data came from the cache or a live fetch.</p>
+
+  <h2 id="s2">2. Build the cache when Main loads</h2>
+  <p>Add one call to <code>Main.OnVisible</code>, after the existing <code>Refresh('Policy Proof Tracker')</code> and before <code>Set(varMainLoading, false)</code> &mdash; order matters, the cache needs the freshly-refreshed table, not whatever was cached from before:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varMainLoading, true);
+Refresh('Policy Proof Tracker');
+RefreshActiveCache();
+Set(varMainLoading, false)</pre></div>
+
+  <h2 id="s3">3. Read from the cache instead of the live table</h2>
+  <p>In <code>HeaderGallery.Items</code>, only the <code>"Current"</code> branch changes &mdash; the other three (<code>Future</code>, <code>UnapprovedHistoric</code>, <code>Historic</code>) stay exactly as they are, still hitting <code>'Policy Proof Tracker'</code> directly. Find the <code>"Current"</code> branch and replace just its inner <code>Filter(...)</code> call:</p>
+  <p>Old:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Filter(
+    'Policy Proof Tracker',
+    'Planned Publish Date' >= Today() &&
+    'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+    (varFilterOwner = false || Owner.Email = User().Email) &&
+    (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+)</pre></div>
+  <p>New:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Filter(
+    colActiveItems,
+    (varFilterOwner = false || Owner.Email = User().Email) &&
+    (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
+)</pre></div>
+  <p>The date-range condition drops out entirely &mdash; it's already baked into what's in <code>colActiveItems</code>. Owner and type filters stay, now running against the local cache instead of the live table, so toggling either is instant too.</p>
+
+  <p><strong>Then simplify the "Current" tab button itself.</strong> Find <code>Button2</code>'s <code>OnSelect</code> (the "Due Next 4 Weeks" tab). Depending on whether item 4 from the fix-list is already applied, it may or may not currently wrap things in <code>varMainLoading</code> &mdash; check what's actually there before editing rather than assuming. Either way, two changes: <strong>remove</strong> the <code>Refresh('Policy Proof Tracker');</code> line if present (switching to this tab no longer needs to fetch anything, the cache is already sitting there from when Main loaded), and swap the <code>colTypeCounts</code> filter's source the same way as step 3 above:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(
+    colTypeCounts,
+    Filter(
+        colActiveItems,
+        (varFilterOwner = false || Owner.Email = User().Email)
+    )
+);</pre></div>
+  <p>Everything else in that formula (<code>Set(varSelectedState, "Current")</code>, <code>Reset(HeaderGallery)</code>, and the <code>varMainLoading</code> wrapper if it's there) stays as-is &mdash; only the <code>Refresh</code> line and the <code>colTypeCounts</code> filter's source change. Leave <code>Button2_1</code>/<code>Button2_2</code>/<code>Button2_3</code> (Future/Issues/Historic) completely untouched &mdash; they still need their own live refresh, this scope stops at "Current" only.</p>
+
+  <h2 id="s4">4. Skip the network entirely when opening a preloaded item</h2>
+  <p>This is the piece that makes clicking into an item from this tab actually instant, not just the list rendering. Builds directly on item 10's <code>varLinksSourceID</code> preload check &mdash; find that same final block in <code>ViewItem.OnVisible</code> and replace it:</p>
+  <p>Old (from item 10):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varSelectedRelease.ID),
+    If(
+        varLinksSourceID <> varSelectedRelease.ID,
+        BuildLinksForSource(varSelectedRelease.ID)
+    );
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
+  <p>New:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(varSelectedRelease.ID),
+    If(
+        !IsBlank(LookUp(colActiveItems, ID = varSelectedRelease.ID)),
+        ClearCollect(colLinks, Filter(colActiveLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
+        Set(varLinksSourceID, varSelectedRelease.ID),
+        If(
+            varLinksSourceID <> varSelectedRelease.ID,
+            BuildLinksForSource(varSelectedRelease.ID)
+        )
+    );
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
+  <p>If the item being opened is one of the ones already in <code>colActiveItems</code>, its links come straight out of <code>colActiveLinks</code> &mdash; a local filter, genuinely zero network calls. Anything not in the cache (an item from Future/Issues/Historic) falls back to exactly the same behaviour as before, untouched.</p>
+
+  <div class="test">Test after steps 1&ndash;4: open Main fresh, click into 3&ndash;4 different items on the Due Next 4 Weeks tab in a row. Fields and links should both appear with zero visible loading gap, not just fields. Then click into a Future or Historic item and confirm it still behaves exactly as before (brief real load, unaffected by any of this).</div>
+
+  <h2 id="s5">5. Keep the cache honest after every write</h2>
+  <p>Anything that changes an item's date, publish status, or links needs the cache rebuilt afterward, or Main will keep showing the old state until the app reloads. Since <code>RefreshActiveCache()</code> rebuilds everything in one call, the fix everywhere is the same one line, not custom patch logic per site. Add <code>RefreshActiveCache();</code> right before each of these, in the success path only:</p>
+  <table>
+    <tr><th>Where</th><th>Add the call</th></tr>
+    <tr><td><code>btnSave1</code> (ViewItem, plain Save)</td><td>Right after <code>Set(varSaving, false)</code> on the success branch</td></tr>
+    <tr><td><code>btnSaveClose1</code> (ViewItem, Save &amp; Close)</td><td>Right before the <code>Navigate(Main, ...)</code> call, so the cache is fresh the instant Main appears</td></tr>
+    <tr><td>Dialog's Delete Item confirm (or the old <code>btnModalAction1</code> if not yet on the new dialog)</td><td>Right before its own <code>Navigate(Main, ...)</code> call</td></tr>
+    <tr><td><code>BossPublishBtn</code> / quick-publish (Main)</td><td>Right after its <code>Patch(...)</code> succeeds</td></tr>
+    <tr><td><code>PublishAllBtn</code> (Main, bulk publish)</td><td>Right after the bulk <code>ForAll</code>/<code>Patch</code> completes</td></tr>
+    <tr><td>Add Document Link / Delete Link (ViewItem)</td><td>Right after their existing <code>BuildLinksForSource(...)</code> call &mdash; keeps <code>colActiveLinks</code> in sync with the per-item <code>colLinks</code> that already updates</td></tr>
+  </table>
+  <p>Every one of these already has a clear success point in its formula (where it currently calls <code>Notify</code>/<code>ShowToast</code>, or right before its own <code>Navigate</code>) &mdash; that's where this one line goes. Not spelling out each full formula here since none of the surrounding logic changes, only this one addition; if you want the exact current text for any specific one before editing it, ask and I'll pull it fresh rather than risk it from memory.</p>
+
+  <div class="test">Test: from Main's Due Next 4 Weeks tab, open an item, tick Top Item, Save &amp; Close. Back on Main, the card should immediately reflect the change (gold border/flag) without needing a manual refresh or app reload.</div>
+
+  <h2 id="s6">6. The trade-off, stated plainly</h2>
+  <p>This does <em>not</em> make Main aware of changes made by someone else, in a different session, while you're sitting on the Due Next 4 Weeks tab &mdash; the cache only refreshes when Main loads or when <em>you</em> make a change through one of the write paths above. If a colleague publishes something while you're looking at your own screen, you won't see it until you switch tabs and back, or reopen the app. Same category of trade-off as removing the redundant <code>Refresh(PolicyLinks)</code> earlier &mdash; instant every time, at the cost of a rare cross-session staleness window. If that's not acceptable for how this app actually gets used day to day, say so before rolling this out &mdash; it's a real, conscious trade, not an oversight.</p>
+
+</main>
+<script>
+function copyBlock(btn) {
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) { btn.classList.add('ok'); btn.textContent = 'Copied'; }
+    else { btn.classList.add('err'); btn.textContent = 'Select + Ctrl+C'; }
+    setTimeout(function () { btn.classList.remove('ok', 'err'); btn.textContent = 'Copy'; }, 1600);
+  }
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  var legacyCopied = false;
+  try { legacyCopied = document.execCommand('copy'); } catch (e) { legacyCopied = false; }
+  if (legacyCopied) { showResult(true); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { showResult(true); }, function () { showResult(false); });
+  } else { showResult(false); }
+}
+</script>
+</body>
+</html>

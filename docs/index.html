@@ -466,6 +466,56 @@ Set(
     <div class="screen-cta green">Open guide &rarr;</div>
   </a>
 
+  <a class="screen-card test-version" href="guides/dialog-component.html" target="_blank">
+    <div>
+      <div class="status-pill pill-done">New build, not yet started</div>
+      <div class="screen-number">ViewItem</div>
+      <div class="screen-name">Dialog Component — Replacing Delete/Discard Modals</div>
+      <div class="screen-desc">One shared cmpEnhancedDialog instance (from powerappsui.com) replaces the three separate confirmation modals on ViewItem — Delete Item, Delete Link, and Discard Unsaved Changes — switching title/message/buttons based on which action opened it. Covers the Component-import verification step, the two new state variables, the full OnButtonSelect dispatch, and retargeting all three trigger buttons.</div>
+    </div>
+    <div class="screen-cta green">Open guide &rarr;</div>
+  </a>
+
+  <a class="screen-card test-version" href="guides/stepper-component.html" target="_blank">
+    <div>
+      <div class="status-pill pill-done">New build, not yet started</div>
+      <div class="screen-number">ViewItem</div>
+      <div class="screen-name">Stepper Component — Replacing the Approval Stepper</div>
+      <div class="screen-desc">Replaces both the compact and full approval steppers with cmpStepper (from powerappsui.com). Flags the one real gap honestly up front — the new component can't recolour a single out-of-sequence dot amber like the current one does — and works around it with a separate warning line driven by the exact same anomaly formula already in use.</div>
+    </div>
+    <div class="screen-cta green">Open guide &rarr;</div>
+  </a>
+
+  <a class="screen-card test-version" href="guides/loading-overlay.html" target="_blank">
+    <div>
+      <div class="status-pill pill-done">New build, not yet started</div>
+      <div class="screen-number">ViewItem</div>
+      <div class="screen-name">Loading Overlay — Real Save Feedback</div>
+      <div class="screen-desc">Adds a blurred full-screen overlay with a spinner while saving, wired straight to the existing varSaving variable — no new state, no logic changes, purely visual feedback for a save that was already being tracked invisibly.</div>
+    </div>
+    <div class="screen-cta green">Open guide &rarr;</div>
+  </a>
+
+  <a class="screen-card test-version" href="guides/loading-screen.html" target="_blank">
+    <div>
+      <div class="status-pill pill-done">New build, not yet started</div>
+      <div class="screen-number">StartScreen</div>
+      <div class="screen-name">Loading Screen — Branded App-Start Splash</div>
+      <div class="screen-desc">Replaces StartScreen's single bare label with a branded splash (logo, wordmark, progress dots), MinDisplayTime kept short on purpose so it never feels like an artificial wait. Honest about the one real platform limit: OnStart finishes before this screen renders, so step labels are cosmetic, not live progress, unless the collection-building is moved into this screen later.</div>
+    </div>
+    <div class="screen-cta green">Open guide &rarr;</div>
+  </a>
+
+  <a class="screen-card test-version" href="guides/preload-current-week.html" target="_blank">
+    <div>
+      <div class="status-pill pill-done">New build, not yet started — biggest guide in this batch</div>
+      <div class="screen-number">Main + ViewItem</div>
+      <div class="screen-name">Preload — Instant Due Next 4 Weeks Tab</div>
+      <div class="screen-desc">Preloads every item due in the next 4 weeks, plus every one of their links, in one combined fetch when Main loads — so clicking that tab or opening any of its items is instant, no per-item network round trip. A new RefreshActiveCache() function, changes to Main.OnVisible/HeaderGallery.Items/the Current tab button, a rewrite of ViewItem's link-loading check, and a table of every write path that needs the cache refreshed afterward. States the real trade-off plainly: it won't reflect another session's changes until you switch tabs or reopen.</div>
+    </div>
+    <div class="screen-cta green">Open guide &rarr;</div>
+  </a>
+
   <a class="screen-card test-version" href="guides/main-type-filter-popover.html" target="_blank">
     <div>
       <div class="status-pill pill-test">Guide — new feature</div>

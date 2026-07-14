@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialog Component — Replacing the Delete/Discard Modals</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
+    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .88rem; }
+    th, td { border: 1px solid #2b3546; padding: 8px 10px; vertical-align: top; }
+    th { background: #182131; color: #b7e4c7; text-align: left; }
+    tr:nth-child(even) td { background: #121926; }
+    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
+    .sev { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+    .sev-bug { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
+    .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+    .toc a { display: block; padding: 4px 0; font-size: .9rem; }
+    .toc .toc-num { color: #8a94a6; display: inline-block; width: 22px; }
+    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Dialog Component — Replacing the Delete/Discard Modals</h1>
+  <p>One shared <code>cmpEnhancedDialog</code> instance replaces all three confirmation modals on <code>ViewItem</code>: Delete Item, Delete Link, and Discard Unsaved Changes. Instead of three separate hand-built overlays, one dialog changes its title/message/buttons based on which action opened it. Source: <a href="https://www.powerappsui.com/components/dialog" target="_blank" rel="noopener">powerappsui.com/components/dialog</a>, archived at <code>yaml/components/Dialog/</code>.</p>
+
+  <div class="note"><strong>Good news on risk:</strong> the dialog's control family (<code>Text@0.0.51</code>, <code>Button@0.0.45</code>) isn't actually new to this app &mdash; both are already used live today in the exact modals this replaces (<code>txtModalTitle1</code>, <code>btnCancelModal1</code>, etc. on <code>DeleteItemModal1</code>). The one genuinely new thing is the <strong>Component workflow itself</strong> (Insert &rarr; Custom &rarr; New Component) &mdash; this project has never created a real Component before, only screen-level control groups. That's what step 1 verifies before anything else.</p></div>
+
+  <div class="toc">
+    <strong>Jump to:</strong>
+    <a href="#s1"><span class="toc-num">1.</span> Verify the component pastes cleanly (do this first)</a>
+    <a href="#s2"><span class="toc-num">2.</span> Two new variables</a>
+    <a href="#s3"><span class="toc-num">3.</span> Place the dialog on ViewItem, wire its properties</a>
+    <a href="#s4"><span class="toc-num">4.</span> Retarget the three trigger buttons</a>
+    <a href="#s5"><span class="toc-num">5.</span> Retire the old modals (only after confirming)</a>
+  </div>
+
+  <h2 id="s1">1. Verify the component pastes cleanly</h2>
+  <p>In Studio: <strong>Insert &rarr; Custom &rarr; New Component</strong> (or the Components tab &rarr; New component &rarr; Import from code). Paste the full contents of <code>yaml/components/Dialog/Dialog.yaml</code> into that new blank component &mdash; not onto a screen. Name it <code>cmpEnhancedDialog</code> to match its own internal name.</p>
+  <div class="test">Test: confirm it imports with zero errors and the component shows up in your Components list before doing anything else. If it errors, stop here and tell me the exact error &mdash; don't proceed to wiring it up against a component that didn't even import cleanly.</div>
+
+  <h2 id="s2">2. Two new variables</h2>
+  <p>Add these two lines to <code>ViewItem.OnVisible</code>, anywhere near the other initial <code>Set(...)</code> lines at the top (order doesn't matter, they just need a default before first use):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varDialogVisible, false);
+Set(varDialogPurpose, "");</pre></div>
+  <p><code>varDialogPurpose</code> is one of <code>"DeleteItem"</code>, <code>"DeleteLink"</code>, or <code>"Discard"</code> &mdash; it's what makes one dialog instance serve all three jobs.</p>
+
+  <h2 id="s3">3. Place the dialog on ViewItem, wire its properties</h2>
+  <p>Drag one instance of <code>cmpEnhancedDialog</code> onto the <code>ViewItem</code> screen (as a top-level screen child, same as the existing modals) and set:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Visible: =varDialogVisible
+DialogType: ="Confirmation"
+Theme: ="Light"
+ShowCloseIcon: =true
+HeaderText: =Switch(
+    varDialogPurpose,
+    "DeleteItem", "Delete",
+    "DeleteLink", "Delete link",
+    "Discard", "Discard changes?",
+    ""
+)
+MessageText: =Switch(
+    varDialogPurpose,
+    "DeleteItem", "Are you sure you want to proceed with deleting this item? This action cannot be undone.",
+    "DeleteLink", "Are you sure you want to delete this document link? This action cannot be undone",
+    "Discard", "You have unsaved changes. Are you sure you want to close without saving?",
+    ""
+)
+IconName: =Switch(
+    varDialogPurpose,
+    "DeleteItem", "Danger",
+    "DeleteLink", "Danger",
+    "Discard", "Warning",
+    "None"
+)
+Buttons: =Table(
+    {Label: "Cancel", ButtonType: "Outline", Action: "cancel", Visible: true},
+    {
+        Label: Switch(varDialogPurpose, "DeleteItem", "Delete", "DeleteLink", "Delete", "Discard", "Yes, Discard", "Confirm"),
+        ButtonType: "Primary",
+        Action: "confirm",
+        Visible: true
+    }
+)</pre></div>
+
+  <p>Every line of actual behaviour that used to live scattered across three separate <code>btnModalAction*</code>/<code>btnCancelModal*</code> handlers now lives in one place, <code>OnButtonSelect</code>:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=If(
+    SelectedButton.Action = "cancel",
+    Set(varDialogVisible, false),
+    Switch(
+        varDialogPurpose,
+        "DeleteItem",
+        Set(varDeletingItem, true);
+        IfError(
+            Remove('Policy Proof Tracker', varSelectedRelease),
+            Set(varDeletingItem, false);
+            Set(varDialogVisible, false);
+            ShowToast("Delete failed", "The item may still exist, please check and try again.", "error"),
+            Set(varDialogVisible, false);
+            ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+            ShowToast("Item deleted", "The item was removed successfully.", "success");
+            Set(varSelectedRelease, Blank());
+            Set(varDeletingItem, false);
+            Navigate(Main, ScreenTransition.Fade)
+        ),
+        "DeleteLink",
+        IfError(
+            Remove(PolicyLinks, varSelectedLink),
+            Set(varDialogVisible, false);
+            ShowToast("Delete failed", "Check your connection and try again.", "error"),
+            Set(varLoadingLinks, true);
+            BuildLinksForSource(varSelectedRelease.ID);
+            Set(varLoadingLinks, false);
+            Set(varDialogVisible, false);
+            Set(varSelectedLink, Blank());
+            ShowToast("Link deleted", "The document link was removed.", "success")
+        ),
+        "Discard",
+        Set(varDialogVisible, false);
+        Set(varSelectPolicy, "Empty");
+        Set(varSelectedRelease, Blank());
+        Set(varUnsavedChanges, false);
+        Set(varShowLinkModal, false);
+        If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
+    )
+)</pre></div>
+  <p>Every branch above is the exact logic already in the current modals, byte-for-byte, just re-homed under one dialog and one dispatch &mdash; the only substantive change is swapping the old <code>Notify(...)</code> calls for <code>ShowToast(...)</code> (the toast component from earlier), so confirmations, deletes, and discards all get the same visual treatment going forward. Also set <code>OnCloseSelect</code> (fires on the X icon or clicking outside):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varDialogVisible, false)</pre></div>
+
+  <h2 id="s4">4. Retarget the three trigger buttons</h2>
+  <p>These are the buttons that <em>open</em> a confirmation, not the ones inside it &mdash; three separate places, each currently sets an old context variable that no longer does anything once the dialog stops reading it.</p>
+
+  <p><strong><code>btnDelete1</code></strong> (top bar, opens Delete Item) &mdash; replace:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=UpdateContext({locDisplayDeletePopUp1: true})</pre></div>
+  <p>with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varDialogPurpose, "DeleteItem");
+Set(varDialogVisible, true)</pre></div>
+
+  <p><strong><code>btnClose1</code></strong> (top bar Close button) &mdash; only the discard branch changes, the rest of this formula stays exactly as-is:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=If(
+    varUnsavedChanges,
+    Set(varDialogPurpose, "Discard");
+    Set(varDialogVisible, true),
+    Set(varSelectPolicy, "Empty");
+    Set(varSelectedRelease, Blank());
+    Set(varUnsavedChanges, false);
+    Set(varShowLinkModal, false);
+    If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
+)</pre></div>
+
+  <p><strong><code>DeleteLink_2</code></strong> (the per-link delete icon, opens Delete Link) &mdash; replace:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedLink, LookUp(PolicyLinks, ID = ThisItem.ID));
+UpdateContext({locDisplayAttDeletePopUp: true})</pre></div>
+  <p>with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varSelectedLink, LookUp(PolicyLinks, ID = ThisItem.ID));
+Set(varDialogPurpose, "DeleteLink");
+Set(varDialogVisible, true)</pre></div>
+
+  <div class="test">Test all three end to end: (1) click Delete on the top bar, confirm the dialog shows "Delete" / the item-delete message, Cancel closes it with no change, Delete actually removes the item and lands on Main with a toast. (2) Click the delete icon on a document link, confirm "Delete link" wording, same cancel/confirm behaviour. (3) Edit a field then click Close, confirm "Discard changes?" wording, Cancel keeps you on the form with your edit intact, "Yes, Discard" throws it away and navigates.</div>
+
+  <h2 id="s5">5. Retire the old modals (only after confirming)</h2>
+  <p>Don't delete <code>DeleteItemModal1</code>, <code>DeleteLinkModal1</code>, or <code>UnsavedChangesModal</code> yet. Once step 4 is done, their trigger buttons no longer set <code>locDisplayDeletePopUp1</code>/<code>locDisplayAttDeletePopUp</code>/<code>locDisplayDiscardPopUp</code> to <code>true</code>, so they simply can't appear anymore &mdash; effectively already retired, just still sitting there as an inert safety net. Once you've tested all three flows above and you're confident the new dialog covers everything, come back and delete those three controls for real. No rush on that part.</p>
+
+</main>
+<script>
+function copyBlock(btn) {
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) {
+      btn.classList.add('ok');
+      btn.textContent = 'Copied';
+    } else {
+      btn.classList.add('err');
+      btn.textContent = 'Select + Ctrl+C';
+    }
+    setTimeout(function () {
+      btn.classList.remove('ok', 'err');
+      btn.textContent = 'Copy';
+    }, 1600);
+  }
+
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  var legacyCopied = false;
+  try {
+    legacyCopied = document.execCommand('copy');
+  } catch (e) {
+    legacyCopied = false;
+  }
+
+  if (legacyCopied) {
+    showResult(true);
+    return;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () {
+      showResult(true);
+    }, function () {
+      showResult(false);
+    });
+  } else {
+    showResult(false);
+  }
+}
+</script>
+</body>
+</html>

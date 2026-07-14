@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading Screen — Branded App-Start Splash</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
+    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
+    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Loading Screen — Branded App-Start Splash</h1>
+  <p>Replaces <code>StartScreen</code>'s single bare "Loading..." label with a real branded splash. Component: <code>cmpLoadingScreen</code> from <a href="https://www.powerappsui.com/components/loading-screen" target="_blank" rel="noopener">powerappsui.com</a>, archived at <code>yaml/components/LoadingScreen/</code>.</p>
+
+  <div class="warn"><strong>One honest limit on what this can actually do:</strong> Power Apps runs <code>App.OnStart</code> completely before showing <em>any</em> screen &mdash; there's no way to display custom UI while <code>OnStart</code> itself is still running, the platform's own generic loading indicator covers that part regardless of what we build. So <code>LoadingSteps</code> here can't be wired to genuine live progress of your real <code>OnStart</code> (building <code>colChoiceColors</code>, etc.) &mdash; that's already finished by the time this screen even renders. What this guide gives you instead is honest: a deliberate, short, branded pause (controlled entirely by <code>MinDisplayTime</code>, which you set) with cosmetic step labels, rather than a technically-impossible "real progress bar." If you want true multi-step progress tracking later, that would mean moving the collection-building out of <code>App.OnStart</code> and into this screen's own <code>OnVisible</code> instead &mdash; a bigger change, not in scope here.</p></div>
+
+  <h2>1. Verify the component pastes cleanly</h2>
+  <p><strong>Insert &rarr; Custom &rarr; New Component</strong>, paste the full contents of <code>yaml/components/LoadingScreen/LoadingScreen.yaml</code>, name it <code>cmpLoadingScreen</code>.</p>
+  <div class="warn">Uses <code>Progress@1.1.34</code>, not yet confirmed live anywhere in this app. Standard modern control, low risk, but confirm the import renders correctly first.</div>
+  <div class="test">Test: component imports clean, previewing it directly shows the logo mark, wordmark, and progress dots without errors.</div>
+
+  <h2>2. Change what StartScreen.OnVisible does</h2>
+  <p>Currently it navigates immediately on load, which is exactly why the old label never really had time to show. Replace the whole property with:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(
+    varStartDestination,
+    If(!IsBlank(Param("ID")), "ViewItem", "Main")
+)</pre></div>
+  <p>This is the same logic as before &mdash; deep link present means go to <code>ViewItem</code>, otherwise <code>Main</code> &mdash; just stored instead of acted on immediately. The actual <code>Navigate()</code> moves to the component's <code>OnReady</code> event below, so the splash gets a real, deliberate moment on screen instead of flashing for a single frame.</p>
+
+  <h2>3. Place the component, wire OnReady</h2>
+  <p><strong>Drag one instance of <code>cmpLoadingScreen</code> from the Components panel</strong> onto <code>StartScreen</code>, delete the old <code>lblLoading</code> label, and set:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Height: =App.Height
+Width: =App.Width
+X: =0
+Y: =0
+Theme: ="Light"
+AccentColor: =RGBA(11, 74, 54, 1)
+LogoLetter: ="P"
+AppName: ="Policy"
+AppNameAccent: =" Tracker"
+AppSubtitle: ="Cadet Forces Document Tracking"
+CompanyName: ="Policy Tracker"
+AppVersion: ="V2"
+LoadingSteps: =Table(
+    {msg: "Loading colour palette…"},
+    {msg: "Loading document list…"},
+    {msg: "Checking staff access…"}
+)
+CurrentStep: =3
+MinDisplayTime: =400
+ErrorMessage: =""
+OnReady: =Navigate(varStartDestination, ScreenTransition.None)</pre></div>
+  <p><code>CurrentStep: =3</code> is set fixed at "all steps shown as done" rather than tracked live, for the honest reason above &mdash; there's nothing left running by this point to track. <code>MinDisplayTime: =400</code> is short on purpose, matching what you asked for: enough to register as an intentional brand moment, nowhere near long enough to feel like a wait. Nudge it up a little (600&ndash;800) if 400ms reads as too much of a flash once you see it live &mdash; that's a one-number change, not a redesign.</p>
+
+  <div class="test">Test: reload the app fresh (not just navigating within it) and confirm the splash appears briefly, shows your branding, then lands on Main. Then test the deep-link path directly (open the app with <code>?ID=</code> in the URL, same method used to test the deep-link "not found" case earlier) and confirm it lands on ViewItem instead.</div>
+
+</main>
+<script>
+function copyBlock(btn) {
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) { btn.classList.add('ok'); btn.textContent = 'Copied'; }
+    else { btn.classList.add('err'); btn.textContent = 'Select + Ctrl+C'; }
+    setTimeout(function () { btn.classList.remove('ok', 'err'); btn.textContent = 'Copy'; }, 1600);
+  }
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  var legacyCopied = false;
+  try { legacyCopied = document.execCommand('copy'); } catch (e) { legacyCopied = false; }
+  if (legacyCopied) { showResult(true); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { showResult(true); }, function () { showResult(false); });
+  } else { showResult(false); }
+}
+</script>
+</body>
+</html>

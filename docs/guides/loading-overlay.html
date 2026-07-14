@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading Overlay — Real Save Feedback on ViewItem</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
+    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
+    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Loading Overlay — Real Save Feedback on ViewItem</h1>
+  <p>Right now, clicking Save just disables the button and changes its text to "Saving...". This adds real full-screen feedback &mdash; a blurred overlay with a spinner &mdash; for exactly as long as the save genuinely takes, using the variable you already have. Component: <code>cmpLoadingSpinner</code> from <a href="https://www.powerappsui.com/components/loading-overlay" target="_blank" rel="noopener">powerappsui.com</a>, archived at <code>yaml/components/LoadingOverlay/</code>.</p>
+
+  <div class="note"><strong>The smallest guide in this batch, on purpose:</strong> <code>varSaving</code> already exists, already gets set <code>true</code> right before every save attempt and <code>false</code> once it resolves (success or failure), on both <code>btnSave1</code> and <code>btnSaveClose1</code>. This component just needs to read that same variable &mdash; no new state, no new logic, purely a visual addition on top of behaviour that's already correct.</p></div>
+
+  <h2>1. Verify the component pastes cleanly</h2>
+  <p><strong>Insert &rarr; Custom &rarr; New Component</strong>, paste the full contents of <code>yaml/components/LoadingOverlay/LoadingOverlay.yaml</code>, name it <code>cmpLoadingSpinner</code>.</p>
+  <div class="warn">Uses <code>Spinner@1.4.6</code>, which isn't yet confirmed live anywhere in this app (unlike <code>Text@0.0.51</code>/<code>Button@0.0.45</code>, already proven in your delete modals). It's a standard modern Power Apps control, not a custom hack, so low risk &mdash; but confirm the import renders correctly, spinner visibly spinning, before wiring it in.</div>
+  <div class="test">Test: component imports clean, and previewing it directly inside the Component editor shows a spinning circle.</div>
+
+  <h2>2. Place it on ViewItem, wire it to what already exists</h2>
+  <p><strong>Drag one instance of <code>cmpLoadingSpinner</code> from the Components panel</strong> onto the <code>ViewItem</code> screen &mdash; last in Tree view so it renders above everything, same placement as the toast and the dialog. (There's no confirmed way to paste a brand-new component instance in as raw YAML in this app yet, since nothing here has used the real Components workflow before today &mdash; drag-and-place first, exactly like the Dialog and Stepper guides, then paste these property values onto it once it exists on the canvas.)</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Visible: =varSaving
+LoadingText: ="Saving..."
+OverlayOpacity: =0.3
+ShowBlur: =true
+Theme: ="Light"
+Height: =App.Height
+Width: =App.Width
+X: =0
+Y: =0</pre></div>
+  <p>Nothing else needs to change &mdash; no formula on <code>btnSave1</code> or <code>btnSaveClose1</code> is touched, since both already set <code>varSaving</code> correctly. The overlay simply starts reflecting a state that was already being tracked, just invisibly.</p>
+
+  <div class="test">Test: edit a field, click Save. You should see the blurred overlay with spinner and "Saving..." for however long the actual save takes &mdash; gone the instant it resolves, whether that's under a second or several. Try it once with a deliberately bad connection (airplane mode briefly, if easy to test) to confirm the overlay also clears correctly on the failure path, not just success.</div>
+
+</main>
+<script>
+function copyBlock(btn) {
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) { btn.classList.add('ok'); btn.textContent = 'Copied'; }
+    else { btn.classList.add('err'); btn.textContent = 'Select + Ctrl+C'; }
+    setTimeout(function () { btn.classList.remove('ok', 'err'); btn.textContent = 'Copy'; }, 1600);
+  }
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  var legacyCopied = false;
+  try { legacyCopied = document.execCommand('copy'); } catch (e) { legacyCopied = false; }
+  if (legacyCopied) { showResult(true); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { showResult(true); }, function () { showResult(false); });
+  } else { showResult(false); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+ComponentDefinitions:
+  cmpStackedBarChart:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      Animate:
+        PropertyKind: Input
+        DisplayName: Animate
+        Description: Enable animations
+        DataType: Boolean
+        Default: =true
+      AnimationDuration:
+        PropertyKind: Input
+        DisplayName: AnimationDuration
+        DataType: Number
+        Default: =0.8
+      ChartData:
+        PropertyKind: Input
+        DisplayName: ChartData
+        Description: Table with Label, Series, and Value columns
+        DataType: Table
+        Default: |-
+          =Table(
+              {Label: "Jan", Series: "Mobile", Value: 55},
+              {Label: "Jan", Series: "Desktop", Value: 65},
+              {Label: "Feb", Series: "Mobile", Value: 65},
+              {Label: "Feb", Series: "Desktop", Value: 55},
+              {Label: "Mar", Series: "Mobile", Value: 40},
+              {Label: "Mar", Series: "Desktop", Value: 25},
+              {Label: "Apr", Series: "Mobile", Value: 55},
+              {Label: "Apr", Series: "Desktop", Value: 70},
+              {Label: "May", Series: "Mobile", Value: 65},
+              {Label: "May", Series: "Desktop", Value: 50},
+              {Label: "Jun", Series: "Mobile", Value: 45},
+              {Label: "Jun", Series: "Desktop", Value: 35}
+          )
+      ChartTitle:
+        PropertyKind: Input
+        DisplayName: ChartTitle
+        DataType: Text
+        Default: ="Mobile / Desktop"
+      Labels:
+        PropertyKind: Input
+        DisplayName: Labels
+        Description: Table with Label column defining x-axis categories
+        DataType: Table
+        Default: |-
+          =Table(
+              {Label: "Jan"},
+              {Label: "Feb"},
+              {Label: "Mar"},
+              {Label: "Apr"},
+              {Label: "May"},
+              {Label: "Jun"}
+          )
+      SeriesConfig:
+        PropertyKind: Input
+        DisplayName: SeriesConfig
+        Description: Table with Series and Color columns
+        DataType: Table
+        Default: |-
+          =Table(
+              {Series: "Mobile", Color: "#3B82F6"},
+              {Series: "Desktop", Color: "#93C5FD"}
+          )
+      ShowGrid:
+        PropertyKind: Input
+        DisplayName: ShowGrid
+        DataType: Boolean
+        Default: =true
+      ShowLegend:
+        PropertyKind: Input
+        DisplayName: ShowLegend
+        DataType: Boolean
+        Default: =true
+      ShowTitle:
+        PropertyKind: Input
+        DisplayName: ShowTitle
+        DataType: Boolean
+        Default: =true
+      ShowValues:
+        PropertyKind: Input
+        DisplayName: ShowValues
+        Description: Show total value above each bar stack
+        DataType: Boolean
+        Default: =false
+      Theme:
+        PropertyKind: Input
+        DisplayName: Theme
+        DataType: Text
+        Default: ="Light"
+    Properties:
+      Fill: =Color.Transparent
+      Height: =400
+      Width: =App.Width
+    Children:
+      - imgStackedBarChart:
+          Control: Image@2.2.3
+          Properties:
+            Height: =Parent.Height
+            Image: |-
+              ="data:image/svg+xml," & EncodeUrl(
+                  With(
+                      {
+                          Data: cmpStackedBarChart.ChartData,
+                          SeriesCfg: cmpStackedBarChart.SeriesConfig,
+                          vbW: 700,
+                          vbH: 320,
+                          Pad: 50,
+                          Bg: If(cmpStackedBarChart.Theme = "Dark", "#1F2937", "#FFFFFF"),
+                          Grid: If(cmpStackedBarChart.Theme = "Dark", "#374151", "#E5E7EB"),
+                          Axis: If(cmpStackedBarChart.Theme = "Dark", "#9CA3AF", "#6B7280"),
+                          Title: If(cmpStackedBarChart.Theme = "Dark", "#F9FAFB", "#0F172A"),
+                          XLbl: If(cmpStackedBarChart.Theme = "Dark", "#D1D5DB", "#64748B"),
+                          YLbl: If(cmpStackedBarChart.Theme = "Dark", "#D1D5DB", "#64748B"),
+                          ValLbl: If(cmpStackedBarChart.Theme = "Dark", "#E5E7EB", "#374151"),
+                          LegendTxt: If(cmpStackedBarChart.Theme = "Dark", "#E5E7EB", "#4B5563"),
+                          EmptyTxt: If(cmpStackedBarChart.Theme = "Dark", "#6B7280", "#9CA3AF"),
+                          Animate: cmpStackedBarChart.Animate,
+                          AnimDur: cmpStackedBarChart.AnimationDuration,
+                          ShowVals: cmpStackedBarChart.ShowValues
+                      },
+                      With(
+                          {
+                              pw: vbW - 2 * Pad,
+                              ph: vbH - 2 * Pad,
+                              bY: vbH - Pad,
+                              tY: Pad,
+                              labels: cmpStackedBarChart.Labels,
+                              ser1: Index(SeriesCfg, 1),
+                              ser2: Index(SeriesCfg, 2),
+                              fnt: "-apple-system,system-ui,Segoe UI,sans-serif"
+                          },
+                          With(
+                              {
+                                  yMax: Max(RoundUp(Max(Data, Value) * 2.2 / 20, 0) * 20, 20),
+                                  nLbl: CountRows(labels),
+                                  ser1Name: ser1.Series,
+                                  ser2Name: ser2.Series,
+                                  ser1Color: ser1.Color,
+                                  ser2Color: ser2.Color,
+                                  leg1Width: Len(ser1.Series) * 7,
+                                  leg2Width: Len(ser2.Series) * 7
+                              },
+                              With(
+                                  {
+                                      gap: pw / Max(nLbl, 1),
+                                      barW: (pw / Max(nLbl, 1)) * If(nLbl <= 4, 0.55, If(nLbl <= 8, 0.5, 0.42)),
+                                      legendTotalWidth: 12 + 18 + leg1Width + 20 + 12 + 18 + leg2Width
+                                  },
+
+                                  If(
+                                      nLbl < 1 || CountRows(Data) < 1,
+                                      "<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 " & vbW & " " & vbH & "' style='background:" & Bg & "'>" &
+                                          "<text x='" & (vbW / 2) & "' y='" & (vbH / 2) & "' text-anchor='middle' dominant-baseline='middle' fill='" & EmptyTxt & "' font-family='" & fnt & "' font-size='14'>No data</text>" &
+                                      "</svg>",
+
+                                      "<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 " & vbW & " " & vbH & "' style='background:" & Bg & "'>" &
+
+                                      If(
+                                          cmpStackedBarChart.ShowTitle,
+                                          "<text x='" & Pad & "' y='25' fill='" & Title & "' font-family='" & fnt & "' font-size='15' font-weight='600'>" & cmpStackedBarChart.ChartTitle & "</text>",
+                                          ""
+                                      ) &
+
+                                      If(
+                                          cmpStackedBarChart.ShowLegend,
+                                          "<g transform='translate(" & (vbW - Pad - legendTotalWidth) & ", 18)'>" &
+                                              "<rect x='0' y='0' width='12' height='12' rx='3' fill='" & ser1Color & "'/>" &
+                                              "<text x='18' y='10' fill='" & LegendTxt & "' font-family='" & fnt & "' font-size='11'>" & ser1Name & "</text>" &
+                                              "<rect x='" & (12 + 18 + leg1Width + 20) & "' y='0' width='12' height='12' rx='3' fill='" & ser2Color & "'/>" &
+                                              "<text x='" & (12 + 18 + leg1Width + 20 + 18) & "' y='10' fill='" & LegendTxt & "' font-family='" & fnt & "' font-size='11'>" & ser2Name & "</text>" &
+                                          "</g>",
+                                          ""
+                                      ) &
+
+                                      Concat(
+                                          Sequence(6),
+                                          With(
+                                              {gy: bY - ((Value - 1) * ph / 5)},
+                                              If(
+                                                  cmpStackedBarChart.ShowGrid,
+                                                  "<line x1='" & Pad & "' y1='" & gy & "' x2='" & (Pad + pw) & "' y2='" & gy & "' stroke='" & Grid & "' stroke-width='" & If(Value = 1, "1", "0.5") & "'/>",
+                                                  If(Value = 1, "<line x1='" & Pad & "' y1='" & gy & "' x2='" & (Pad + pw) & "' y2='" & gy & "' stroke='" & Grid & "' stroke-width='1'/>", "")
+                                              ) &
+                                              "<text x='" & (Pad - 8) & "' y='" & gy & "' text-anchor='end' dominant-baseline='central' fill='" & YLbl & "' font-family='" & fnt & "' font-size='11'>" & Text(Round((Value - 1) * yMax / 5, 0)) & "</text>"
+                                          )
+                                      ) &
+
+                                      Concat(
+                                          Sequence(nLbl),
+                                          With(
+                                              {
+                                                  cx: Pad + (Value - 0.5) * gap,
+                                                  lbl: Last(FirstN(labels, Value)).Label,
+                                                  currentLabel: Last(FirstN(labels, Value)).Label,
+                                                  barIndex: Value
+                                              },
+                                              With(
+                                                  {
+                                                      v1: Coalesce(LookUp(Data, Label = currentLabel && Series = ser1Name).Value, 0),
+                                                      v2: Coalesce(LookUp(Data, Label = currentLabel && Series = ser2Name).Value, 0)
+                                                  },
+                                                  With(
+                                                      {
+                                                          h1: v1 * ph / yMax,
+                                                          h2: v2 * ph / yMax,
+                                                          y1: bY - (v1 * ph / yMax),
+                                                          y2: bY - (v1 * ph / yMax) - (v2 * ph / yMax),
+                                                          delay: (barIndex - 1) * 0.06,
+                                                          total: v1 + v2
+                                                      },
+
+                                                      "<text x='" & cx & "' y='" & (bY + 14) & "' text-anchor='middle' dominant-baseline='hanging' fill='" & XLbl & "' font-family='" & fnt & "' font-size='11'>" & lbl & "</text>" &
+
+                                                      If(
+                                                          Animate,
+                                                          "<rect x='" & (cx - barW / 2) & "' y='" & bY & "' width='" & barW & "' height='0' fill='" & ser1Color & "'>" &
+                                                              "<animate attributeName='y' from='" & bY & "' to='" & y1 & "' dur='" & AnimDur & "s' begin='" & delay & "s' fill='freeze' calcMode='spline' keySplines='0.4 0 0.2 1'/>" &
+                                                              "<animate attributeName='height' from='0' to='" & h1 & "' dur='" & AnimDur & "s' begin='" & delay & "s' fill='freeze' calcMode='spline' keySplines='0.4 0 0.2 1'/>" &
+                                                          "</rect>",
+                                                          "<rect x='" & (cx - barW / 2) & "' y='" & y1 & "' width='" & barW & "' height='" & h1 & "' fill='" & ser1Color & "'/>"
+                                                      ) &
+
+                                                      If(
+                                                          Animate,
+                                                          "<rect x='" & (cx - barW / 2) & "' y='" & bY & "' width='" & barW & "' height='0' fill='" & ser2Color & "' rx='3'>" &
+                                                              "<animate attributeName='y' from='" & bY & "' to='" & y2 & "' dur='" & AnimDur & "s' begin='" & delay & "s' fill='freeze' calcMode='spline' keySplines='0.4 0 0.2 1'/>" &
+                                                              "<animate attributeName='height' from='0' to='" & h2 & "' dur='" & AnimDur & "s' begin='" & delay & "s' fill='freeze' calcMode='spline' keySplines='0.4 0 0.2 1'/>" &
+                                                          "</rect>",
+                                                          "<rect x='" & (cx - barW / 2) & "' y='" & y2 & "' width='" & barW & "' height='" & h2 & "' fill='" & ser2Color & "' rx='3'/>"
+                                                      ) &
+
+                                                      If(
+                                                          ShowVals && total > 0,
+                                                          "<text x='" & cx & "' y='" & (y2 - 6) & "' text-anchor='middle' dominant-baseline='auto' fill='" & ValLbl & "' font-family='" & fnt & "' font-size='10' font-weight='500'>" & Text(total, "[$-en-US]#,##0") & "</text>",
+                                                          ""
+                                                      )
+                                                  )
+                                              )
+                                          )
+                                      ) &
+
+                                      "</svg>"
+                                  )
+                              )
+                          )
+                      )
+                  )
+              )
+            Width: =Parent.Width

@@ -1,0 +1,87 @@
+ComponentDefinitions:
+  cmpHeatmap:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      BaseColor:
+        PropertyKind: Input
+        DisplayName: BaseColor
+        Description: Base color for heatmap (hex format)
+        DataType: Text
+        Default: ="#6366F1"
+      ChartData:
+        PropertyKind: Input
+        DisplayName: ChartData
+        Description: Table with DayOfWeek (0-6), Hour, and Value columns
+        DataType: Table
+        Default: |-
+          =Table(
+              {DayOfWeek: 0, Hour: 6, Value: 2},
+              {DayOfWeek: 1, Hour: 6, Value: 3},
+              {DayOfWeek: 0, Hour: 10, Value: 5},
+              {DayOfWeek: 1, Hour: 10, Value: 4},
+              {DayOfWeek: 2, Hour: 10, Value: 8},
+              {DayOfWeek: 4, Hour: 10, Value: 7},
+              {DayOfWeek: 0, Hour: 12, Value: 6},
+              {DayOfWeek: 2, Hour: 12, Value: 7},
+              {DayOfWeek: 3, Hour: 12, Value: 9},
+              {DayOfWeek: 4, Hour: 12, Value: 12},
+              {DayOfWeek: 0, Hour: 17, Value: 10},
+              {DayOfWeek: 1, Hour: 17, Value: 15},
+              {DayOfWeek: 2, Hour: 17, Value: 11},
+              {DayOfWeek: 3, Hour: 17, Value: 18},
+              {DayOfWeek: 4, Hour: 17, Value: 20},
+              {DayOfWeek: 6, Hour: 20, Value: 14}
+          )
+      ChartTitle:
+        PropertyKind: Input
+        DisplayName: ChartTitle
+        DataType: Text
+        Default: ="Issues opening time"
+      DayLabels:
+        PropertyKind: Input
+        DisplayName: DayLabels
+        DataType: Text
+        Default: ="M,T,W,T,F,S,S"
+      EmptyColor:
+        PropertyKind: Input
+        DisplayName: EmptyColor
+        Description: Color for empty cells (hex format)
+        DataType: Text
+        Default: ="#E0E7FF"
+      ShowTitle:
+        PropertyKind: Input
+        DisplayName: ShowTitle
+        Description: Show or hide the chart title
+        DataType: Boolean
+        Default: =true
+      Theme:
+        PropertyKind: Input
+        DisplayName: Theme
+        Description: Light or Dark theme
+        DataType: Text
+        Default: ="Light"
+      TimeLabels:
+        PropertyKind: Input
+        DisplayName: TimeLabels
+        Description: Table with Hour and Label columns
+        DataType: Table
+        Default: |-
+          =Table(
+              {Hour: 6, Label: "6am"},
+              {Hour: 10, Label: "10am"},
+              {Hour: 12, Label: "12am"},
+              {Hour: 17, Label: "5pm"},
+              {Hour: 20, Label: "8pm"}
+          )
+    Properties:
+      Fill: =Color.Transparent
+      Height: =350
+      Width: =App.Width
+    Children:
+      - imgHeatmap:
+          Control: Image@2.2.3
+          Properties:
+            Height: =Parent.Height
+            Image: "=With(\n    {\n        vData: cmpHeatmap.ChartData,\n        vTimeLabels: cmpHeatmap.TimeLabels,\n        vDayLabels: Split(cmpHeatmap.DayLabels, \",\"),\n        vMax: Max(cmpHeatmap.ChartData, Value),\n        vPadding: 40,\n        vCellSize: 60,\n        vCellGap: 8,\n        vLabelWidth: 80,\n        vBgColor: If(cmpHeatmap.Theme = \"Dark\", \"#1F2937\", \"#FFFFFF\"),\n        vTitleColor: If(cmpHeatmap.Theme = \"Dark\", \"#F9FAFB\", \"#1A202C\"),\n        vLabelColor: If(cmpHeatmap.Theme = \"Dark\", \"#D1D5DB\", \"#4A5568\")\n    },\n    With(\n        {\n            vTimeCount: CountRows(vTimeLabels),\n            vDayCount: CountRows(vDayLabels),\n            vW: vPadding * 2 + vLabelWidth + (vCellSize + vCellGap) * 7,\n            vH: vPadding * 2 + If(cmpHeatmap.ShowTitle, 60, 20) + (vCellSize + vCellGap) * 5 + 40\n        },\n        With(\n            {\n                vStartX: vPadding + vLabelWidth,\n                vStartY: vPadding + If(cmpHeatmap.ShowTitle, 60, 20)\n            },\n            \"data:image/svg+xml,\" & EncodeUrl(\n                \"<svg width='100%' height='100%' viewBox='0 0 \" & vW & \" \" & vH & \"' xmlns='http://www.w3.org/2000/svg'>\" &\n                \"<rect width='\" & vW & \"' height='\" & vH & \"' fill='\" & vBgColor & \"'/>\" &\n                \n                If(\n                    cmpHeatmap.ShowTitle,\n                    \"<text x='\" & vStartX  & \"' y='35' font-family='system-ui' font-size='20' font-weight='600' fill='\" & vTitleColor & \"'>\" & cmpHeatmap.ChartTitle & \"</text>\",\n                    \"\"\n                ) &\n                \n                Concat(\n                    ForAll(\n                        Sequence(vTimeCount),\n                        {RowIndex: Value, TimeLabel: Index(vTimeLabels, Value)}\n                    ),\n                    With(\n                        {vY: vStartY + (RowIndex - 1) * (vCellSize + vCellGap) + vCellSize / 2},\n                        \"<text x='\" & (vStartX - 15) & \"' y='\" & (vY + 4) & \"' text-anchor='end' font-family='system-ui' font-size='14' fill='\" & vLabelColor & \"'>\" & TimeLabel.Label & \"</text>\"\n                    )\n                ) &\n                \n                Concat(\n                    ForAll(\n                        Sequence(vDayCount),\n                        {ColIndex: Value, DayLabel: Index(vDayLabels, Value).Value}\n                    ),\n                    With(\n                        {vX: vStartX + (ColIndex - 1) * (vCellSize + vCellGap) + vCellSize / 2},\n                        \"<text x='\" & vX & \"' y='\" & (vStartY + vTimeCount * (vCellSize + vCellGap) + 25) & \"' text-anchor='middle' font-family='system-ui' font-size='14' font-weight='500' fill='\" & vLabelColor & \"'>\" & DayLabel & \"</text>\"\n                    )\n                ) &\n                \n                Concat(\n                    ForAll(\n                        Sequence(vTimeCount),\n                        {RowIndex: Value, TimeLabel: Index(vTimeLabels, Value)}\n                    ),\n                    Concat(\n                        ForAll(\n                            Sequence(vDayCount),\n                            {ColIndex: Value}\n                        ),\n                        With(\n                            {\n                                vX: vStartX + (ColIndex - 1) * (vCellSize + vCellGap),\n                                vY: vStartY + (RowIndex - 1) * (vCellSize + vCellGap)\n                            },\n                            With(\n                                {\n                                    vValue: Coalesce(\n                                        LookUp(\n                                            vData,\n                                            DayOfWeek = ColIndex - 1 && Hour = TimeLabel.Hour\n                                        ).Value,\n                                        0\n                                    )\n                                },\n                                With(\n                                    {\n                                        vIntensity: If(vValue > 0, vValue / vMax, 0),\n                                        vColor: If(\n                                            vValue = 0,\n                                            cmpHeatmap.EmptyColor,\n                                            Switch(\n                                                Int(vValue / vMax * 5),\n                                                0, \"#C7D2FE\",\n                                                1, \"#A5B4FC\",\n                                                2, \"#818CF8\",\n                                                3, \"#6366F1\",\n                                                4, \"#4F46E5\",\n                                                \"#3730A3\"\n                                            )\n                                        )\n                                    },\n                                    \"<rect x='\" & vX & \"' y='\" & vY & \"' width='\" & vCellSize & \"' height='\" & vCellSize & \"' rx='8' fill='\" & vColor & \"'/>\"\n                                )\n                            )\n                        )\n                    )\n                ) &\n                \n                \"</svg>\"\n            )\n        )\n    )\n)"
+            Width: =Parent.Width

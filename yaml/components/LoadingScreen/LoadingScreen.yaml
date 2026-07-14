@@ -1,0 +1,355 @@
+ComponentDefinitions:
+  cmpLoadingScreen:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      AccentColor:
+        PropertyKind: Input
+        DisplayName: Accent Color
+        Description: Accent color for logo, wordmark, divider, dots, ring, and version label.
+        DataType: Color
+        Default: =RGBA(79, 142, 247, 1)
+      AppName:
+        PropertyKind: Input
+        DisplayName: App Name
+        Description: First word of wordmark in default color. e.g. "PowerApps"
+        DataType: Text
+        Default: ="PowerApps"
+      AppNameAccent:
+        PropertyKind: Input
+        DisplayName: App Name Accent
+        Description: Second word of wordmark in accent color. Leave blank for single-word app names.
+        DataType: Text
+        Default: ="UI"
+      AppSubtitle:
+        PropertyKind: Input
+        DisplayName: App Subtitle
+        Description: Small uppercase subtitle below wordmark.
+        DataType: Text
+        Default: ="Component Library"
+      AppVersion:
+        PropertyKind: Input
+        DisplayName: App Version
+        Description: Version string in the bottom badge.
+        DataType: Text
+        Default: ="v1.0"
+      CompanyName:
+        PropertyKind: Input
+        DisplayName: Company Name
+        Description: Version badge text at the bottom.
+        DataType: Text
+        Default: ="powerappsui.com"
+      CurrentStep:
+        PropertyKind: Input
+        DisplayName: Current Step
+        Description: 1-based active stage index (0 = not started).
+        DataType: Number
+        Default: =0
+      ErrorMessage:
+        PropertyKind: Input
+        DisplayName: ErrorMessage
+        Description: When non-blank, hides the progress bar and dots and shows this text in red. Use to surface OnStart failures.
+        DataType: Text
+        Default: =""
+      IsReady:
+        PropertyKind: Output
+        DisplayName: IsReady
+        Description: True once MinDisplayTime has elapsed. Reactive alternative to OnReady event.
+        DataType: Boolean
+      LoadingSteps:
+        PropertyKind: Input
+        DisplayName: Loading Steps
+        Description: Table of {msg:Text} rows — one per loading stage.
+        DataType: Table
+        Default: |-
+          =Table(
+            {msg: "Loading configuration…"   },
+            {msg: "Connecting to SharePoint…"},
+            {msg: "Loading rate tables…"     },
+            {msg: "Preparing workspace…"     }
+          )
+      LogoLetter:
+        PropertyKind: Input
+        DisplayName: Logo Letter
+        Description: Single character inside the logo mark.
+        DataType: Text
+        Default: ="P"
+      MinDisplayTime:
+        PropertyKind: Input
+        DisplayName: MinDisplayTime
+        Description: Minimum milliseconds the screen stays visible regardless of how fast OnStart finishes. When elapsed, OnReady fires.
+        DataType: Number
+        Default: =1500
+      OnReady:
+        PropertyKind: Event
+        DisplayName: OnReady
+        Description: Fires once MinDisplayTime has elapsed. Wire to Set(gAppReady, true) to hide the loading screen.
+        ReturnType: None
+        Default: =
+      Theme:
+        PropertyKind: Input
+        DisplayName: Theme
+        Description: '"Dark" or "Light"'
+        DataType: Text
+        Default: ="Dark"
+    Properties:
+      Height: =App.Height
+      IsReady: =tmrMinDisplay.Value >= tmrMinDisplay.Duration
+      Width: =App.Width
+    Children:
+      - tmrMinDisplay:
+          Control: Timer@2.1.0
+          Properties:
+            AutoStart: =true
+            Duration: =cmpLoadingScreen.MinDisplayTime
+            Height: =16
+            OnTimerEnd: =cmpLoadingScreen.OnReady()
+            Visible: =false
+            Width: =16
+      - rctBackground:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =If(cmpLoadingScreen.Theme = "Dark", RGBA(13, 17, 28, 1), RGBA(238, 242, 255, 1))
+            Height: =Parent.Height
+            Width: =Parent.Width
+      - imgGlowTL:
+          Control: Image@2.2.3
+          Properties:
+            Height: =Max(Parent.Width, Parent.Height) * 0.65
+            Image: |-
+              =With({c: Substitute(JSON(cmpLoadingScreen.AccentColor), """", "")},
+                "data:image/svg+xml," & EncodeUrl(
+                  "<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><defs><radialGradient id='g' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='" & c & "' stop-opacity='" & If(cmpLoadingScreen.Theme="Dark","0.28","0.13") & "'/><stop offset='40%' stop-color='" & c & "' stop-opacity='" & If(cmpLoadingScreen.Theme="Dark","0.10","0.04") & "'/><stop offset='100%' stop-color='" & c & "' stop-opacity='0'/></radialGradient></defs><ellipse cx='300' cy='300' rx='300' ry='300' fill='url(#g)'/></svg>"
+                )
+              )
+            Width: =Self.Height
+            X: =Self.Width * -0.15
+            Y: =Self.Height * -0.25
+      - imgGlowBR:
+          Control: Image@2.2.3
+          Properties:
+            Height: =Max(Parent.Width, Parent.Height) * 0.55
+            Image: |-
+              =With({c: Substitute(JSON(cmpLoadingScreen.AccentColor), """", "")},
+                "data:image/svg+xml," & EncodeUrl(
+                  "<svg xmlns='http://www.w3.org/2000/svg' width='500' height='500'><defs><radialGradient id='g' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='" & c & "' stop-opacity='" & If(cmpLoadingScreen.Theme="Dark","0.18","0.09") & "'/><stop offset='50%' stop-color='" & c & "' stop-opacity='" & If(cmpLoadingScreen.Theme="Dark","0.06","0.03") & "'/><stop offset='100%' stop-color='" & c & "' stop-opacity='0'/></radialGradient></defs><ellipse cx='250' cy='250' rx='250' ry='250' fill='url(#g)'/></svg>"
+                )
+              )
+            Width: =Self.Height
+            X: =Parent.Width - Self.Width * 0.8
+            Y: =Parent.Height - Self.Height * 0.8
+      - imgGlowCenter:
+          Control: Image@2.2.3
+          Properties:
+            Height: =Max(Parent.Width, Parent.Height) * 0.8
+            Image: |-
+              =With({c: Substitute(JSON(cmpLoadingScreen.AccentColor), """", "")},
+                "data:image/svg+xml," & EncodeUrl(
+                  "<svg xmlns='http://www.w3.org/2000/svg' width='700' height='700'><defs><radialGradient id='g' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='" & c & "' stop-opacity='" & If(cmpLoadingScreen.Theme="Dark","0.18","0.09") & "'/><stop offset='35%' stop-color='" & c & "' stop-opacity='" & If(cmpLoadingScreen.Theme="Dark","0.07","0.03") & "'/><stop offset='68%' stop-color='" & c & "' stop-opacity='0'/></radialGradient></defs><ellipse cx='350' cy='350' rx='350' ry='350' fill='url(#g)'/></svg>"
+                )
+              )
+            Width: =Self.Height
+            X: =(Parent.Width - Self.Width) / 2
+            Y: =(Parent.Height - Self.Height) / 2
+      - cntLoadingCenter:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =Color.Transparent
+            Height: =320
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =12
+            PaddingBottom: =5
+            PaddingTop: =5
+            Width: =Parent.Width
+            Y: =(Parent.Height - 320) / 2 - 20
+          Children:
+            - cntLogoWrap:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  Fill: =Color.Transparent
+                  FillPortions: =0
+                  Height: =116
+                  Width: =116
+                Children:
+                  - imgLogoMark:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =cmpLoadingScreen.AccentColor
+                        Height: =88
+                        RadiusBottomLeft: =22
+                        RadiusBottomRight: =22
+                        RadiusTopLeft: =22
+                        RadiusTopRight: =22
+                        Width: =88
+                        X: =14
+                        Y: =14
+                      Children:
+                        - lblLogoLetter:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Bold
+                              Height: =88
+                              Size: =40
+                              Text: =cmpLoadingScreen.LogoLetter
+                              Width: =88
+                  - cntRing:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: |-
+                          =If(cmpLoadingScreen.Theme = "Dark",
+                            RGBA(79, 142, 247, Max(0, 0.55 * (1 - tmrRing.Value / tmrRing.Duration))),
+                            RGBA(37, 99, 235,  Max(0, 0.55 * (1 - tmrRing.Value / tmrRing.Duration)))
+                          )
+                        BorderThickness: =1 + 4 * (tmrRing.Value / tmrRing.Duration)
+                        DropShadow: =DropShadow.None
+                        Fill: =Color.Transparent
+                        Height: =imgLogoMark.Width + 12
+                        RadiusBottomLeft: =26
+                        RadiusBottomRight: =26
+                        RadiusTopLeft: =26
+                        RadiusTopRight: =26
+                        Width: =imgLogoMark.Width + 12
+                        X: =8
+                        Y: =8
+                      Children:
+                        - tmrRing:
+                            Control: Timer@2.1.0
+                            Properties:
+                              AutoStart: =true
+                              Duration: =1200
+                              Height: =16
+                              Repeat: =true
+                              Visible: =false
+                              Width: =16
+            - htxWordmark:
+                Control: HtmlViewer@2.1.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoHeight: =true
+                  Height: =48
+                  HtmlText: |-
+                    ="<div style='font-family:Segoe UI,system-ui,sans-serif;font-size:28px;font-weight:700;line-height:48px;text-align:center;white-space:nowrap;color:" &
+                    If(cmpLoadingScreen.Theme = "Dark", "#e8eaf0", "#111827") & "'>" &
+                    cmpLoadingScreen.AppName &
+                    If(!IsBlank(cmpLoadingScreen.AppNameAccent),
+                      "<span style='color:" & Substitute(JSON(cmpLoadingScreen.AccentColor), """", "") & "'>&nbsp;" & cmpLoadingScreen.AppNameAccent & "</span>",
+                      "") &
+                    "</div>"
+                  Width: =
+            - lblSubtitle:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: |-
+                    =If(cmpLoadingScreen.Theme = "Dark",
+                      RGBA(160, 168, 192, 1),
+                      RGBA(107, 114, 128, 1))
+                  Font: =Font.'Segoe UI'
+                  Height: =20
+                  Size: =11
+                  Text: =Upper(cmpLoadingScreen.AppSubtitle)
+                  Width: =
+            - rctDivider_1:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =cmpLoadingScreen.AccentColor
+                  Height: =2
+                  Width: =52
+            - pbrLoading:
+                Control: Progress@1.1.34
+                Properties:
+                  BasePaletteColor: =cmpLoadingScreen.AccentColor
+                  Height: =3
+                  Indeterminate: =true
+                  Visible: =IsBlank(cmpLoadingScreen.ErrorMessage)
+                  Width: =Min(276, Parent.Width - 64)
+            - lblStatus_1:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: |-
+                    =If(
+                      !IsBlank(cmpLoadingScreen.ErrorMessage),
+                      RGBA(220, 38, 38, 1),
+                      If(cmpLoadingScreen.Theme = "Dark",
+                        RGBA(160, 168, 192, 1),
+                        RGBA(107, 114, 128, 1))
+                    )
+                  Font: =Font.'Segoe UI'
+                  Height: =20
+                  Size: =11
+                  Text: |-
+                    =If(
+                      !IsBlank(cmpLoadingScreen.ErrorMessage),
+                      cmpLoadingScreen.ErrorMessage,
+                      Coalesce(
+                        Index(cmpLoadingScreen.LoadingSteps,
+                          Max(cmpLoadingScreen.CurrentStep, 1)).msg,
+                        "Loading…"
+                      )
+                    )
+                  Width: =
+            - galDots:
+                Control: Gallery@2.15.0
+                Variant: Horizontal
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  FillPortions: =0
+                  Height: =9
+                  Items: =Sequence(CountRows(cmpLoadingScreen.LoadingSteps))
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =12
+                  Visible: =IsBlank(cmpLoadingScreen.ErrorMessage)
+                  Width: =CountRows(cmpLoadingScreen.LoadingSteps) * 12 - 7
+                Children:
+                  - cntDot:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: |-
+                          =If(
+                            ThisItem.Value < cmpLoadingScreen.CurrentStep,
+                            ColorFade(cmpLoadingScreen.AccentColor, 0.4),
+                            If(
+                              ThisItem.Value = cmpLoadingScreen.CurrentStep,
+                              cmpLoadingScreen.AccentColor,
+                              If(cmpLoadingScreen.Theme = "Dark",
+                                ColorFade(cmpLoadingScreen.AccentColor, 0.65),
+                                RGBA(180, 194, 230, 1))
+                            )
+                          )
+                        Height: =5
+                        RadiusBottomLeft: =99
+                        RadiusBottomRight: =99
+                        RadiusTopLeft: =99
+                        RadiusTopRight: =99
+                        Width: =5
+                        Y: =2
+      - lblVersion:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =cmpLoadingScreen.AccentColor
+            Font: =Font.'Segoe UI'
+            Height: =16
+            Size: =9
+            Text: =cmpLoadingScreen.CompanyName & "  ·  " & cmpLoadingScreen.AppVersion
+            Width: =Parent.Width
+            X: =(Parent.Width - Self.Width) / 2
+            Y: =Parent.Height - 40

@@ -1,0 +1,717 @@
+ComponentDefinitions:
+  cmpPhotoUpload:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      BottomSectionLabel:
+        PropertyKind: Input
+        DisplayName: BottomSectionLabel
+        Description: Header label for the bottom photo section
+        DataType: Text
+        Default: ="Bottom Photos — Report Footer"
+      MaxBottomPhotos:
+        PropertyKind: Input
+        DisplayName: MaxBottomPhotos
+        Description: Total photo slots in the bottom section — wraps at MaxColumns per row
+        DataType: Number
+        Default: =3
+      MaxColumns:
+        PropertyKind: Input
+        DisplayName: MaxColumns
+        Description: Slots per row before wrapping. Default 4 gives 3 items comfortable width on mobile.
+        DataType: Number
+        Default: =4
+      MaxFileSizeMB:
+        PropertyKind: Input
+        DisplayName: MaxFileSizeMB
+        Description: Max file size in MB — informational, shown in helper text
+        DataType: Number
+        Default: =5
+      MaxTopPhotos:
+        PropertyKind: Input
+        DisplayName: MaxTopPhotos
+        Description: Total photo slots in the top section — wraps at MaxColumns per row
+        DataType: Number
+        Default: =3
+      OnSave:
+        PropertyKind: Event
+        DisplayName: OnSave
+        Description: Fires when Save Photos is tapped
+        ReturnType: None
+        Default: =
+      ShowActions:
+        PropertyKind: Input
+        DisplayName: ShowActions
+        Description: Show or hide Cancel / Save buttons. Set false when host screen handles actions.
+        DataType: Boolean
+        Default: =true
+      StyleConfig:
+        PropertyKind: Input
+        DisplayName: StyleConfig
+        Description: Color and radius tokens. Override any value to theme the component.
+        DataType: Record
+        Default: |-
+          ={
+              colors: {
+                  cardBg:         ColorValue("#FFFFFF"),
+                  cardBorder:     ColorValue("#DCE4F2"),
+                  cardBorderSlot: ColorValue("#B0C0D8"),
+                  divider:        ColorValue("#E8EDF5"),
+                  camPillBg:      ColorValue("#EEF3FB"),
+                  camPillIcon:    ColorValue("#3A6BC4"),
+                  titleText:      ColorValue("#1E3A6B"),
+                  slotEmptyBg:    ColorValue("#F7F9FC"),
+                  slotIconBg:     ColorValue("#DCE4F2"),
+                  slotIconColor:  ColorValue("#6482B4"),
+                  helperText:     ColorValue("#9BACC4"),
+                  cancelBorder:   ColorValue("#D1DAEB"),
+                  imageBorder:    ColorValue("#A8C5EA"),
+                  overlayBg:      ColorValue("#0F1826"),
+                  overlayHeader:  ColorValue("#1A2740")
+              },
+              radius: {
+                  card: 16,
+                  slot: 12,
+                  pill: 8
+              }
+          }
+      TopSectionLabel:
+        PropertyKind: Input
+        DisplayName: TopSectionLabel
+        Description: Header label for the top photo section
+        DataType: Text
+        Default: ="Top Photos — Report Header"
+    Properties:
+      Height: |-
+        =With({rH: 110, hH: 73, fH: 28, g: 16, cols: Max(1, cmpPhotoUpload.MaxColumns), aH: If(cmpPhotoUpload.ShowActions, 64, 16)}, (hH + RoundUp(cmpPhotoUpload.MaxTopPhotos / cols, 0) * rH + fH) + g + (hH + RoundUp(cmpPhotoUpload.MaxBottomPhotos / cols, 0) * rH + fH) + aH)
+    Children:
+      - conActions_2:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =40
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =12
+            LayoutJustifyContent: =LayoutJustifyContent.End
+            PaddingRight: =24
+            Visible: =cmpPhotoUpload.ShowActions
+            Width: =Parent.Width
+            Y: |-
+              =With({rH: 110, hH: 73, fH: 28, g: 16, cols: Max(1, cmpPhotoUpload.MaxColumns)}, (hH + RoundUp(cmpPhotoUpload.MaxTopPhotos / cols, 0) * rH + fH) + g + (hH + RoundUp(cmpPhotoUpload.MaxBottomPhotos / cols, 0) * rH + fH) + g)
+          Children:
+            - btnCancel_1:
+                Control: Button@0.0.45
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Secondary
+                  BorderColor: =cmpPhotoUpload.StyleConfig.colors.cancelBorder
+                  BorderRadius: =8
+                  Height: =40
+                  OnSelect: =Clear(_cmpTopPhotos); Clear(_cmpBottomPhotos)
+                  Text: ="Cancel"
+                  Width: =100
+            - btnSave_1:
+                Control: Button@0.0.45
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Primary
+                  BorderRadius: =8
+                  Height: =40
+                  OnSelect: =cmpPhotoUpload.OnSave()
+                  Text: ="Save Photos"
+                  Width: =148
+      - conBottomSection:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            BorderColor: =cmpPhotoUpload.StyleConfig.colors.cardBorder
+            BorderThickness: =1
+            DropShadow: =DropShadow.None
+            Fill: =cmpPhotoUpload.StyleConfig.colors.cardBg
+            Height: |-
+              =With({rH: 110, hH: 73, fH: 28, cols: Max(1, cmpPhotoUpload.MaxColumns)}, hH + RoundUp(cmpPhotoUpload.MaxBottomPhotos / cols, 0) * rH + fH)
+            LayoutDirection: =LayoutDirection.Vertical
+            RadiusBottomLeft: =cmpPhotoUpload.StyleConfig.radius.card
+            RadiusBottomRight: =cmpPhotoUpload.StyleConfig.radius.card
+            RadiusTopLeft: =cmpPhotoUpload.StyleConfig.radius.card
+            RadiusTopRight: =cmpPhotoUpload.StyleConfig.radius.card
+            Width: =Parent.Width - 48
+            X: =24
+            Y: |-
+              =With({rH: 110, hH: 73, fH: 28, cols: Max(1, cmpPhotoUpload.MaxColumns)}, hH + RoundUp(cmpPhotoUpload.MaxTopPhotos / cols, 0) * rH + fH) + 16
+          Children:
+            - conBotHeader:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =50
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                Children:
+                  - conBotCamPill:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        DropShadow: =DropShadow.None
+                        Fill: =cmpPhotoUpload.StyleConfig.colors.camPillBg
+                        FillPortions: =0
+                        Height: =36
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Width: =36
+                      Children:
+                        - icnBotCam:
+                            Control: Classic/Icon@2.5.0
+                            Properties:
+                              Color: =cmpPhotoUpload.StyleConfig.colors.camPillIcon
+                              Height: =20
+                              Icon: =Icon.Camera
+                              Width: =20
+                              X: =8
+                              Y: =8
+                  - lblBotTitle:
+                      Control: Text@0.0.51
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        FillPortions: =1
+                        FontColor: =cmpPhotoUpload.StyleConfig.colors.titleText
+                        Height: =36
+                        Size: =11
+                        Text: =Upper(cmpPhotoUpload.BottomSectionLabel)
+                        VerticalAlign: =VerticalAlign.Middle
+                        Weight: ='TextCanvas.Weight'.Bold
+                  - badgeBotCount:
+                      Control: Badge@0.0.24
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Appearance: ='BadgeCanvas.Appearance'.Filled
+                        Content: =Text(CountRows(_cmpBottomPhotos)) & " / " & Text(cmpPhotoUpload.MaxBottomPhotos)
+                        Shape: ='BadgeCanvas.Shape'.Circular
+                        ThemeColor: ='BadgeCanvas.ThemeColor'.Brand
+                        Width: =50
+            - recBotDivider:
+                Control: Rectangle@2.3.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Fill: =cmpPhotoUpload.StyleConfig.colors.divider
+                  Height: =1
+            - galBotSlots:
+                Control: Gallery@2.15.0
+                Variant: Vertical
+                Properties:
+                  Height: =RoundUp(cmpPhotoUpload.MaxBottomPhotos / Max(1, cmpPhotoUpload.MaxColumns), 0) * 110
+                  Items: =Sequence(cmpPhotoUpload.MaxBottomPhotos)
+                  LayoutMinHeight: =0
+                  ShowScrollbar: =false
+                  TemplateSize: =100
+                  Width: =cmpPhotoUpload.Width - 48
+                  WrapCount: =Max(1, cmpPhotoUpload.MaxColumns)
+                Children:
+                  - conBotEmpty:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =cmpPhotoUpload.StyleConfig.colors.cardBorderSlot
+                        BorderStyle: =BorderStyle.Dashed
+                        BorderThickness: =2
+                        DropShadow: =DropShadow.None
+                        Fill: =cmpPhotoUpload.StyleConfig.colors.slotEmptyBg
+                        Height: =90
+                        RadiusBottomLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusBottomRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        Visible: =IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                      Children:
+                        - conBotEmptyIcon:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =cmpPhotoUpload.StyleConfig.colors.slotIconBg
+                              Height: =36
+                              RadiusBottomLeft: =18
+                              RadiusBottomRight: =18
+                              RadiusTopLeft: =18
+                              RadiusTopRight: =18
+                              Width: =36
+                              X: =(Parent.Width - 36) / 2
+                              Y: =12
+                            Children:
+                              - icnBotEmptyCam:
+                                  Control: Classic/Icon@2.5.0
+                                  Properties:
+                                    Color: =cmpPhotoUpload.StyleConfig.colors.slotIconColor
+                                    Height: =18
+                                    Icon: =Icon.Camera
+                                    Width: =18
+                                    X: =9
+                                    Y: =9
+                        - lblBotAddPhoto:
+                            Control: ModernText@1.0.0
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =cmpPhotoUpload.StyleConfig.colors.slotIconColor
+                              FontWeight: =FontWeight.Semibold
+                              Height: =18
+                              Size: =10
+                              Text: ="Add Photo"
+                              Width: =Parent.Width
+                              Y: =56
+                  - btnBotTap:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        Height: =90
+                        OnSelect: =Set(_cmpShowOverlay, true); Set(_cmpOverlaySection, "bot"); Set(_cmpOverlayMode, "capture")
+                        Text: =""
+                        Visible: =IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                  - imgBotPreview:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =cmpPhotoUpload.StyleConfig.colors.imageBorder
+                        BorderThickness: =2
+                        Height: =90
+                        Image: =LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value).Photo
+                        RadiusBottomLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusBottomRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        Visible: =!IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                  - btnBotView_1:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        Height: =90
+                        OnSelect: =Set(_cmpShowOverlay, true); Set(_cmpOverlaySection, "bot"); Set(_cmpOverlayMode, "view"); Set(_cmpViewSlot, ThisItem.Value)
+                        Text: =""
+                        Visible: =!IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                  - imgBotCheck:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Height: =26
+                        Image: ="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'12'%20fill%3D'rgba(34%2C113%2C54%2C0.92)'%2F%3E%3Cpolyline%20points%3D'6%2C12.5%2010.5%2C17%2018%2C8'%20stroke%3D'white'%20stroke-width%3D'2.5'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E"
+                        Visible: =!IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))
+                        Width: =26
+                        X: =6
+                        Y: =58
+                  - imgBotRemove:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Height: =26
+                        Image: ="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'12'%20fill%3D'rgba(0%2C0%2C0%2C0.55)'%2F%3E%3Cline%20x1%3D'7'%20y1%3D'7'%20x2%3D'17'%20y2%3D'17'%20stroke%3D'white'%20stroke-width%3D'2.5'%20stroke-linecap%3D'round'%2F%3E%3Cline%20x1%3D'17'%20y1%3D'7'%20x2%3D'7'%20y2%3D'17'%20stroke%3D'white'%20stroke-width%3D'2.5'%20stroke-linecap%3D'round'%2F%3E%3C%2Fsvg%3E"
+                        OnSelect: =IfError(Remove(_cmpBottomPhotos, LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value)), false)
+                        Visible: =!IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))
+                        Width: =26
+                        X: =Parent.TemplateWidth - 32
+                        Y: =6
+            - lblBotHelper:
+                Control: Text@0.0.51
+                Properties:
+                  Align: =Align.Center
+                  FontColor: =cmpPhotoUpload.StyleConfig.colors.helperText
+                  Height: =28
+                  Size: =11
+                  Text: ="All image types  ·  Max " & Text(cmpPhotoUpload.MaxFileSizeMB) & " MB per photo"
+                  Width: =Parent.Width
+      - conTopSection:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            BorderColor: =cmpPhotoUpload.StyleConfig.colors.cardBorder
+            BorderThickness: =1
+            DropShadow: =DropShadow.None
+            Fill: =cmpPhotoUpload.StyleConfig.colors.cardBg
+            Height: |-
+              =With({rH: 110, hH: 73, fH: 28, cols: Max(1, cmpPhotoUpload.MaxColumns)}, hH + RoundUp(cmpPhotoUpload.MaxTopPhotos / cols, 0) * rH + fH)
+            LayoutDirection: =LayoutDirection.Vertical
+            RadiusBottomLeft: =cmpPhotoUpload.StyleConfig.radius.card
+            RadiusBottomRight: =cmpPhotoUpload.StyleConfig.radius.card
+            RadiusTopLeft: =cmpPhotoUpload.StyleConfig.radius.card
+            RadiusTopRight: =cmpPhotoUpload.StyleConfig.radius.card
+            Width: =Parent.Width - 48
+            X: =24
+            Y: =5
+          Children:
+            - conTopHeader:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =50
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                Children:
+                  - conTopCamPill:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        DropShadow: =DropShadow.None
+                        Fill: =cmpPhotoUpload.StyleConfig.colors.camPillBg
+                        FillPortions: =0
+                        Height: =36
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Width: =36
+                      Children:
+                        - icnTopCam:
+                            Control: Classic/Icon@2.5.0
+                            Properties:
+                              Color: =cmpPhotoUpload.StyleConfig.colors.camPillIcon
+                              Height: =20
+                              Icon: =Icon.Camera
+                              Width: =20
+                              X: =8
+                              Y: =8
+                  - lblTopTitle:
+                      Control: Text@0.0.51
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        FillPortions: =1
+                        FontColor: =cmpPhotoUpload.StyleConfig.colors.titleText
+                        Height: =36
+                        Size: =11
+                        Text: =Upper(cmpPhotoUpload.TopSectionLabel)
+                        VerticalAlign: =VerticalAlign.Middle
+                        Weight: ='TextCanvas.Weight'.Bold
+                  - badgeTopCount:
+                      Control: Badge@0.0.24
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Appearance: ='BadgeCanvas.Appearance'.Filled
+                        Content: =Text(CountRows(_cmpTopPhotos)) & " / " & Text(cmpPhotoUpload.MaxTopPhotos)
+                        Shape: ='BadgeCanvas.Shape'.Circular
+                        ThemeColor: ='BadgeCanvas.ThemeColor'.Brand
+                        Width: =50
+            - recTopDivider:
+                Control: Rectangle@2.3.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Fill: =cmpPhotoUpload.StyleConfig.colors.divider
+                  Height: =1
+            - galTopSlots:
+                Control: Gallery@2.15.0
+                Variant: Vertical
+                Properties:
+                  Height: =RoundUp(cmpPhotoUpload.MaxTopPhotos / Max(1, cmpPhotoUpload.MaxColumns), 0) * 110
+                  Items: =Sequence(cmpPhotoUpload.MaxTopPhotos)
+                  LayoutMinHeight: =0
+                  ShowScrollbar: =false
+                  TemplateSize: =100
+                  Width: =cmpPhotoUpload.Width - 48
+                  WrapCount: =Max(1, cmpPhotoUpload.MaxColumns)
+                Children:
+                  - conTopEmpty:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =cmpPhotoUpload.StyleConfig.colors.cardBorderSlot
+                        BorderStyle: =BorderStyle.Dashed
+                        BorderThickness: =2
+                        DropShadow: =DropShadow.None
+                        Fill: =cmpPhotoUpload.StyleConfig.colors.slotEmptyBg
+                        Height: =90
+                        RadiusBottomLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusBottomRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        Visible: =IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                      Children:
+                        - conTopEmptyIcon:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =cmpPhotoUpload.StyleConfig.colors.slotIconBg
+                              Height: =36
+                              RadiusBottomLeft: =18
+                              RadiusBottomRight: =18
+                              RadiusTopLeft: =18
+                              RadiusTopRight: =18
+                              Width: =36
+                              X: =(Parent.Width - 36) / 2
+                              Y: =12
+                            Children:
+                              - icnTopEmptyCam:
+                                  Control: Classic/Icon@2.5.0
+                                  Properties:
+                                    Color: =cmpPhotoUpload.StyleConfig.colors.slotIconColor
+                                    Height: =18
+                                    Icon: =Icon.Camera
+                                    Width: =18
+                                    X: =9
+                                    Y: =9
+                        - lblTopAddPhoto:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: =Align.Center
+                              FontColor: =cmpPhotoUpload.StyleConfig.colors.slotIconColor
+                              Height: =18
+                              Size: =10
+                              Text: ="Add Photo"
+                              Weight: ='TextCanvas.Weight'.Semibold
+                              Width: =Parent.Width
+                              Y: =56
+                  - btnTopTap:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        Height: =90
+                        OnSelect: =Set(_cmpShowOverlay, true); Set(_cmpOverlaySection, "top"); Set(_cmpOverlayMode, "capture")
+                        Text: =""
+                        Visible: =IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        Y: =10
+                  - imgTopPreview:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =cmpPhotoUpload.StyleConfig.colors.imageBorder
+                        BorderThickness: =2
+                        Height: =90
+                        Image: =LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value).Photo
+                        RadiusBottomLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusBottomRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopLeft: =cmpPhotoUpload.StyleConfig.radius.slot
+                        RadiusTopRight: =cmpPhotoUpload.StyleConfig.radius.slot
+                        Visible: =!IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                  - btnTopView_1:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        Height: =90
+                        OnSelect: =Set(_cmpShowOverlay, true); Set(_cmpOverlaySection, "top"); Set(_cmpOverlayMode, "view"); Set(_cmpViewSlot, ThisItem.Value)
+                        Text: =""
+                        Visible: =!IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value))
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                  - imgTopCheck:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Height: =26
+                        Image: ="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'12'%20fill%3D'rgba(34%2C113%2C54%2C0.92)'%2F%3E%3Cpolyline%20points%3D'6%2C12.5%2010.5%2C17%2018%2C8'%20stroke%3D'white'%20stroke-width%3D'2.5'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E"
+                        Visible: =!IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value))
+                        Width: =26
+                        X: =6
+                        Y: =58
+                  - imgTopRemove:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Height: =26
+                        Image: ="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'12'%20fill%3D'rgba(0%2C0%2C0%2C0.55)'%2F%3E%3Cline%20x1%3D'7'%20y1%3D'7'%20x2%3D'17'%20y2%3D'17'%20stroke%3D'white'%20stroke-width%3D'2.5'%20stroke-linecap%3D'round'%2F%3E%3Cline%20x1%3D'17'%20y1%3D'7'%20x2%3D'7'%20y2%3D'17'%20stroke%3D'white'%20stroke-width%3D'2.5'%20stroke-linecap%3D'round'%2F%3E%3C%2Fsvg%3E"
+                        OnSelect: =IfError(Remove(_cmpTopPhotos, LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value)), false)
+                        Visible: =!IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value))
+                        Width: =26
+                        X: =Parent.TemplateWidth - 32
+                        Y: =6
+            - lblTopHelper:
+                Control: Text@0.0.51
+                Properties:
+                  Align: =Align.Center
+                  FontColor: =cmpPhotoUpload.StyleConfig.colors.helperText
+                  Height: =28
+                  Size: =11
+                  Text: ="All image types  ·  Max " & Text(cmpPhotoUpload.MaxFileSizeMB) & " MB per photo"
+                  Width: =Parent.Width
+      - conCamOverlay_1:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =cmpPhotoUpload.StyleConfig.colors.overlayBg
+            Height: =Parent.Height
+            Visible: =_cmpShowOverlay
+            Width: =Parent.Width
+          Children:
+            - conOverlayHeader_1:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =cmpPhotoUpload.StyleConfig.colors.overlayHeader
+                  Height: =56
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =8
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  Width: =Parent.Width
+                Children:
+                  - btnOverlayBack_1:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        Height: =40
+                        OnSelect: =Set(_cmpShowOverlay, false)
+                        Text: ="← Back"
+                        Width: =80
+                  - lblOverlayTitle_1:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: =Align.Center
+                        FillPortions: =1
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        Height: =40
+                        Size: =13
+                        Text: =If(_cmpOverlaySection = "top", Upper(cmpPhotoUpload.TopSectionLabel), Upper(cmpPhotoUpload.BottomSectionLabel)) & If(_cmpOverlayMode = "view", "  —  VIEW", "  —  CAPTURE")
+                        VerticalAlign: =VerticalAlign.Middle
+                        Weight: ='TextCanvas.Weight'.Semibold
+                  - btnOverlayConfirm_1:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Primary
+                        BorderRadius: =20
+                        Height: =40
+                        OnSelect: =Set(_cmpShowOverlay, false)
+                        Text: ="✓ Done"
+                        Width: =80
+            - camOverlay_1:
+                Control: Camera@2.4.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Camera: =0
+                  Height: =Parent.Height - 56
+                  OnSelect: |-
+                    =IfError(
+                      With({
+                        sec: _cmpOverlaySection,
+                        col: If(_cmpOverlaySection = "top", _cmpTopPhotos, _cmpBottomPhotos),
+                        maxS: If(_cmpOverlaySection = "top", cmpPhotoUpload.MaxTopPhotos, cmpPhotoUpload.MaxBottomPhotos),
+                        photo: Text(ParseJSON(JSON({p: Self.Photo}, JSONFormat.IncludeBinaryData)).p)
+                      },
+                      If(IsBlank(photo),
+                        Notify("Could not capture photo. Please try again.", NotificationType.Warning),
+                        With({nextSlot: Min(Filter(Sequence(maxS), !(Value in col.SlotIndex)), Value)},
+                          If(!IsBlank(nextSlot),
+                            If(sec = "top",
+                              Collect(_cmpTopPhotos, {SlotIndex: nextSlot, Photo: photo, Name: "top_" & Text(nextSlot) & ".jpg"}),
+                              Collect(_cmpBottomPhotos, {SlotIndex: nextSlot, Photo: photo, Name: "bottom_" & Text(nextSlot) & ".jpg"})
+                            )
+                          )
+                        );
+                        If(
+                          CountRows(If(_cmpOverlaySection = "top", _cmpTopPhotos, _cmpBottomPhotos)) >= If(_cmpOverlaySection = "top", cmpPhotoUpload.MaxTopPhotos, cmpPhotoUpload.MaxBottomPhotos),
+                          Set(_cmpShowOverlay, false)
+                        )
+                      )),
+                      Notify("Camera error: " & FirstError.Message, NotificationType.Error)
+                    )
+                  Visible: =_cmpOverlayMode = "capture"
+                  Width: =cmpPhotoUpload.Width * 0.62
+                  Y: =56
+            - imgViewFull_1:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Height: =Parent.Height - 56
+                  Image: =If(_cmpOverlaySection = "top", LookUp(_cmpTopPhotos, SlotIndex = _cmpViewSlot).Photo, LookUp(_cmpBottomPhotos, SlotIndex = _cmpViewSlot).Photo)
+                  Visible: =_cmpOverlayMode = "view"
+                  Width: =cmpPhotoUpload.Width * 0.62
+                  Y: =56
+            - galOverlayThumbs_1:
+                Control: Gallery@2.15.0
+                Variant: Vertical
+                Properties:
+                  Height: =Parent.Height - 56
+                  Items: =Sequence(If(_cmpOverlaySection = "top", cmpPhotoUpload.MaxTopPhotos, cmpPhotoUpload.MaxBottomPhotos))
+                  TemplatePadding: =4
+                  TemplateSize: =100
+                  Width: =cmpPhotoUpload.Width * 0.38
+                  X: =cmpPhotoUpload.Width * 0.62
+                  Y: =56
+                Children:
+                  - btnThumbSelect_1:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        Height: =88
+                        OnSelect: =If(_cmpOverlayMode = "view" And If(_cmpOverlaySection = "top", !IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value)), !IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))), Set(_cmpViewSlot, ThisItem.Value))
+                        Text: =""
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                  - imgThumb_1:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =If(_cmpOverlayMode = "view" And _cmpViewSlot = ThisItem.Value, RGBA(255, 255, 255, 1), RGBA(255, 255, 255, 0.15))
+                        BorderThickness: =If(_cmpOverlayMode = "view" And _cmpViewSlot = ThisItem.Value, 3, 1)
+                        Height: =88
+                        Image: =If(_cmpOverlaySection = "top", Coalesce(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value).Photo, SampleImage), Coalesce(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value).Photo, SampleImage))
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Width: =Parent.TemplateWidth - 8
+                        X: =4
+                        Y: =4
+                  - lblThumbNum_1:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: =Align.Center
+                        FontColor: =RGBA(255, 255, 255, 0.7)
+                        Height: =18
+                        Size: =9
+                        Text: =Text(ThisItem.Value)
+                        Width: =Parent.TemplateWidth
+                        Y: =70
+                  - imgThumbRemove:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Height: =36
+                        Image: ="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2036%2036'%3E%3Ccircle%20cx%3D'18'%20cy%3D'18'%20r%3D'18'%20fill%3D'rgba(200%2C30%2C30%2C0.92)'%2F%3E%3Cline%20x1%3D'11'%20y1%3D'11'%20x2%3D'25'%20y2%3D'25'%20stroke%3D'white'%20stroke-width%3D'3'%20stroke-linecap%3D'round'%2F%3E%3Cline%20x1%3D'25'%20y1%3D'11'%20x2%3D'11'%20y2%3D'25'%20stroke%3D'white'%20stroke-width%3D'3'%20stroke-linecap%3D'round'%2F%3E%3C%2Fsvg%3E"
+                        OnSelect: =IfError(If(_cmpOverlaySection = "top", Remove(_cmpTopPhotos, LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value)), Remove(_cmpBottomPhotos, LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value))), false)
+                        Visible: =If(_cmpOverlaySection = "top", !IsBlank(LookUp(_cmpTopPhotos, SlotIndex = ThisItem.Value)), !IsBlank(LookUp(_cmpBottomPhotos, SlotIndex = ThisItem.Value)))
+                        Width: =36
+                        X: =(Parent.TemplateWidth - 36) / 2
+                        Y: =Parent.TemplateHeight - 40
+            - btnReplacePhoto_1:
+                Control: Button@0.0.45
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Primary
+                  BorderRadius: =20
+                  Height: =44
+                  OnSelect: =IfError(If(_cmpOverlaySection = "top", Remove(_cmpTopPhotos, LookUp(_cmpTopPhotos, SlotIndex = _cmpViewSlot)), Remove(_cmpBottomPhotos, LookUp(_cmpBottomPhotos, SlotIndex = _cmpViewSlot))), false); Set(_cmpOverlayMode, "capture")
+                  Text: ="↺  Replace Photo"
+                  Visible: =_cmpOverlayMode = "view"
+                  Width: =160
+                  X: =(Parent.Width * 0.62 - 160) / 2
+                  Y: =Parent.Height - 56 - 56

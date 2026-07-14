@@ -1,0 +1,611 @@
+ComponentDefinitions:
+  cmpNavigationMenu:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      ActiveColor:
+        PropertyKind: Input
+        DisplayName: ActiveColor
+        Description: Accent color for active menu items
+        DataType: Color
+        Default: =RGBA(37, 99, 235, 1)
+      DropdownColumns:
+        PropertyKind: Input
+        DisplayName: DropdownColumns
+        Description: Columns in dropdown (1 = simple list, 2 = mega menu)
+        DataType: Number
+        Default: =2
+      DropdownItems:
+        PropertyKind: Input
+        DisplayName: DropdownItems
+        Description: 'Table: MenuID, Section, Icon, Label, Description, Link, Column'
+        DataType: Table
+        Default: |-
+          =Table(
+              {MenuID: "inventory", Section: "Products", Icon: "Layout", Label: "All Items", Description: "Browse and search full catalog", Link: "ItemsScreen", Column: 1},
+              {MenuID: "inventory", Section: "Products", Icon: "BarChart", Label: "Stock Levels", Description: "Current quantities by location", Link: "StockScreen", Column: 1},
+              {MenuID: "inventory", Section: "Products", Icon: "FileText", Label: "Categories", Description: "Organize items by type and tag", Link: "CategoriesScreen", Column: 1},
+              {MenuID: "inventory", Section: "Tracking", Icon: "Rocket", Label: "Incoming", Description: "Expected shipments and POs", Link: "IncomingScreen", Column: 2},
+              {MenuID: "inventory", Section: "Tracking", Icon: "Zap", Label: "Adjustments", Description: "Manual counts and corrections", Link: "AdjustScreen", Column: 2},
+              {MenuID: "inventory", Section: "Tracking", Icon: "Settings", Label: "Reorder Rules", Description: "Auto-replenishment thresholds", Link: "ReorderScreen", Column: 2},
+              {MenuID: "operations", Section: "Warehouse", Icon: "Layout", Label: "Receiving", Description: "Log inbound deliveries", Link: "ReceivingScreen", Column: 1},
+              {MenuID: "operations", Section: "Warehouse", Icon: "Rocket", Label: "Pick & Pack", Description: "Fulfill and stage orders", Link: "PickPackScreen", Column: 1},
+              {MenuID: "operations", Section: "Warehouse", Icon: "Code", Label: "Transfers", Description: "Move stock between locations", Link: "TransferScreen", Column: 1},
+              {MenuID: "operations", Section: "Fulfillment", Icon: "Zap", Label: "Shipping", Description: "Labels, tracking, and carriers", Link: "ShippingScreen", Column: 2},
+              {MenuID: "operations", Section: "Fulfillment", Icon: "FileText", Label: "Returns", Description: "RMAs and restocking workflow", Link: "ReturnsScreen", Column: 2},
+              {MenuID: "operations", Section: "Fulfillment", Icon: "Settings", Label: "Cycle Counts", Description: "Scheduled audit procedures", Link: "CycleCountScreen", Column: 2},
+              {MenuID: "reports", Section: "", Icon: "BarChart", Label: "Inventory Value", Description: "Cost and valuation summaries", Link: "ValueReportScreen", Column: 1},
+              {MenuID: "reports", Section: "", Icon: "Sparkles", Label: "Turnover Analysis", Description: "Sell-through rates and velocity", Link: "TurnoverScreen", Column: 1},
+              {MenuID: "reports", Section: "", Icon: "Book", Label: "Low Stock Alerts", Description: "Items below reorder threshold", Link: "LowStockScreen", Column: 1}
+          )
+      IsOpen:
+        PropertyKind: Output
+        DisplayName: IsOpen
+        Description: Whether a dropdown is currently open
+        DataType: Boolean
+      MenuItems:
+        PropertyKind: Input
+        DisplayName: MenuItems
+        Description: 'Table: ID, Label, HasDropdown (Boolean), Link'
+        DataType: Table
+        Default: |-
+          =Table(
+              {ID: "dashboard", Label: "Dashboard", HasDropdown: false, Link: "DashboardScreen"},
+              {ID: "inventory", Label: "Inventory", HasDropdown: true, Link: ""},
+              {ID: "operations", Label: "Operations", HasDropdown: true, Link: ""},
+              {ID: "reports", Label: "Reports", HasDropdown: true, Link: ""}
+          )
+      NavAlign:
+        PropertyKind: Input
+        DisplayName: NavAlign
+        Description: 'Alignment of menu buttons: Left, Center, or Right'
+        DataType: Text
+        Default: ="Center"
+      OnItemSelect:
+        PropertyKind: Event
+        DisplayName: OnItemSelect
+        Description: Fires when any menu or dropdown item is clicked
+        ReturnType: None
+        Default: =false
+      SelectedItem:
+        PropertyKind: Output
+        DisplayName: SelectedItem
+        Description: The last selected item record
+        DataType: Record
+      SelectedMenuID:
+        PropertyKind: Output
+        DisplayName: SelectedMenuID
+        Description: ID of the currently open or last selected menu
+        DataType: Text
+      ShowDescriptions:
+        PropertyKind: Input
+        DisplayName: ShowDescriptions
+        Description: Show item descriptions in dropdown
+        DataType: Boolean
+        Default: =true
+      ShowDropdownScrollbar:
+        PropertyKind: Input
+        DisplayName: ShowDropdownScrollbar
+        Description: Show scrollbar in dropdown galleries
+        DataType: Boolean
+        Default: =false
+      ShowIcons:
+        PropertyKind: Input
+        DisplayName: ShowIcons
+        Description: Show icons in dropdown items
+        DataType: Boolean
+        Default: =true
+      ShowNavScrollbar:
+        PropertyKind: Input
+        DisplayName: ShowNavScrollbar
+        Description: Show scrollbar on the nav bar gallery
+        DataType: Boolean
+        Default: =false
+      Theme:
+        PropertyKind: Input
+        DisplayName: Theme
+        Description: Light or Dark theme
+        DataType: Text
+        Default: ="Light"
+    Properties:
+      Fill: =Color.Transparent
+      Height: |-
+        =With(
+            {_barH: If(cmpNavigationMenu.ShowNavScrollbar, 68, 48)},
+            If(
+                !IsBlank(_navOpenMenu) && CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu)) > 0,
+                _barH + 8 + 8 + With(
+                    {
+                        _col1: If(cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500, CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))), CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu))),
+                        _col2: If(cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500, CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)), 0),
+                        _rowH: If(cmpNavigationMenu.ShowDescriptions, 80, 56),
+                        _secH: If(!IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))).Section) && (App.Width > 500 || CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) = 0), 24, 0)
+                    },
+                    Max(_col1, _col2) * _rowH + 24 + _secH
+                ),
+                _barH
+            )
+        )
+      IsOpen: =!IsBlank(_navOpenMenu)
+      OnReset: |-
+        =Set(_navOpenMenu, Blank());
+         Set(_navSelectedItem, Blank())
+      SelectedItem: =_navSelectedItem
+      SelectedMenuID: =If(!IsBlank(_navOpenMenu), _navOpenMenu, "")
+      Width: =App.Width
+    Children:
+      - cntNavRoot:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =Color.Transparent
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            Width: =Parent.Width
+          Children:
+            - cntNavBar:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(55, 65, 81, 1), RGBA(229, 231, 235, 1))
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =If(cmpNavigationMenu.Theme = "Dark", RGBA(31, 41, 55, 1), RGBA(255, 255, 255, 1))
+                  Height: =If(cmpNavigationMenu.ShowNavScrollbar, 68, 48)
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Width: =Parent.Width
+                Children:
+                  - galMenuItems:
+                      Control: Gallery@2.15.0
+                      Variant: Horizontal
+                      Properties:
+                        BorderStyle: =BorderStyle.None
+                        Height: =If(cmpNavigationMenu.ShowNavScrollbar, 56, 36)
+                        Items: =cmpNavigationMenu.MenuItems
+                        ShowScrollbar: =cmpNavigationMenu.ShowNavScrollbar
+                        TemplatePadding: =4
+                        TemplateSize: =Min(160, Max(120, (Parent.Width - 16) / Max(1, CountRows(cmpNavigationMenu.MenuItems)) - 8))
+                        Width: =Min(CountRows(cmpNavigationMenu.MenuItems) * (Min(160, Max(120, (Parent.Width - 16) / Max(1, CountRows(cmpNavigationMenu.MenuItems)) - 8)) + 8), Parent.Width - 16)
+                        X: |-
+                          =Switch(
+                              cmpNavigationMenu.NavAlign,
+                              "Left", 8,
+                              "Right", Parent.Width - Self.Width - 8,
+                              (Parent.Width - Self.Width) / 2
+                          )
+                        Y: =(Parent.Height - Self.Height) / 2
+                      Children:
+                        - btnMenuItem:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Color: |-
+                                =If(
+                                    _navOpenMenu = ThisItem.ID
+                                    || (!ThisItem.HasDropdown && !IsBlank(_navSelectedItem) && _navSelectedItem.ID = ThisItem.ID && IsBlank(_navOpenMenu))
+                                    || (ThisItem.HasDropdown && !IsBlank(_navSelectedItem) && _navSelectedItem.MenuID = ThisItem.ID && IsBlank(_navOpenMenu)),
+                                    cmpNavigationMenu.ActiveColor,
+                                    If(cmpNavigationMenu.Theme = "Dark", RGBA(209, 213, 219, 1), RGBA(75, 85, 99, 1))
+                                )
+                              Fill: |-
+                                =If(
+                                    _navOpenMenu = ThisItem.ID
+                                    || (!ThisItem.HasDropdown && !IsBlank(_navSelectedItem) && _navSelectedItem.ID = ThisItem.ID && IsBlank(_navOpenMenu))
+                                    || (ThisItem.HasDropdown && !IsBlank(_navSelectedItem) && _navSelectedItem.MenuID = ThisItem.ID && IsBlank(_navOpenMenu)),
+                                    ColorFade(cmpNavigationMenu.ActiveColor, If(cmpNavigationMenu.Theme = "Dark", -0.7, 0.85)),
+                                    RGBA(0, 0, 0, 0)
+                                )
+                              Font: =Font.'Segoe UI'
+                              Height: =36
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(255, 255, 255, 1), RGBA(17, 24, 39, 1))
+                              HoverFill: =If(cmpNavigationMenu.Theme = "Dark", RGBA(55, 65, 81, 1), RGBA(243, 244, 246, 1))
+                              OnSelect: |-
+                                =If(
+                                    ThisItem.HasDropdown,
+                                    If(
+                                        _navOpenMenu = ThisItem.ID,
+                                        Set(_navOpenMenu, Blank()),
+                                        Set(_navOpenMenu, ThisItem.ID)
+                                    ),
+                                    Set(_navOpenMenu, Blank());
+                                    Set(_navSelectedItem, ThisItem);
+                                    cmpNavigationMenu.OnItemSelect()
+                                )
+                              PaddingRight: =If(ThisItem.HasDropdown, 20, 0)
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(255, 255, 255, 1), RGBA(17, 24, 39, 1))
+                              PressedFill: =If(cmpNavigationMenu.Theme = "Dark", RGBA(75, 85, 99, 1), RGBA(229, 231, 235, 1))
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Size: =If(App.Width < 500, 12, 14)
+                              Text: =ThisItem.Label
+                              Width: =Parent.TemplateWidth
+                        - imgChevron:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =12
+                              Image: |-
+                                =With(
+                                    {_clr: If(cmpNavigationMenu.Theme = "Dark", "#D1D5DB", "#4B5563")},
+                                    If(
+                                        _navOpenMenu = ThisItem.ID,
+                                        "data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='" & _clr & "' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='18 15 12 9 6 15'/></svg>"),
+                                        "data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='" & _clr & "' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>")
+                                    )
+                                )
+                              Visible: =ThisItem.HasDropdown
+                              Width: =12
+                              X: =(Parent.TemplateWidth + Len(ThisItem.Label) * If(App.Width < 500, 7, 8.5)) / 2 + 2
+                              Y: =(36 - Self.Height) / 2
+            - btnBackdrop:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Color: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =Parent.Height
+                  HoverBorderColor: =RGBA(0, 0, 0, 0)
+                  HoverColor: =RGBA(0, 0, 0, 0)
+                  HoverFill: =RGBA(0, 0, 0, 0)
+                  OnSelect: =Set(_navOpenMenu, Blank())
+                  PressedBorderColor: =RGBA(0, 0, 0, 0)
+                  PressedColor: =RGBA(0, 0, 0, 0)
+                  PressedFill: =RGBA(0, 0, 0, 0)
+                  Text: =""
+                  Visible: =!IsBlank(_navOpenMenu)
+                  Width: =Parent.Width
+            - cntDropdownPanel:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(55, 65, 81, 1), RGBA(229, 231, 235, 1))
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.Bold
+                  Fill: =If(cmpNavigationMenu.Theme = "Dark", RGBA(31, 41, 55, 1), RGBA(255, 255, 255, 1))
+                  Height: |-
+                    =With(
+                        {
+                            _col1: CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))),
+                            _col2: If(cmpNavigationMenu.DropdownColumns > 1, CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)), 0),
+                            _rowH: If(cmpNavigationMenu.ShowDescriptions, 80, 56),
+                            _secH: If(!IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))).Section) && (App.Width > 500 || CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) = 0), 24, 0)
+                        },
+                        Max(72, Max(_col1, _col2) * _rowH + 24 + _secH)
+                    )
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Width: |-
+                    =If(
+                        cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500 && CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) > 0,
+                        Min(Parent.Width - 16, 560),
+                        Min(Parent.Width - 16, 320)
+                    )
+                  X: |-
+                    =With(
+                        {
+                            _idx: Coalesce(
+                                LookUp(
+                                    ForAll(
+                                        Sequence(CountRows(cmpNavigationMenu.MenuItems)),
+                                        {_pos: Value, _id: Index(cmpNavigationMenu.MenuItems, Value).ID}
+                                    ),
+                                    _id = _navOpenMenu,
+                                    _pos
+                                ),
+                                1
+                            )
+                        },
+                        Min(
+                            galMenuItems.X + (_idx - 1) * (Min(160, Max(120, (Parent.Width - 16) / Max(1, CountRows(cmpNavigationMenu.MenuItems)) - 8)) + 8),
+                            Parent.Width - Self.Width - 8
+                        )
+                    )
+                  Y: =If(cmpNavigationMenu.ShowNavScrollbar, 76, 56)
+                Children:
+                  - lblCol1Section:
+                      Control: Text@0.0.51
+                      Properties:
+                        Font: =Font.'Segoe UI'
+                        FontColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(156, 163, 175, 1), RGBA(107, 114, 128, 1))
+                        Height: =16
+                        Size: =11
+                        Text: |-
+                          =Upper(Coalesce(
+                              First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))).Section,
+                              ""
+                          ))
+                        Visible: |-
+                          =!IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))).Section)
+                          && (App.Width > 500 || CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) = 0)
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: |-
+                          =If(
+                              cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500 && CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) > 0,
+                              (Parent.Width - 32) / 2,
+                              Parent.Width - 24
+                          )
+                        X: =If(cmpNavigationMenu.ShowIcons, 22, 12)
+                        Y: =14
+                  - galDDCol1:
+                      Control: Gallery@2.15.0
+                      Variant: Vertical
+                      Properties:
+                        BorderStyle: =BorderStyle.None
+                        Height: =Parent.Height - 24 - If(!IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))).Section) && (App.Width > 500 || CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) = 0), 24, 0)
+                        Items: |-
+                          =If(
+                              cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500 && CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) > 0,
+                              Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0)),
+                              Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu)
+                          )
+                        ShowScrollbar: =cmpNavigationMenu.ShowDropdownScrollbar
+                        TemplatePadding: =0
+                        TemplateSize: =If(cmpNavigationMenu.ShowDescriptions, 80, 56)
+                        Width: |-
+                          =If(
+                              cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500 && CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) > 0,
+                              (Parent.Width - 32) / 2,
+                              Parent.Width - 24
+                          )
+                        X: =12
+                        Y: =12 + If(!IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && (Column = 1 || IsBlank(Column) || Column = 0))).Section) && (App.Width > 500 || CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) = 0), 24, 0)
+                      Children:
+                        - imgC1Icon:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =36
+                              Image: |-
+                                =With(
+                                    {
+                                        _ico: ThisItem.Icon,
+                                        _clr: If(
+                                            cmpNavigationMenu.Theme = "Dark",
+                                            "#60A5FA",
+                                            "#2563EB"
+                                        ),
+                                        _bg: If(
+                                            cmpNavigationMenu.Theme = "Dark",
+                                            "#172554",
+                                            "#EFF6FF"
+                                        )
+                                    },
+                                    If(
+                                        StartsWith(
+                                            _ico,
+                                            "data:"
+                                        ),
+                                        _ico,
+                                        StartsWith(
+                                            _ico,
+                                            "<svg"
+                                        ),
+                                        "data:image/svg+xml;utf8," & EncodeUrl(_ico),
+                                        "data:image/svg+xml;utf8," & EncodeUrl(
+                                            "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'>" & "<rect width='36' height='36' rx='6' fill='" & _bg & "'/>" & "<g transform='translate(9,9) scale(0.75)' fill='none' stroke='" & _clr & "' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>" & Switch(
+                                                _ico,
+                                                "Home",
+                                                "<path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><path d='M9 22V12h6v10'/>",
+                                                "Users",
+                                                "<path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M23 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/>",
+                                                "Shield",
+                                                "<path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/>",
+                                                "Database",
+                                                "<ellipse cx='12' cy='5' rx='9' ry='3'/><path d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'/><path d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'/>",
+                                                "Globe",
+                                                "<circle cx='12' cy='12' r='10'/><line x1='2' y1='12' x2='22' y2='12'/><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/>",
+                                                "Mail",
+                                                "<rect x='2' y='4' width='20' height='16' rx='2'/><path d='M22 7l-10 7L2 7'/>",
+                                                "Star",
+                                                "<polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/>",
+                                                "Calendar",
+                                                "<rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/>",
+                                                "Heart",
+                                                "<path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/>",
+                                                "Bell",
+                                                "<path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/>",
+                                                "Sparkles",
+                                                "<path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/>",
+                                                "Rocket",
+                                                "<path d='M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09Z'/><path d='m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2Z'/>",
+                                                "Book",
+                                                "<path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/>",
+                                                "Layout",
+                                                "<rect width='18' height='18' x='3' y='3' rx='2' ry='2'/><line x1='3' y1='9' x2='21' y2='9'/><line x1='9' y1='21' x2='9' y2='9'/>",
+                                                "FileText",
+                                                "<path d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/><path d='M14 2v4a2 2 0 0 0 2 2h4'/><path d='M10 9H8'/><path d='M16 13H8'/><path d='M16 17H8'/>",
+                                                "BarChart",
+                                                "<line x1='12' y1='20' x2='12' y2='10'/><line x1='18' y1='20' x2='18' y2='4'/><line x1='6' y1='20' x2='6' y2='16'/>",
+                                                "Zap",
+                                                "<polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/>",
+                                                "Code",
+                                                "<polyline points='16 18 22 12 16 6'/><polyline points='8 6 2 12 8 18'/>",
+                                                "Settings",
+                                                "<circle cx='12' cy='12' r='3'/><path d='M12 1v2'/><path d='M12 21v2'/><path d='m4.22 4.22 1.42 1.42'/><path d='m18.36 18.36 1.42 1.42'/><path d='M1 12h2'/><path d='M21 12h2'/><path d='m4.22 19.78 1.42-1.42'/><path d='m18.36 5.64 1.42-1.42'/>",
+                                                ""
+                                            ) & "</g></svg>"
+                                        )
+                                    )
+                                )
+                              Visible: =cmpNavigationMenu.ShowIcons
+                              Width: =36
+                              X: =10
+                              Y: =(Parent.TemplateHeight - Self.Height) / 2
+                        - lblC1Label:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.'Segoe UI'
+                              FontColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(255, 255, 255, 1), RGBA(17, 24, 39, 1))
+                              Height: =If(cmpNavigationMenu.ShowDescriptions, 20, Parent.TemplateHeight)
+                              Text: =ThisItem.Label
+                              VerticalAlign: =If(cmpNavigationMenu.ShowDescriptions, VerticalAlign.Bottom, VerticalAlign.Middle)
+                              Weight: ='TextCanvas.Weight'.Semibold
+                              Width: =Parent.TemplateWidth - If(cmpNavigationMenu.ShowIcons, 62, 16)
+                              X: =If(cmpNavigationMenu.ShowIcons, 58, 12)
+                              Y: =If(cmpNavigationMenu.ShowDescriptions, 10, 0)
+                        - lblC1Desc:
+                            Control: Text@0.0.51
+                            Properties:
+                              AutoHeight: =true
+                              Font: =Font.'Segoe UI'
+                              FontColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(156, 163, 175, 1), RGBA(107, 114, 128, 1))
+                              Height: =28
+                              Size: =12
+                              Text: =ThisItem.Description
+                              Visible: =cmpNavigationMenu.ShowDescriptions
+                              Width: =Parent.TemplateWidth - If(cmpNavigationMenu.ShowIcons, 62, 16)
+                              X: =If(cmpNavigationMenu.ShowIcons, 58, 12)
+                              Y: =38
+                        - btnC1Hit:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Color: =RGBA(0, 0, 0, 0)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              Height: =Parent.TemplateHeight
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =RGBA(0, 0, 0, 0.06)
+                              OnSelect: |-
+                                =Set(_navSelectedItem, ThisItem);
+                                 Set(_navOpenMenu, Blank());
+                                 cmpNavigationMenu.OnItemSelect()
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =If(cmpNavigationMenu.Theme = "Dark", RGBA(75, 85, 99, 1), RGBA(243, 244, 246, 1))
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Text: =""
+                              Width: =Parent.TemplateWidth
+                  - lblCol2Section:
+                      Control: Text@0.0.51
+                      Properties:
+                        Font: =Font.'Segoe UI'
+                        FontColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(156, 163, 175, 1), RGBA(107, 114, 128, 1))
+                        Height: =16
+                        Size: =11
+                        Text: =Upper(Coalesce(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)).Section, ""))
+                        Visible: =cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500 && CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) > 0 && !IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)).Section)
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =(Parent.Width - 32) / 2
+                        X: =Parent.Width / 2 + If(cmpNavigationMenu.ShowIcons, 14, 4)
+                        Y: =14
+                  - galDDCol2:
+                      Control: Gallery@2.15.0
+                      Variant: Vertical
+                      Properties:
+                        BorderStyle: =BorderStyle.None
+                        Height: =Parent.Height - 24 - If(!IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)).Section), 24, 0)
+                        Items: =Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)
+                        ShowScrollbar: =cmpNavigationMenu.ShowDropdownScrollbar
+                        TemplatePadding: =0
+                        TemplateSize: =If(cmpNavigationMenu.ShowDescriptions, 80, 56)
+                        Visible: =cmpNavigationMenu.DropdownColumns > 1 && App.Width > 500 && CountRows(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)) > 0
+                        Width: =(Parent.Width - 32) / 2
+                        X: =Parent.Width / 2 + 4
+                        Y: =12 + If(!IsBlank(First(Filter(cmpNavigationMenu.DropdownItems, MenuID = _navOpenMenu && Column = 2)).Section), 24, 0)
+                      Children:
+                        - imgC2Icon:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =36
+                              Image: |-
+                                =With(
+                                    {_ico: ThisItem.Icon, _clr: If(cmpNavigationMenu.Theme = "Dark", "#60A5FA", "#2563EB"), _bg: If(cmpNavigationMenu.Theme = "Dark", "#172554", "#EFF6FF")},
+                                    If(
+                                        StartsWith(_ico, "data:"),
+                                        _ico,
+                                        StartsWith(_ico, "<svg"),
+                                        "data:image/svg+xml;utf8," & EncodeUrl(_ico),
+                                        "data:image/svg+xml;utf8," & EncodeUrl(
+                                            "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'>" &
+                                            "<rect width='36' height='36' rx='6' fill='" & _bg & "'/>" &
+                                            "<g transform='translate(9,9) scale(0.75)' fill='none' stroke='" & _clr & "' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>" &
+                                            Switch(_ico,
+                                            "Home", "<path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><path d='M9 22V12h6v10'/>",
+                                "Users", "<path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M23 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/>",
+                                "Shield", "<path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/>",
+                                "Database", "<ellipse cx='12' cy='5' rx='9' ry='3'/><path d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'/><path d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'/>",
+                                "Globe", "<circle cx='12' cy='12' r='10'/><line x1='2' y1='12' x2='22' y2='12'/><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/>",
+                                "Mail", "<rect x='2' y='4' width='20' height='16' rx='2'/><path d='M22 7l-10 7L2 7'/>",
+                                "Star", "<polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/>",
+                                "Calendar", "<rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/>",
+                                "Heart", "<path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/>",
+                                "Bell", "<path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/>",
+
+                                                "Sparkles", "<path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/>",
+                                                "Rocket", "<path d='M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09Z'/><path d='m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2Z'/>",
+                                                "Book", "<path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/>",
+                                                "Layout", "<rect width='18' height='18' x='3' y='3' rx='2' ry='2'/><line x1='3' y1='9' x2='21' y2='9'/><line x1='9' y1='21' x2='9' y2='9'/>",
+                                                "FileText", "<path d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/><path d='M14 2v4a2 2 0 0 0 2 2h4'/><path d='M10 9H8'/><path d='M16 13H8'/><path d='M16 17H8'/>",
+                                                "BarChart", "<line x1='12' y1='20' x2='12' y2='10'/><line x1='18' y1='20' x2='18' y2='4'/><line x1='6' y1='20' x2='6' y2='16'/>",
+                                                "Zap", "<polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/>",
+                                                "Code", "<polyline points='16 18 22 12 16 6'/><polyline points='8 6 2 12 8 18'/>",
+                                                "Settings", "<circle cx='12' cy='12' r='3'/><path d='M12 1v2'/><path d='M12 21v2'/><path d='m4.22 4.22 1.42 1.42'/><path d='m18.36 18.36 1.42 1.42'/><path d='M1 12h2'/><path d='M21 12h2'/><path d='m4.22 19.78 1.42-1.42'/><path d='m18.36 5.64 1.42-1.42'/>",
+                                                ""
+                                            ) &
+                                            "</g></svg>"
+                                        )
+                                    )
+                                )
+                              Visible: =cmpNavigationMenu.ShowIcons
+                              Width: =36
+                              X: =10
+                              Y: =(Parent.TemplateHeight - Self.Height) / 2
+                        - lblC2Label:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.'Segoe UI'
+                              FontColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(255, 255, 255, 1), RGBA(17, 24, 39, 1))
+                              Height: =If(cmpNavigationMenu.ShowDescriptions, 20, Parent.TemplateHeight)
+                              Text: =ThisItem.Label
+                              VerticalAlign: =If(cmpNavigationMenu.ShowDescriptions, VerticalAlign.Bottom, VerticalAlign.Middle)
+                              Weight: ='TextCanvas.Weight'.Semibold
+                              Width: =Parent.TemplateWidth - If(cmpNavigationMenu.ShowIcons, 62, 16)
+                              X: =If(cmpNavigationMenu.ShowIcons, 58, 12)
+                              Y: =If(cmpNavigationMenu.ShowDescriptions, 10, 0)
+                        - lblC2Desc:
+                            Control: Text@0.0.51
+                            Properties:
+                              AutoHeight: =true
+                              Font: =Font.'Segoe UI'
+                              FontColor: =If(cmpNavigationMenu.Theme = "Dark", RGBA(156, 163, 175, 1), RGBA(107, 114, 128, 1))
+                              Height: =28
+                              Size: =12
+                              Text: =ThisItem.Description
+                              Visible: =cmpNavigationMenu.ShowDescriptions
+                              Width: =Parent.TemplateWidth - If(cmpNavigationMenu.ShowIcons, 62, 16)
+                              X: =If(cmpNavigationMenu.ShowIcons, 58, 12)
+                              Y: =38
+                        - btnC2Hit:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Color: =RGBA(0, 0, 0, 0)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              Height: =Parent.TemplateHeight
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =RGBA(0, 0, 0, 0.06)
+                              OnSelect: |-
+                                =Set(_navSelectedItem, ThisItem);
+                                 Set(_navOpenMenu, Blank());
+                                 cmpNavigationMenu.OnItemSelect()
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =If(cmpNavigationMenu.Theme = "Dark", RGBA(75, 85, 99, 1), RGBA(243, 244, 246, 1))
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Text: =""
+                              Width: =Parent.TemplateWidth

@@ -1,0 +1,1251 @@
+ComponentDefinitions:
+  cmpChips:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      CharWidths:
+        PropertyKind: Input
+        DisplayName: CharWidths
+        Description: Character width lookup table
+        DataType: Table
+        Default: |-
+          =Table(
+              {CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:" ",Size:0.369},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"!",Size:0.408},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"""",Size:0.585},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"#",Size:0.788},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"$",Size:0.742},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"%",Size:1.123},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"&",Size:0.954},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"'",Size:0.346},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"(",Size:0.446},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:")",Size:0.446},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"*",Size:0.581},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"+",Size:0.927},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:",",Size:0.323},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"-",Size:0.538},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:".",Size:0.323},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"/",Size:0.554},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"0",Size:0.742},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"1",Size:0.538},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"2",Size:0.742},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"3",Size:0.742},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"4",Size:0.769},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"5",Size:0.742},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"6",Size:0.746},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"7",Size:0.715},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"8",Size:0.742},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"9",Size:0.746},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:":",Size:0.323},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:";",Size:0.323},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"<",Size:0.927},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"=",Size:0.927},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:">",Size:0.927},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"?",Size:0.592},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"@",Size:1.273},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"A",Size:0.892},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"B",Size:0.808},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"C",Size:0.792},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"D",Size:0.958},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"E",Size:0.692},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"F",Size:0.673},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"G",Size:0.931},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"H",Size:0.981},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"I",Size:0.392},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"J",Size:0.492},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"K",Size:0.815},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"L",Size:0.654},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"M",Size:1.235},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"N",Size:1.023},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"O",Size:1.008},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"P",Size:0.781},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"Q",Size:1.008},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"R",Size:0.831},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"S",Size:0.727},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"T",Size:0.762},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"U",Size:0.938},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"V",Size:0.858},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"W",Size:1.288},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"X",Size:0.823},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"Y",Size:0.773},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"Z",Size:0.785},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"[",Size:0.446},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"]",Size:0.446},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"^",Size:0.927},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"_",Size:0.55},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"\`",Size:0.388},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"a",Size:0.696},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"b",Size:0.804},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"c",Size:0.627},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"d",Size:0.804},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"e",Size:0.712},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"f",Size:0.462},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"g",Size:0.804},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"h",Size:0.777},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"i",Size:0.35},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"j",Size:0.369},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"k",Size:0.7},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"l",Size:0.35},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"m",Size:1.181},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"n",Size:0.781},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"o",Size:0.796},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"p",Size:0.804},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"q",Size:0.804},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"r",Size:0.496},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"s",Size:0.573},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"t",Size:0.485},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"u",Size:0.781},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"v",Size:0.677},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"w",Size:1.012},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"x",Size:0.669},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"y",Size:0.681},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"z",Size:0.619},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"{",Size:0.446},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"|",Size:0.369},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"}",Size:0.446},{CharFont:Font.'Segoe UI',CharWeight:FontWeight.Semibold,Char:"~",Size:0.927}
+          )
+      ChipType:
+        PropertyKind: Input
+        DisplayName: ChipType
+        DataType: Text
+        Default: ="filter"
+      Color:
+        PropertyKind: Input
+        DisplayName: Color
+        DataType: Text
+        Default: ="secondary"
+      Config:
+        PropertyKind: Input
+        DisplayName: Config
+        DataType: Record
+        Default: ={Theme:"light",Wrap:false,Closable:true,Disabled:false,Radius:99,Gap:8,MaxVisible:10}
+      CustomColors:
+        PropertyKind: Input
+        DisplayName: CustomColors
+        Description: Theme-level color overrides (hex strings)
+        DataType: Record
+        Default: ={primary:"",secondary:"",success:"",warning:"",error:""}
+      Icons:
+        PropertyKind: Input
+        DisplayName: Icons
+        DataType: Record
+        Default: ={Prepend:"",Check:"✓"}
+      Items:
+        PropertyKind: Input
+        DisplayName: Items
+        DataType: Table
+        Default: |-
+          =Table(
+              {
+                  id: "1",
+                  label: "Approved",
+                  icon: "",
+                  color: "",
+                  variant: "",
+                  selected: false
+              },
+              {
+                  id: "2",
+                  label: "Rejected"
+              },
+              {
+                  id: "3",
+                  label: "Pending Review"
+              },
+              {
+                  id: "4",
+                  label: "Draft"
+              },
+              {
+                  id: "5",
+                  label: "New"
+              },
+              {
+                  id: "6",
+                  label: "Archived"
+              },
+              {
+                  id: "7",
+                  label: "In Progress"
+              },
+              {
+                  id: "8",
+                  label: "On Hold"
+              },
+              {
+                  id: "9",
+                  label: "Completed"
+              },
+              {
+                  id: "10",
+                  label: "Cancelled"
+              }
+          )
+      OnClose:
+        PropertyKind: Event
+        DisplayName: OnClose
+        ReturnType: None
+        Default: =
+      OnOverflow:
+        PropertyKind: Event
+        DisplayName: OnOverflow
+        Description: A custom property
+        ReturnType: None
+        Default: =
+      OnSelect:
+        PropertyKind: Event
+        DisplayName: OnSelect
+        ReturnType: None
+        Default: =
+      SelectedItem:
+        PropertyKind: Output
+        DisplayName: SelectedItem
+        DataType: Record
+      Size:
+        PropertyKind: Input
+        DisplayName: Size
+        DataType: Text
+        Default: ="default"
+      Variant:
+        PropertyKind: Input
+        DisplayName: Variant
+        DataType: Text
+        Default: ="tonal"
+    Properties:
+      Height: =Switch(Self.Size, "x-small", 38, "small", 44, "large", 56, "x-large", 62, 50)
+      SelectedItem: =_chipSelected
+      Width: =800
+    Children:
+      - cntChipsWrapper_1:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =cmpChips.Config.Gap
+            LayoutOverflowX: =LayoutOverflow.Scroll
+            PaddingBottom: =8
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =12
+            Width: =Parent.Width
+          Children:
+            - cntChip1:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=1,With({_i:Index(cmpChips.Items,1),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=1,If(Coalesce(Index(cmpChips.Items,1).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=1,With({_i:Index(cmpChips.Items,1),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=1 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 1<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent1.Width
+                Children:
+                  - cntContent1:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: |+
+                          =If(imgIcon1_1.Visible,imgIcon1_1.Width+4,0)+lblText1_1.Width+If(cntClose1_1.Visible,4+cntClose1_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+
+                      Children:
+                        - imgIcon1_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: |-
+                                =If(CountRows(cmpChips.Items)>=1,
+                                    With({_i:Index(cmpChips.Items,1),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},
+                                        With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},
+                                            If(_f&&_sel&&IsBlank(_ico),
+                                                "data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),
+                                                If(StartsWith(_ico,"data:"),_ico,
+                                                    If(StartsWith(_ico,"<svg"),
+                                                        "data:image/svg+xml;utf8,"&EncodeUrl(_ico),
+                                                        "data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),
+                                    "")
+                              Visible: =If(CountRows(cmpChips.Items)>=1,With({_i:Index(cmpChips.Items,1),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText1_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: |-
+                                =With(
+                                    {
+                                        _i: IfError(Index(cmpChips.Items,1), {color:"",variant:"",selected:false,icon:"",label:"",id:""}),
+                                        _lt: cmpChips.Config.Theme="light"
+                                    },
+                                    With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))
+                                )
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=1,Index(cmpChips.Items,1).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose1_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose1_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose1_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =Set(_chipSelected,Index(cmpChips.Items,1));cmpChips.OnClose()
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip1_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =Set(_chipSelected,Index(cmpChips.Items,1));cmpChips.OnSelect()
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip2:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=2,With({_i:Index(cmpChips.Items,2),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=2,If(Coalesce(Index(cmpChips.Items,2).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=2,With({_i:Index(cmpChips.Items,2),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=2 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 2<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent2.Width
+                Children:
+                  - cntContent2:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon2_1.Visible,imgIcon2_1.Width+4,0)+lblText2_1.Width+If(cntClose2_1.Visible,4+cntClose2_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon2_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=2,With({_i:Index(cmpChips.Items,2),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=2,With({_i:Index(cmpChips.Items,2),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText2_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=2,With({_i:Index(cmpChips.Items,2),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=2,Index(cmpChips.Items,2).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose2_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose2_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose2_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=2,Set(_chipSelected,Index(cmpChips.Items,2));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip2_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=2,Set(_chipSelected,Index(cmpChips.Items,2));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip3:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=3,With({_i:Index(cmpChips.Items,3),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=3,If(Coalesce(Index(cmpChips.Items,3).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=3,With({_i:Index(cmpChips.Items,3),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=3 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 3<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent3.Width
+                Children:
+                  - cntContent3:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon3_1.Visible,imgIcon3_1.Width+4,0)+lblText3_1.Width+If(cntClose3_1.Visible,4+cntClose3_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon3_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=3,With({_i:Index(cmpChips.Items,3),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=3,With({_i:Index(cmpChips.Items,3),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText3_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=3,With({_i:Index(cmpChips.Items,3),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=3,Index(cmpChips.Items,3).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose3_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose3_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose3_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=3,Set(_chipSelected,Index(cmpChips.Items,3));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip3_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=3,Set(_chipSelected,Index(cmpChips.Items,3));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip4:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=4,With({_i:Index(cmpChips.Items,4),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=4,If(Coalesce(Index(cmpChips.Items,4).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=4,With({_i:Index(cmpChips.Items,4),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=4 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 4<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent4.Width
+                Children:
+                  - cntContent4:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon4_1.Visible,imgIcon4_1.Width+4,0)+lblText4_1.Width+If(cntClose4_1.Visible,4+cntClose4_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon4_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=4,With({_i:Index(cmpChips.Items,4),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=4,With({_i:Index(cmpChips.Items,4),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText4_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=4,With({_i:Index(cmpChips.Items,4),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=4,Index(cmpChips.Items,4).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose4_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose4_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose4_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=4,Set(_chipSelected,Index(cmpChips.Items,4));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip4_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=4,Set(_chipSelected,Index(cmpChips.Items,4));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip5:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=5,With({_i:Index(cmpChips.Items,5),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=5,If(Coalesce(Index(cmpChips.Items,5).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=5,With({_i:Index(cmpChips.Items,5),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=5 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 5<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent5.Width
+                Children:
+                  - cntContent5:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon5_1.Visible,imgIcon5_1.Width+4,0)+lblText5_1.Width+If(cntClose5_1.Visible,4+cntClose5_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon5_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=5,With({_i:Index(cmpChips.Items,5),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=5,With({_i:Index(cmpChips.Items,5),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText5_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=5,With({_i:Index(cmpChips.Items,5),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=5,Index(cmpChips.Items,5).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose5_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose5_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose5_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=5,Set(_chipSelected,Index(cmpChips.Items,5));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip5_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=5,Set(_chipSelected,Index(cmpChips.Items,5));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip6:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=6,With({_i:Index(cmpChips.Items,6),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=6,If(Coalesce(Index(cmpChips.Items,6).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=6,With({_i:Index(cmpChips.Items,6),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=6 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 6<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent6.Width
+                Children:
+                  - cntContent6:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon6_1.Visible,imgIcon6_1.Width+4,0)+lblText6_1.Width+If(cntClose6_1.Visible,4+cntClose6_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon6_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=6,With({_i:Index(cmpChips.Items,6),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=6,With({_i:Index(cmpChips.Items,6),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText6_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=6,With({_i:Index(cmpChips.Items,6),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=6,Index(cmpChips.Items,6).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose6_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose6_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose6_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=6,Set(_chipSelected,Index(cmpChips.Items,6));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip6_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=6,Set(_chipSelected,Index(cmpChips.Items,6));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip7:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=7,With({_i:Index(cmpChips.Items,7),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=7,If(Coalesce(Index(cmpChips.Items,7).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=7,With({_i:Index(cmpChips.Items,7),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=7 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 7<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent7.Width
+                Children:
+                  - cntContent7:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon7_1.Visible,imgIcon7_1.Width+4,0)+lblText7_1.Width+If(cntClose7_1.Visible,4+cntClose7_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon7_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=7,With({_i:Index(cmpChips.Items,7),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=7,With({_i:Index(cmpChips.Items,7),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText7_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=7,With({_i:Index(cmpChips.Items,7),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=7,Index(cmpChips.Items,7).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose7_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose7_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose7_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=7,Set(_chipSelected,Index(cmpChips.Items,7));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip7_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=7,Set(_chipSelected,Index(cmpChips.Items,7));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip8:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=8,With({_i:Index(cmpChips.Items,8),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=8,If(Coalesce(Index(cmpChips.Items,8).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=8,With({_i:Index(cmpChips.Items,8),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=8 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 8<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent8.Width
+                Children:
+                  - cntContent8:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon8_1.Visible,imgIcon8_1.Width+4,0)+lblText8_1.Width+If(cntClose8_1.Visible,4+cntClose8_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon8_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=8,With({_i:Index(cmpChips.Items,8),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=8,With({_i:Index(cmpChips.Items,8),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText8_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=8,With({_i:Index(cmpChips.Items,8),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=8,Index(cmpChips.Items,8).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose8_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose8_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose8_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=8,Set(_chipSelected,Index(cmpChips.Items,8));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip8_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=8,Set(_chipSelected,Index(cmpChips.Items,8));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip9:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=9,With({_i:Index(cmpChips.Items,9),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=9,If(Coalesce(Index(cmpChips.Items,9).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=9,With({_i:Index(cmpChips.Items,9),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=9 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 9<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent9.Width
+                Children:
+                  - cntContent9:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon9_1.Visible,imgIcon9_1.Width+4,0)+lblText9_1.Width+If(cntClose9_1.Visible,4+cntClose9_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon9_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=9,With({_i:Index(cmpChips.Items,9),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=9,With({_i:Index(cmpChips.Items,9),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText9_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=9,With({_i:Index(cmpChips.Items,9),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=9,Index(cmpChips.Items,9).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose9_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose9_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose9_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=9,Set(_chipSelected,Index(cmpChips.Items,9));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip9_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=9,Set(_chipSelected,Index(cmpChips.Items,9));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - cntChip10:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =If(CountRows(cmpChips.Items)>=10,With({_i:Index(cmpChips.Items,10),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(_v<>"outlined",Color.Transparent,If(!IsBlank(_theme),ColorValue(_theme),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(148,163,184,1),RGBA(100,116,139,1))))))),Color.Transparent)
+                  BorderThickness: =If(CountRows(cmpChips.Items)>=10,If(Coalesce(Index(cmpChips.Items,10).variant,cmpChips.Variant)="outlined",1,0),0)
+                  DropShadow: =DropShadow.None
+                  Fill: =If(CountRows(cmpChips.Items)>=10,With({_i:Index(cmpChips.Items,10),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),ColorValue(_theme)),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,ColorValue(_theme),ColorFade(ColorValue(_theme),If(_lt,0.8,-0.6))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(241,245,249,1),RGBA(51,65,85,0.5)),Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1))),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Switch(_c,"primary",RGBA(59,130,246,1),"secondary",RGBA(100,116,139,1),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),RGBA(100,116,139,1)),If(_lt,Switch(_c,"primary",RGBA(219,234,254,1),"secondary",RGBA(241,245,249,1),"success",RGBA(220,252,231,1),"warning",RGBA(254,243,199,1),"error",RGBA(254,226,226,1),RGBA(241,245,249,1)),Switch(_c,"primary",RGBA(30,64,175,0.25),"secondary",RGBA(51,65,85,0.25),"success",RGBA(22,101,52,0.25),"warning",RGBA(146,64,14,0.25),"error",RGBA(153,27,27,0.25),RGBA(51,65,85,0.25)))),"outlined",Color.Transparent,"text",Color.Transparent,Color.Transparent)))),Color.Transparent)
+                  FillPortions: =0
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  RadiusBottomLeft: =Min(cmpChips.Config.Radius,Self.Height/2)
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Visible: =CountRows(cmpChips.Items)>=10 && (IsBlankOrError(cmpChips.Config.MaxVisible) || 10<=cmpChips.Config.MaxVisible)
+                  Width: =cntContent10.Width
+                Children:
+                  - cntContent10:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =4
+                        PaddingLeft: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        PaddingRight: =Switch(cmpChips.Size,"x-small",6,"small",8,"large",12,"x-large",14,10)
+                        Width: =If(imgIcon10_1.Visible,imgIcon10_1.Width+4,0)+lblText10_1.Width+If(cntClose10_1.Visible,4+cntClose10_1.Width,0)+Self.PaddingLeft+Self.PaddingRight
+                      Children:
+                        - imgIcon10_1:
+                            Control: Image@2.2.3
+                            Properties:
+                              Height: =Self.Width
+                              Image: =If(CountRows(cmpChips.Items)>=10,With({_i:Index(cmpChips.Items,10),_f:cmpChips.ChipType="filter",_chk:cmpChips.Icons.Check},With({_ico:Coalesce(_i.icon,cmpChips.Icons.Prepend),_sel:Coalesce(_i.selected,false)},If(_f&&_sel&&IsBlank(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_chk&"</text></svg>"),If(StartsWith(_ico,"data:"),_ico,If(StartsWith(_ico,"<svg"),"data:image/svg+xml;utf8,"&EncodeUrl(_ico),"data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='80'>"&_ico&"</text></svg>")))))),"")
+                              Visible: =If(CountRows(cmpChips.Items)>=10,With({_i:Index(cmpChips.Items,10),_f:cmpChips.ChipType="filter"},!IsBlank(Coalesce(_i.icon,cmpChips.Icons.Prepend))||(_f&&Coalesce(_i.selected,false))),false)
+                              Width: =Switch(cmpChips.Size,"x-small",12,"small",14,"large",20,"x-large",24,18)
+                        - lblText10_1:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              Color: =If(CountRows(cmpChips.Items)>=10,With({_i:Index(cmpChips.Items,10),_lt:cmpChips.Config.Theme="light"},With({_c:Coalesce(_i.color,cmpChips.Color),_v:Coalesce(_i.variant,cmpChips.Variant),_s:Coalesce(_i.selected,false),_theme:Switch(Coalesce(_i.color,cmpChips.Color),"primary",cmpChips.CustomColors.primary,"secondary",cmpChips.CustomColors.secondary,"success",cmpChips.CustomColors.success,"warning",cmpChips.CustomColors.warning,"error",cmpChips.CustomColors.error,"")},If(!IsBlank(_theme),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,ColorValue(_theme)),"outlined",ColorValue(_theme),"text",ColorValue(_theme),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1))),Switch(_v,"filled",If(cmpChips.ChipType in ["filter","choice"]&&!_s,If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)),Color.White),"tonal",If(cmpChips.ChipType in ["filter","choice"]&&_s,Color.White,If(_lt,Switch(_c,"primary",RGBA(29,78,216,1),"secondary",RGBA(51,65,85,1),"success",RGBA(21,128,61,1),"warning",RGBA(180,83,9,1),"error",RGBA(185,28,28,1),RGBA(51,65,85,1)),Switch(_c,"primary",RGBA(147,197,253,1),"secondary",RGBA(203,213,225,1),"success",RGBA(134,239,172,1),"warning",RGBA(252,211,77,1),"error",RGBA(252,165,165,1),RGBA(203,213,225,1)))),"outlined",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(71,85,105,1),RGBA(148,163,184,1))),"text",Switch(_c,"primary",RGBA(59,130,246,1),"secondary",If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1)),"success",RGBA(34,197,94,1),"warning",RGBA(245,158,11,1),"error",RGBA(239,68,68,1),If(_lt,RGBA(100,116,139,1),RGBA(148,163,184,1))),If(_lt,RGBA(51,65,85,1),RGBA(203,213,225,1)))))),Color.Transparent)
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =Switch(cmpChips.Size,"x-small",10,"small",11,"large",14,"x-large",16,12)
+                              Text: =If(CountRows(cmpChips.Items)>=10,Index(cmpChips.Items,10).label,"")
+                              Width: =Sum(AddColumns(Split(Self.Text,""),_w,Coalesce(LookUp(cmpChips.CharWidths,CharFont=Self.Font&&CharWeight=Self.FontWeight&&Char=Value).Size,0.7)),_w)*Self.Size *1.05 + 6
+                              Wrap: =false
+                        - cntClose10_1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =Switch(cmpChips.Size,"x-small",14,"small",16,"large",22,"x-large",26,20)
+                              RadiusBottomLeft: =Self.Height/2
+                              RadiusBottomRight: =Self.Height/2
+                              RadiusTopLeft: =Self.Height/2
+                              RadiusTopRight: =Self.Height/2
+                              Visible: =cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled
+                              Width: =Self.Height
+                            Children:
+                              - imgClose10_1:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    Height: =Parent.Height
+                                    Image: ="data:image/svg+xml;utf8,"&EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 1 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z' fill='"&If(cmpChips.Config.Theme="light","#334155","#CBD5E1")&"'/></svg>")
+                                    Width: =Parent.Width
+                              - btnClose10_1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(0,0,0,0)
+                                    Height: =Parent.Height
+                                    HoverFill: =RGBA(0,0,0,0.1)
+                                    OnSelect: =If(CountRows(cmpChips.Items)>=10,Set(_chipSelected,Index(cmpChips.Items,10));cmpChips.OnClose())
+                                    PressedFill: =RGBA(0,0,0,0.15)
+                                    RadiusBottomLeft: =Parent.Height/2
+                                    RadiusBottomRight: =Parent.Height/2
+                                    RadiusTopLeft: =Parent.Height/2
+                                    RadiusTopRight: =Parent.Height/2
+                                    Text: =""
+                                    Width: =Parent.Width
+                  - btnChip10_1:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(0,0,0,0)
+                        Height: =Parent.Height
+                        HoverFill: =RGBA(0,0,0,0.08)
+                        OnSelect: =If(CountRows(cmpChips.Items)>=10,Set(_chipSelected,Index(cmpChips.Items,10));cmpChips.OnSelect())
+                        PressedFill: =RGBA(0,0,0,0.12)
+                        RadiusBottomLeft: =Parent.RadiusBottomLeft
+                        RadiusBottomRight: =Parent.RadiusBottomLeft
+                        RadiusTopLeft: =Parent.RadiusBottomLeft
+                        RadiusTopRight: =Parent.RadiusBottomLeft
+                        Text: =""
+                        Visible: =!(cmpChips.ChipType="input"&&cmpChips.Config.Closable&&!cmpChips.Config.Disabled)
+                        Width: =Parent.Width
+            - btnOverflow_2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderThickness: =0
+                  Color: =If(cmpChips.Config.Theme="light",RGBA(100,116,139,1),RGBA(148,163,184,1))
+                  Fill: =If(cmpChips.Config.Theme="light",RGBA(241,245,249,1),RGBA(51,65,85,1))
+                  Font: =Font.'Segoe UI'
+                  Height: =Switch(cmpChips.Size,"x-small",20,"small",26,"large",38,"x-large",44,32)
+                  HoverFill: =If(cmpChips.Config.Theme="light",RGBA(226,232,240,1),RGBA(71,85,105,1))
+                  OnSelect: =cmpChips.OnOverflow()
+                  PressedFill: =If(cmpChips.Config.Theme="light",RGBA(203,213,225,1),RGBA(100,116,139,1))
+                  RadiusBottomLeft: =Self.Height/2
+                  RadiusBottomRight: =Self.Height/2
+                  RadiusTopLeft: =Self.Height/2
+                  RadiusTopRight: =Self.Height/2
+                  Size: =Switch(cmpChips.Size,"x-small",9,"small",10,"large",13,"x-large",15,11)
+                  Text: =If(IsBlankOrError(cmpChips.Config.MaxVisible),"","+"&Text(CountRows(cmpChips.Items)-cmpChips.Config.MaxVisible))
+                  Tooltip: ="Show all "&CountRows(cmpChips.Items)&" items"
+                  Visible: =!IsBlankOrError(cmpChips.Config.MaxVisible) && CountRows(cmpChips.Items)>cmpChips.Config.MaxVisible
+                  Width: =48
