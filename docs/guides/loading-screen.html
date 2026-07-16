@@ -332,10 +332,15 @@ OnReady: =Set(varSplashMinTimeElapsed, true)</pre></div>
       OnTimerEnd: |-
         =If(
             varSplashMinTimeElapsed && (varStartDestination = "ViewItem" || varActiveCacheReady),
-            Navigate(varStartDestination, ScreenTransition.None)
+            If(
+                varStartDestination = "ViewItem",
+                Navigate(ViewItem, ScreenTransition.None),
+                Navigate(Main, ScreenTransition.None)
+            )
         )
       Repeat: =true
       Visible: =false</pre></div>
+  <div class="warn"><strong>Correction:</strong> the first draft of this had <code>Navigate(varStartDestination, ScreenTransition.None)</code> — that's wrong and won't run. <code>Navigate()</code> needs an actual screen reference as its first argument (<code>Main</code>, <code>ViewItem</code>), not a text variable holding the screen's name as a string — Power Fx has no way to resolve <code>"Main"</code> into the real <code>Main</code> screen object at runtime. The version above branches explicitly instead, calling <code>Navigate()</code> with the real screen name in each branch, and is the one to actually use.</div>
   <p>Every 150ms it checks: has the splash's own minimum branding time passed, <em>and</em> is there actually somewhere safe to land (either the deep-link case, which never needed the cache, or the cache genuinely finished)? Only when both are true does it navigate.</p>
 
   <h3>2f. The step that actually makes any of this run — repoint App.StartScreen</h3>
