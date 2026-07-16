@@ -47,9 +47,75 @@
   </div>
 
   <h2 id="s1">1. Fix colThursdayOptions — same delegation bug as NewsletterPack, worse <span class="prio prio-1">Do first</span></h2>
-  <p>In <code>ViewItem.OnVisible</code>, the date-picker's per-Thursday item count is built like this — the exact same non-delegable <code>Year</code>/<code>Month</code>/<code>Day</code> pattern that broke <code>NewsletterPack</code>, except run <strong>104 times</strong>, once per upcoming Thursday for the next two years, every single time <code>ViewItem</code> loads:</p>
-  <p>Old (find this block in <code>ViewItem.OnVisible</code>):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ClearCollect(
+  <p>In <code>ViewItem.OnVisible</code>, the date-picker's per-Thursday item count is built with the exact same non-delegable <code>Year</code>/<code>Month</code>/<code>Day</code> pattern that broke <code>NewsletterPack</code>, except run <strong>104 times</strong>, once per upcoming Thursday for the next two years, every single time <code>ViewItem</code> loads. Below is the <strong>entire <code>ViewItem.OnVisible</code> property</strong>, old and new in full — not the block in isolation — so there's no hunting for where it sits among the resets and the deep-link handling around it.</p>
+  <p>Old — full current <code>ViewItem.OnVisible</code>:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Table({DisplayName: User().FullName, Mail: User().Email}),
+        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+    )
+);
+Set(
+    varPlannedPublishDate,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.'Planned Publish Date'),
+        DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"),
+        varSelectedRelease.'Planned Publish Date'
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email}));
+        Set(varPlannedPublishDate, varDeepLinkItem.'Planned Publish Date'),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1);
+Set(varShowThursdayPicker, false);
+ClearCollect(
     colThursdayOptions,
     ForAll(
         Sequence(104),
@@ -68,10 +134,90 @@
             }
         )
     )
+);
+If(
+    !IsBlank(varSelectedRelease.ID),
+    If(
+        !IsBlank(LookUp(colActiveItems, ID = varSelectedRelease.ID)),
+        ClearCollect(colLinks, Filter(colActiveLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
+        Set(varLinksSourceID, varSelectedRelease.ID),
+        If(
+            varLinksSourceID <> varSelectedRelease.ID,
+            BuildLinksForSource(varSelectedRelease.ID)
+        )
+    );
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
 );</pre></div>
-  <p>Same failure mode as before: past the delegation row limit, counts silently go wrong, and this version also runs 104 separate non-delegable evaluations against the live table on every load. Fix does one delegable fetch of the whole two-year window, groups it once, then looks each Thursday's count up locally — no more per-Thursday network-level filtering:</p>
-  <p>New (full replacement for the block above):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ClearCollect(
+  <p>New — full replacement <code>ViewItem.OnVisible</code>, everything identical except the <code>colThursdayOptions</code> section (now two <code>ClearCollect</code>s instead of one):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Table({DisplayName: User().FullName, Mail: User().Email}),
+        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+    )
+);
+Set(
+    varPlannedPublishDate,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.'Planned Publish Date'),
+        DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"),
+        varSelectedRelease.'Planned Publish Date'
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email}));
+        Set(varPlannedPublishDate, varDeepLinkItem.'Planned Publish Date'),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Reset(cmb_Owner1);
+Set(varShowThursdayPicker, false);
+ClearCollect(
     colThursdayItemCounts,
     AddColumns(
         GroupBy(
@@ -99,8 +245,23 @@ ClearCollect(
             }
         )
     )
+);
+If(
+    !IsBlank(varSelectedRelease.ID),
+    If(
+        !IsBlank(LookUp(colActiveItems, ID = varSelectedRelease.ID)),
+        ClearCollect(colLinks, Filter(colActiveLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
+        Set(varLinksSourceID, varSelectedRelease.ID),
+        If(
+            varLinksSourceID <> varSelectedRelease.ID,
+            BuildLinksForSource(varSelectedRelease.ID)
+        )
+    );
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
 );</pre></div>
-  <p><code>colThursdayItemCounts</code> is a new, throwaway local collection — one delegable <code>Filter</code>, one <code>GroupBy</code>, done. The second <code>ClearCollect</code> is structurally identical to what you had, just reading counts from that local collection (via <code>LookUp</code>, which isn't delegation-limited once the data's already local) instead of hitting the live table 104 times. <code>Coalesce(..., 0)</code> keeps the same "no items that week" behaviour as before, since <code>LookUp</code> returns blank when nothing matches.</p>
+  <p><code>colThursdayItemCounts</code> is a new, throwaway local collection — one delegable <code>Filter</code>, one <code>GroupBy</code>, done. <code>colThursdayOptions</code> itself is structurally identical to before, just reading counts from that local collection (via <code>LookUp</code>, which isn't delegation-limited once the data's already local) instead of hitting the live table 104 times. <code>Coalesce(..., 0)</code> keeps the same "no items that week" behaviour as before, since <code>LookUp</code> returns blank when nothing matches. Everything else in the property — the resets, the deep-link handling, the final <code>colLinks</code> block — is byte-for-byte what you already have; paste the whole thing and it changes nothing else.</p>
   <div class="test">Test: open any item, open the release-date picker, scroll through several months. Counts should match what's actually on the calendar, and it should feel at least as fast as before (fewer, cheaper operations, not more).</div>
 
   <h2 id="s2">2. Loading Screen — wait for the real thing, not a timer <span class="prio prio-2">The feature</span></h2>
