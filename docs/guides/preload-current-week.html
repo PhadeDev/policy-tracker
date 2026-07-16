@@ -171,13 +171,50 @@ Set(varMainLoading, false)</pre></div>
   <h2 id="s5">5. Keep the cache honest after every write</h2>
   <p>This turned out simpler than it first looked. <code>Main.OnVisible</code> already rebuilds the cache <em>unconditionally, every single time Main is visited</em> (step 2) &mdash; and every write path that matters here (Save &amp; Close, plain Close, Delete) ends in <code>Navigate(Main, ...)</code>, which re-runs <code>Main.OnVisible</code> every time. So editing an item, adding a link, and hitting Save &amp; Close is already covered for free: the moment you land back on Main, the whole cache rebuilds from scratch, no exceptions, nothing extra to add. Same for plain Save followed by Close &mdash; whenever you actually leave <code>ViewItem</code>, the cache catches up.</p>
 
-  <p><strong>The only genuine gap</strong> is the two places that change data <em>without</em> navigating away and back &mdash; they never trigger <code>Main.OnVisible</code> again, so nothing else rebuilds the cache for them:</p>
-  <table>
-    <tr><th>Where</th><th>Add the call</th></tr>
-    <tr><td><code>BossPublishBtn</code> / quick-publish (Main)</td><td>Right after its <code>Patch(...)</code> succeeds</td></tr>
-    <tr><td><code>PublishAllBtn</code> (Main, bulk publish)</td><td>Right after the bulk <code>ForAll</code>/<code>Patch</code> completes</td></tr>
-  </table>
-  <p>Both already have a clear success point in their formula &mdash; that's where <code>RefreshActiveCache();</code> goes, one line each. Not spelling out the full formulas here since nothing else in either one changes; ask and I'll pull the exact current text before you edit, same discipline as everything else today.</p>
+  <p><strong>The only genuine gap</strong> is the two places that change data <em>without</em> navigating away and back &mdash; they never trigger <code>Main.OnVisible</code> again, so nothing else rebuilds the cache for them. Both buttons are on <code>Main</code>. In each, the only change is one new line, <code>RefreshActiveCache();</code>, added right after <code>Refresh('Policy Proof Tracker');</code> and before the closing <code>Notify(...)</code> &mdash; everything else in both formulas is unchanged from what's already live.</p>
+
+  <p><code>BossPublishBtn.OnSelect</code> (Main, quick-publish button) &mdash; full replacement:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(
+    varQuickPublishDate,
+    Coalesce(ThisItem.'Planned Publish Date', Today())
+);
+Patch(
+    'Policy Proof Tracker',
+    LookUp('Policy Proof Tracker', ID = ThisItem.ID),
+    {
+        Published: true,
+        'Published Date': varQuickPublishDate
+    }
+);
+Refresh('Policy Proof Tracker');
+RefreshActiveCache();
+Notify(
+    "Marked as published - " & Text(varQuickPublishDate, "d mmm yyyy"),
+    NotificationType.Success
+)</pre></div>
+
+  <p><code>PublishAllBtn.OnSelect</code> (Main, bulk-publish button) &mdash; full replacement:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=// PublishAllBtn.OnSelect
+Set(varPublishGroupDate, ThisItem.PlannedDate);
+Set(varPublishGroupCount, CountRows(Filter(ThisItem.GroupedItems, 'External consultation required' = false)));
+ForAll(
+    Filter(ThisItem.GroupedItems, 'External consultation required' = false) As PubItem,
+    Patch(
+        'Policy Proof Tracker',
+        LookUp('Policy Proof Tracker', ID = PubItem.ID),
+        {
+            Published: true,
+            'Published Date': varPublishGroupDate
+        }
+    )
+);
+Refresh('Policy Proof Tracker');
+RefreshActiveCache();
+Notify(
+    "Published all " & varPublishGroupCount & " items for " & Text(varPublishGroupDate, "d mmm yyyy"),
+    NotificationType.Success
+)</pre></div>
+  <p>If your current live version of either button differs from what's shown above (e.g. you've made other edits since), don't blind-paste &mdash; just add the single <code>RefreshActiveCache();</code> line in the same spot (right after <code>Refresh('Policy Proof Tracker');</code>) in whatever you actually have.</p>
 
   <div class="test">Test the scenario that actually matters: open an item from the Due Next 4 Weeks tab (instant), edit some text, add a link, hit Save &amp; Close. Back on Main, then click the same item again &mdash; it should still open instantly, and both the text change and the new link should be there, not the old version. Separately, test the quick-publish button on Main directly and confirm the card updates without needing to leave and return.</div>
 
