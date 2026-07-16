@@ -265,15 +265,25 @@ If(
   <div class="test">Test: open any item, open the release-date picker, scroll through several months. Counts should match what's actually on the calendar, and it should feel at least as fast as before (fewer, cheaper operations, not more).</div>
 
   <h2 id="s2">2. Loading Screen — wait for the real thing, not a timer <span class="prio prio-2">The feature</span></h2>
-  <p>Component: <code>cmpLoadingScreen</code> from <a href="https://www.powerappsui.com/components/loading-screen" target="_blank" rel="noopener">powerappsui.com</a>, archived at <code>yaml/components/LoadingScreen/</code> — same component as before, nothing wrong with its visuals. What changes is <em>when it decides to navigate away</em>.</p>
-  <div class="note"><strong>The idea:</strong> the app now has one real, variable-length async step worth tracking — <code>RefreshActiveCache()</code> building <code>colActiveItems</code>/<code>colActiveLinks</code> — and it already sets <code>varActiveCacheReady</code> to <code>true</code> when done (that variable exists in <code>Formulas.txt</code> today but nothing reads it yet). The splash now genuinely waits on that flag instead of a fixed pause. Deep links straight to <code>ViewItem</code> skip this entirely — that screen already falls back to a live per-item fetch if the cache isn't ready, so there's nothing worth making a shared link wait on.</div>
+  <div class="warn"><strong>Correction from the previous version of this guide:</strong> it assumed a screen called <code>StartScreen</code> already existed. It doesn't — this app has never had one. Routing between <code>ViewItem</code> and <code>Main</code> currently happens entirely inside <strong><code>App.StartScreen</code></strong> (the App object's own property, not a screen), with this exact formula, confirmed live in your app:
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(Param("ID")),
+    ViewItem,
+    Main
+)</pre></div>
+  This resolves once, at launch, straight to a real screen — it can't itself show a splash or wait on anything, same as <code>App.OnStart</code> can't. So a genuine branded, data-gated splash needs an actual new screen created from scratch, with <code>App.StartScreen</code> changed to always land there first instead of choosing directly between <code>ViewItem</code>/<code>Main</code>. Steps below now include that missing setup, in the right order.</div>
+  <p>Component: <code>cmpLoadingScreen</code> from <a href="https://www.powerappsui.com/components/loading-screen" target="_blank" rel="noopener">powerappsui.com</a>, archived at <code>yaml/components/LoadingScreen/</code>.</p>
+  <div class="note"><strong>The idea:</strong> the app now has one real, variable-length async step worth tracking — <code>RefreshActiveCache()</code> building <code>colActiveItems</code>/<code>colActiveLinks</code> — and it already sets <code>varActiveCacheReady</code> to <code>true</code> when done (that variable exists in <code>Formulas.txt</code> today but nothing reads it yet). The new splash screen genuinely waits on that flag instead of a fixed pause. Deep links straight to <code>ViewItem</code> skip the wait entirely — that screen already falls back to a live per-item fetch if the cache isn't ready, so there's nothing worth making a shared link wait on. <code>ViewItem.OnVisible</code>'s own existing <code>Param("ID")</code> handling doesn't need to change at all — it's already guarded by <code>varDeepLinkHandled</code>, so it runs correctly and exactly once regardless of whether it's reached via the old direct routing or the new splash screen.</div>
 
-  <h3>2a. Verify the component pastes cleanly (if not already done)</h3>
+  <h3>2a. Create the screen</h3>
+  <p><strong>Insert &rarr; New screen &rarr; Blank</strong>, name it <code>StartScreen</code> (that name is free — it was never taken).</p>
+
+  <h3>2b. Verify the component pastes cleanly</h3>
   <p><strong>Insert &rarr; Custom &rarr; New Component</strong>, paste the full contents of <code>yaml/components/LoadingScreen/LoadingScreen.yaml</code>, name it <code>cmpLoadingScreen</code>.</p>
   <div class="test">Test: component imports clean, previewing it directly shows the logo mark, wordmark, and progress dots without errors.</div>
 
-  <h3>2b. StartScreen.OnVisible — kick off the cache build, don't navigate yet</h3>
-  <p>Full replacement:</p>
+  <h3>2c. StartScreen.OnVisible — kick off the cache build, don't navigate yet</h3>
+  <p>This is a brand new screen, so this is the entire property from scratch, not a replacement of anything:</p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(
     varStartDestination,
     If(!IsBlank(Param("ID")), "ViewItem", "Main")
@@ -287,8 +297,8 @@ If(
 )</pre></div>
   <p>Deep-link case (<code>varStartDestination = "ViewItem"</code>) deliberately skips the cache build — a shared link shouldn't wait on a 4-week preload it doesn't need. The <code>Main</code> case fires the same <code>RefreshActiveCache()</code> used everywhere else in the app, so this is the exact same function, just called one screen earlier than before.</p>
 
-  <h3>2c. Place the component, repurpose OnReady</h3>
-  <p><strong>Drag one instance of <code>cmpLoadingScreen</code></strong> onto <code>StartScreen</code>, delete the old <code>lblLoading</code> label, and set:</p>
+  <h3>2d. Place the component, wire OnReady</h3>
+  <p><strong>Drag one instance of <code>cmpLoadingScreen</code></strong> onto the new <code>StartScreen</code> and set:</p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Height: =App.Height
 Width: =App.Width
 X: =0
@@ -310,10 +320,10 @@ CurrentStep: =If(varStartDestination = "ViewItem" || varActiveCacheReady, 3, 2)
 MinDisplayTime: =400
 ErrorMessage: =""
 OnReady: =Set(varSplashMinTimeElapsed, true)</pre></div>
-  <p>Two changes from before: <code>CurrentStep</code> is no longer hardcoded to 3 — it now genuinely reflects reality, sitting at step 2 ("Loading document list…") for as long as the real fetch is still running, and only reaching step 3 once <code>varActiveCacheReady</code> actually flips (or immediately for the deep-link case, which never claimed to load that list). And <code>OnReady</code> no longer navigates directly — it only marks that the component's own minimum branding time has passed. Navigation itself moves to the timer below, which is the piece that actually enforces "wait for everything, then disappear."</p>
+  <p><code>CurrentStep</code> genuinely reflects reality — it sits at step 2 ("Loading document list…") for as long as the real fetch is still running, and only reaches step 3 once <code>varActiveCacheReady</code> actually flips (or immediately for the deep-link case, which never claimed to load that list). <code>OnReady</code> doesn't navigate directly — it only marks that the component's own minimum branding time has passed. Navigation itself happens in the timer below, which is the piece that actually enforces "wait for everything, then disappear."</p>
 
-  <h3>2d. Add the gate — a small polling Timer on StartScreen</h3>
-  <p>Power Fx has no native "await a variable" — the standard way to do this in canvas apps is a repeating <code>Timer</code> that checks the condition and navigates once it's true. Add one new control to <code>StartScreen</code>:</p>
+  <h3>2e. Add the gate — a small polling Timer on StartScreen</h3>
+  <p>Power Fx has no native "await a variable" — the standard way to do this in canvas apps is a repeating <code>Timer</code> that checks the condition and navigates once it's true. Add this new control to <code>StartScreen</code>:</p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- tmrSplashGate:
     Control: Timer@2.1.0
     Properties:
@@ -326,7 +336,21 @@ OnReady: =Set(varSplashMinTimeElapsed, true)</pre></div>
         )
       Repeat: =true
       Visible: =false</pre></div>
-  <p>Every 150ms it checks: has the splash's own minimum branding time passed, <em>and</em> is there actually somewhere safe to land (either the deep-link case, which never needed the cache, or the cache genuinely finished)? Only when both are true does it navigate. If data's still loading when the branding timer finishes, the splash just keeps showing "Loading document list…" at step 2 until it's actually done — no more, no less than what you asked for.</p>
+  <p>Every 150ms it checks: has the splash's own minimum branding time passed, <em>and</em> is there actually somewhere safe to land (either the deep-link case, which never needed the cache, or the cache genuinely finished)? Only when both are true does it navigate.</p>
+
+  <h3>2f. The step that actually makes any of this run — repoint App.StartScreen</h3>
+  <div class="warn">Without this step, everything above sits on a screen the app never visits. This is the fix for exactly the gap you caught — nothing built in 2a&ndash;2e does anything until <code>App.StartScreen</code> is told to go there first.</div>
+  <p>Click <strong>App</strong> at the top of the Tree view (above all screens), find <strong>StartScreen</strong> in its property list, select all, replace it entirely:</p>
+  <p>Old (confirmed live in your app):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !IsBlank(Param("ID")),
+    ViewItem,
+    Main
+)</pre></div>
+  <p>New:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>StartScreen</pre></div>
+  <p>The <code>If(!IsBlank(Param("ID")), ...)</code> branching logic isn't lost — it just moves one step later, into the new <code>StartScreen.OnVisible</code> from 2c, which does the exact same check and then either waits (Main-bound) or goes straight through (ViewItem-bound).</p>
+
   <div class="test">Test 1 (cold start, normal): reload the app fresh (not just navigating within it), confirm the splash shows, step 2 briefly, step 3, then lands on Main with the "Due Next 4 Weeks" tab already populated — not a skeleton loader after the splash disappears, actually populated.<br>Test 2 (deep link): open the app with <code>?ID=</code> in the URL and confirm it lands on ViewItem quickly, without waiting on the 4-week cache.<br>Test 3 (slow network, optional): if you can throttle your connection, confirm the splash now visibly stays on step 2 longer rather than flashing through regardless — that's the whole point of this change, proof it's a real gate and not cosmetic.</div>
 
   <h2 id="s3">3. Dedup: shared GetFileExt formula <span class="prio prio-3">Tidy-up, zero behaviour change</span></h2>
