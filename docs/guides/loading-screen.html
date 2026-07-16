@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loading Screen — Branded App-Start Splash</title>
+  <title>Cleanup Pass — Delegation Fix, Formula Dedup, Real Data-Gated Loading Screen</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
@@ -22,31 +22,112 @@
     button.copy.ok { background: #40916c; }
     button.copy.err { background: #b3542e; }
     .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+    .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+    .toc a { display: block; padding: 4px 0; font-size: .9rem; }
+    .toc .toc-num { color: #8a94a6; display: inline-block; width: 22px; }
+    .prio { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+    .prio-1 { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
+    .prio-2 { background: #11291e; color: #8fd6ab; border: 1px solid #2f6b4a; }
+    .prio-3 { background: #141a26; color: #9aa7bb; border: 1px solid #2b3546; }
   </style>
 </head>
 <body>
 <main>
   <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
-  <h1>Loading Screen — Branded App-Start Splash</h1>
-  <p>Replaces <code>StartScreen</code>'s single bare "Loading..." label with a real branded splash. Component: <code>cmpLoadingScreen</code> from <a href="https://www.powerappsui.com/components/loading-screen" target="_blank" rel="noopener">powerappsui.com</a>, archived at <code>yaml/components/LoadingScreen/</code>.</p>
+  <h1>Cleanup Pass — Delegation Fix, Formula Dedup, Real Data-Gated Loading Screen</h1>
+  <p>This replaces the old "Loading Screen — Branded App-Start Splash" guide entirely. That guide's core premise — "there's nothing real to gate on, <code>OnStart</code> already finished, just do a cosmetic pause" — stopped being true the moment <code>RefreshActiveCache()</code> and <code>colActiveItems</code>/<code>colActiveLinks</code> were built. There's now something genuinely worth waiting for, so the splash is redesigned to actually wait for it instead of faking a delay.</p>
 
-  <div class="warn"><strong>One honest limit on what this can actually do:</strong> Power Apps runs <code>App.OnStart</code> completely before showing <em>any</em> screen &mdash; there's no way to display custom UI while <code>OnStart</code> itself is still running, the platform's own generic loading indicator covers that part regardless of what we build. So <code>LoadingSteps</code> here can't be wired to genuine live progress of your real <code>OnStart</code> (building <code>colChoiceColors</code>, etc.) &mdash; that's already finished by the time this screen even renders. What this guide gives you instead is honest: a deliberate, short, branded pause (controlled entirely by <code>MinDisplayTime</code>, which you set) with cosmetic step labels, rather than a technically-impossible "real progress bar." If you want true multi-step progress tracking later, that would mean moving the collection-building out of <code>App.OnStart</code> and into this screen's own <code>OnVisible</code> instead &mdash; a bigger change, not in scope here.</p></div>
+  <div class="note">Three items, done in priority order — a real correctness/performance bug first, then the feature this whole session has been building toward, then a pure tidy-up with zero behaviour change. Each is independent; do them in any order you like, but this is the order that matters most first.</div>
 
-  <h2>1. Verify the component pastes cleanly</h2>
+  <div class="toc">
+    <strong>Jump to:</strong>
+    <a href="#s1"><span class="toc-num">1.</span> Fix: colThursdayOptions — 104 non-delegable filters <span class="prio prio-1">Do first</span></a>
+    <a href="#s2"><span class="toc-num">2.</span> Loading Screen — actually gated on real data <span class="prio prio-2">The feature</span></a>
+    <a href="#s3"><span class="toc-num">3.</span> Dedup: shared GetFileExt formula <span class="prio prio-3">Tidy-up</span></a>
+  </div>
+
+  <h2 id="s1">1. Fix colThursdayOptions — same delegation bug as NewsletterPack, worse <span class="prio prio-1">Do first</span></h2>
+  <p>In <code>ViewItem.OnVisible</code>, the date-picker's per-Thursday item count is built like this — the exact same non-delegable <code>Year</code>/<code>Month</code>/<code>Day</code> pattern that broke <code>NewsletterPack</code>, except run <strong>104 times</strong>, once per upcoming Thursday for the next two years, every single time <code>ViewItem</code> loads:</p>
+  <p>Old (find this block in <code>ViewItem.OnVisible</code>):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ClearCollect(
+    colThursdayOptions,
+    ForAll(
+        Sequence(104),
+        With(
+            {_thu: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")},
+            {
+                ThursdayDate: _thu,
+                ItemCount: CountRows(
+                    Filter(
+                        'Policy Proof Tracker',
+                        Year('Planned Publish Date') = Year(_thu) &&
+                        Month('Planned Publish Date') = Month(_thu) &&
+                        Day('Planned Publish Date') = Day(_thu)
+                    )
+                )
+            }
+        )
+    )
+);</pre></div>
+  <p>Same failure mode as before: past the delegation row limit, counts silently go wrong, and this version also runs 104 separate non-delegable evaluations against the live table on every load. Fix does one delegable fetch of the whole two-year window, groups it once, then looks each Thursday's count up locally — no more per-Thursday network-level filtering:</p>
+  <p>New (full replacement for the block above):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ClearCollect(
+    colThursdayItemCounts,
+    AddColumns(
+        GroupBy(
+            Filter(
+                'Policy Proof Tracker',
+                'Planned Publish Date' >= Today() &&
+                'Planned Publish Date' <= DateAdd(Today(), 104 * 7, "Days")
+            ),
+            'Planned Publish Date',
+            GroupedItems
+        ),
+        DayItemCount,
+        CountRows(GroupedItems)
+    )
+);
+ClearCollect(
+    colThursdayOptions,
+    ForAll(
+        Sequence(104),
+        With(
+            {_thu: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")},
+            {
+                ThursdayDate: _thu,
+                ItemCount: Coalesce(LookUp(colThursdayItemCounts, 'Planned Publish Date' = _thu, DayItemCount), 0)
+            }
+        )
+    )
+);</pre></div>
+  <p><code>colThursdayItemCounts</code> is a new, throwaway local collection — one delegable <code>Filter</code>, one <code>GroupBy</code>, done. The second <code>ClearCollect</code> is structurally identical to what you had, just reading counts from that local collection (via <code>LookUp</code>, which isn't delegation-limited once the data's already local) instead of hitting the live table 104 times. <code>Coalesce(..., 0)</code> keeps the same "no items that week" behaviour as before, since <code>LookUp</code> returns blank when nothing matches.</p>
+  <div class="test">Test: open any item, open the release-date picker, scroll through several months. Counts should match what's actually on the calendar, and it should feel at least as fast as before (fewer, cheaper operations, not more).</div>
+
+  <h2 id="s2">2. Loading Screen — wait for the real thing, not a timer <span class="prio prio-2">The feature</span></h2>
+  <p>Component: <code>cmpLoadingScreen</code> from <a href="https://www.powerappsui.com/components/loading-screen" target="_blank" rel="noopener">powerappsui.com</a>, archived at <code>yaml/components/LoadingScreen/</code> — same component as before, nothing wrong with its visuals. What changes is <em>when it decides to navigate away</em>.</p>
+  <div class="note"><strong>The idea:</strong> the app now has one real, variable-length async step worth tracking — <code>RefreshActiveCache()</code> building <code>colActiveItems</code>/<code>colActiveLinks</code> — and it already sets <code>varActiveCacheReady</code> to <code>true</code> when done (that variable exists in <code>Formulas.txt</code> today but nothing reads it yet). The splash now genuinely waits on that flag instead of a fixed pause. Deep links straight to <code>ViewItem</code> skip this entirely — that screen already falls back to a live per-item fetch if the cache isn't ready, so there's nothing worth making a shared link wait on.</div>
+
+  <h3>2a. Verify the component pastes cleanly (if not already done)</h3>
   <p><strong>Insert &rarr; Custom &rarr; New Component</strong>, paste the full contents of <code>yaml/components/LoadingScreen/LoadingScreen.yaml</code>, name it <code>cmpLoadingScreen</code>.</p>
-  <div class="warn">Uses <code>Progress@1.1.34</code>, not yet confirmed live anywhere in this app. Standard modern control, low risk, but confirm the import renders correctly first.</div>
   <div class="test">Test: component imports clean, previewing it directly shows the logo mark, wordmark, and progress dots without errors.</div>
 
-  <h2>2. Change what StartScreen.OnVisible does</h2>
-  <p>Currently it navigates immediately on load, which is exactly why the old label never really had time to show. Replace the whole property with:</p>
+  <h3>2b. StartScreen.OnVisible — kick off the cache build, don't navigate yet</h3>
+  <p>Full replacement:</p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(
     varStartDestination,
     If(!IsBlank(Param("ID")), "ViewItem", "Main")
+);
+Set(varSplashMinTimeElapsed, false);
+Set(varActiveCacheReady, false);
+If(
+    varStartDestination = "Main",
+    Refresh('Policy Proof Tracker');
+    RefreshActiveCache()
 )</pre></div>
-  <p>This is the same logic as before &mdash; deep link present means go to <code>ViewItem</code>, otherwise <code>Main</code> &mdash; just stored instead of acted on immediately. The actual <code>Navigate()</code> moves to the component's <code>OnReady</code> event below, so the splash gets a real, deliberate moment on screen instead of flashing for a single frame.</p>
+  <p>Deep-link case (<code>varStartDestination = "ViewItem"</code>) deliberately skips the cache build — a shared link shouldn't wait on a 4-week preload it doesn't need. The <code>Main</code> case fires the same <code>RefreshActiveCache()</code> used everywhere else in the app, so this is the exact same function, just called one screen earlier than before.</p>
 
-  <h2>3. Place the component, wire OnReady</h2>
-  <p><strong>Drag one instance of <code>cmpLoadingScreen</code> from the Components panel</strong> onto <code>StartScreen</code>, delete the old <code>lblLoading</code> label, and set:</p>
+  <h3>2c. Place the component, repurpose OnReady</h3>
+  <p><strong>Drag one instance of <code>cmpLoadingScreen</code></strong> onto <code>StartScreen</code>, delete the old <code>lblLoading</code> label, and set:</p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Height: =App.Height
 Width: =App.Width
 X: =0
@@ -64,13 +145,92 @@ LoadingSteps: =Table(
     {msg: "Loading document list…"},
     {msg: "Checking staff access…"}
 )
-CurrentStep: =3
+CurrentStep: =If(varStartDestination = "ViewItem" || varActiveCacheReady, 3, 2)
 MinDisplayTime: =400
 ErrorMessage: =""
-OnReady: =Navigate(varStartDestination, ScreenTransition.None)</pre></div>
-  <p><code>CurrentStep: =3</code> is set fixed at "all steps shown as done" rather than tracked live, for the honest reason above &mdash; there's nothing left running by this point to track. <code>MinDisplayTime: =400</code> is short on purpose, matching what you asked for: enough to register as an intentional brand moment, nowhere near long enough to feel like a wait. Nudge it up a little (600&ndash;800) if 400ms reads as too much of a flash once you see it live &mdash; that's a one-number change, not a redesign.</p>
+OnReady: =Set(varSplashMinTimeElapsed, true)</pre></div>
+  <p>Two changes from before: <code>CurrentStep</code> is no longer hardcoded to 3 — it now genuinely reflects reality, sitting at step 2 ("Loading document list…") for as long as the real fetch is still running, and only reaching step 3 once <code>varActiveCacheReady</code> actually flips (or immediately for the deep-link case, which never claimed to load that list). And <code>OnReady</code> no longer navigates directly — it only marks that the component's own minimum branding time has passed. Navigation itself moves to the timer below, which is the piece that actually enforces "wait for everything, then disappear."</p>
 
-  <div class="test">Test: reload the app fresh (not just navigating within it) and confirm the splash appears briefly, shows your branding, then lands on Main. Then test the deep-link path directly (open the app with <code>?ID=</code> in the URL, same method used to test the deep-link "not found" case earlier) and confirm it lands on ViewItem instead.</div>
+  <h3>2d. Add the gate — a small polling Timer on StartScreen</h3>
+  <p>Power Fx has no native "await a variable" — the standard way to do this in canvas apps is a repeating <code>Timer</code> that checks the condition and navigates once it's true. Add one new control to <code>StartScreen</code>:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>- tmrSplashGate:
+    Control: Timer@2.1.0
+    Properties:
+      AutoStart: =true
+      Duration: =150
+      OnTimerEnd: |-
+        =If(
+            varSplashMinTimeElapsed && (varStartDestination = "ViewItem" || varActiveCacheReady),
+            Navigate(varStartDestination, ScreenTransition.None)
+        )
+      Repeat: =true
+      Visible: =false</pre></div>
+  <p>Every 150ms it checks: has the splash's own minimum branding time passed, <em>and</em> is there actually somewhere safe to land (either the deep-link case, which never needed the cache, or the cache genuinely finished)? Only when both are true does it navigate. If data's still loading when the branding timer finishes, the splash just keeps showing "Loading document list…" at step 2 until it's actually done — no more, no less than what you asked for.</p>
+  <div class="test">Test 1 (cold start, normal): reload the app fresh (not just navigating within it), confirm the splash shows, step 2 briefly, step 3, then lands on Main with the "Due Next 4 Weeks" tab already populated — not a skeleton loader after the splash disappears, actually populated.<br>Test 2 (deep link): open the app with <code>?ID=</code> in the URL and confirm it lands on ViewItem quickly, without waiting on the 4-week cache.<br>Test 3 (slow network, optional): if you can throttle your connection, confirm the splash now visibly stays on step 2 longer rather than flashing through regardless — that's the whole point of this change, proof it's a real gate and not cosmetic.</div>
+
+  <h2 id="s3">3. Dedup: shared GetFileExt formula <span class="prio prio-3">Tidy-up, zero behaviour change</span></h2>
+  <p><code>BuildLinksForSource</code> and <code>RefreshActiveCache</code> (both in <code>Formulas.txt</code>) duplicate the entire "figure out the file extension from <code>LinkUrl</code>" block verbatim — only the <code>Filter(...)</code> feeding into it differs. Pulling it out means one place to touch if you ever add a file type, nothing else changes.</p>
+  <p>Add this new formula to <code>Formulas.txt</code>:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>GetFileExt(LinkUrl: Text): Text = With(
+    {FileParamStart: Find("file=", LinkUrl, 1)},
+    With(
+        {
+            FileNamePart: If(
+                FileParamStart > 0,
+                With(
+                    {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                ),
+                If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+            )
+        },
+        Switch(
+            true,
+            Right(FileNamePart, 5) = ".docx", "docx",
+            Right(FileNamePart, 4) = ".doc", "doc",
+            Right(FileNamePart, 5) = ".xlsx", "xlsx",
+            Right(FileNamePart, 4) = ".xls", "xls",
+            Right(FileNamePart, 5) = ".pptx", "pptx",
+            Right(FileNamePart, 4) = ".ppt", "ppt",
+            Right(FileNamePart, 4) = ".pdf", "pdf",
+            ""
+        )
+    )
+)</pre></div>
+  <p>Then replace both UDFs with the shortened versions — full replacements, everything else in each is unchanged:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>BuildLinksForSource(SourceID: Number): Boolean = {
+    ClearCollect(
+        colLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id = SourceID),
+            FileExt,
+            GetFileExt(LinkUrl)
+        )
+    );
+    Set(varLinksSourceID, SourceID);
+    true
+};</pre></div>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>RefreshActiveCache(): Boolean = {
+    ClearCollect(
+        colActiveItems,
+        Filter(
+            'Policy Proof Tracker',
+            'Planned Publish Date' >= Today() &&
+            'Planned Publish Date' <= DateAdd(Today(), 28, "Days")
+        )
+    );
+    ClearCollect(
+        colActiveLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id in colActiveItems.ID),
+            FileExt,
+            GetFileExt(LinkUrl)
+        )
+    );
+    Set(varActiveCacheReady, true);
+    true
+};</pre></div>
+  <div class="test">Test: open any item's link list (from cache and from a live fallback item), confirm file icons/extensions still show correctly — behaviour should be identical to before, this is pure refactor.</div>
 
 </main>
 <script>

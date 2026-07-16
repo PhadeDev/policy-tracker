@@ -499,9 +499,9 @@ Set(
   <a class="screen-card test-version" href="guides/loading-screen.html" target="_blank">
     <div>
       <div class="status-pill pill-done">New build, not yet started</div>
-      <div class="screen-number">StartScreen</div>
-      <div class="screen-name">Loading Screen — Branded App-Start Splash</div>
-      <div class="screen-desc">Replaces StartScreen's single bare label with a branded splash (logo, wordmark, progress dots), MinDisplayTime kept short on purpose so it never feels like an artificial wait. Honest about the one real platform limit: OnStart finishes before this screen renders, so step labels are cosmetic, not live progress, unless the collection-building is moved into this screen later.</div>
+      <div class="screen-number">Multiple</div>
+      <div class="screen-name">Cleanup Pass — Delegation Fix, Formula Dedup, Real Data-Gated Loading Screen</div>
+      <div class="screen-desc">Three items in priority order: fixes the same non-delegable Year/Month/Day bug from NewsletterPack, still live in ViewItem's colThursdayOptions (104 filters, not just 3); redesigns StartScreen's branded splash to genuinely wait on RefreshActiveCache() finishing (colActiveItems/colActiveLinks) instead of a fixed cosmetic delay; and dedupes the file-extension logic duplicated across BuildLinksForSource and RefreshActiveCache.</div>
     </div>
     <div class="screen-cta green">Open guide &rarr;</div>
   </a>
