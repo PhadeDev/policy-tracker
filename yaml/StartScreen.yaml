@@ -1,0 +1,59 @@
+Screens:
+  StartScreen:
+    Properties:
+      LoadingSpinnerColor: =RGBA(11, 74, 54, 1)
+      OnVisible: |-
+        =Set(
+            varStartDestination,
+            If(!IsBlank(Param("ID")), "ViewItem", "Main")
+        );
+        Set(varSplashMinTimeElapsed, false);
+        Set(varActiveCacheReady, false);
+        Set(varSkipMainInitialRefresh, false);
+        If(
+            varStartDestination = "Main",
+            Refresh('Policy Proof Tracker');
+            RefreshActiveCache()
+        )
+    Children:
+      - cmpLoadingScreen_1:
+          Control: CanvasComponent
+          ComponentName: cmpLoadingScreen
+          Properties:
+            AccentColor: =RGBA(11, 74, 54, 1)
+            AppName: ="Policy"
+            AppNameAccent: ="Tracker"
+            AppSubtitle: ="Cadet Forces Document Tracking"
+            AppVersion: ="v2"
+            CompanyName: ="Policy Tracker"
+            CurrentStep: =If(varStartDestination = "ViewItem" || varActiveCacheReady, 3, 2)
+            ErrorMessage: =""
+            Height: =App.Height
+            LoadingSteps: |-
+              =Table(
+                  {msg: "Loading colour palette..."},
+                  {msg: "Loading document list..."},
+                  {msg: "Checking staff access..."}
+              )
+            LogoLetter: ="P"
+            MinDisplayTime: =400
+            OnReady: =Set(varSplashMinTimeElapsed, true)
+            Theme: ="Light"
+            Width: =App.Width
+      - tmrSplashGate:
+          Control: Timer@2.1.0
+          Properties:
+            AutoStart: =true
+            Duration: =150
+            OnTimerEnd: |-
+              =If(
+                  varSplashMinTimeElapsed && (varStartDestination = "ViewItem" || varActiveCacheReady),
+                  If(
+                      varStartDestination = "ViewItem",
+                      Navigate(ViewItem, ScreenTransition.None),
+                      Set(varSkipMainInitialRefresh, true);
+                      Navigate(Main, ScreenTransition.None)
+                  )
+              )
+            Repeat: =true
+            Visible: =false

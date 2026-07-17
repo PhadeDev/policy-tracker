@@ -89,7 +89,6 @@ Screens:
         Reset(radApproval1);
         Reset(ckbPublished1);
         Reset(dpkPublishedDate1);
-        Reset(cmb_Owner1);
         If(
             !IsBlank(varSelectedRelease.ID),
             Refresh(PolicyLinks);
@@ -1008,7 +1007,7 @@ Screens:
                                                 Fill: =RGBA(255, 255, 255, 1)
                                                 Font: =Font.'Open Sans'
                                                 FontWeight: =""
-                                                Format: =Text(Self.SelectedDate, "d mmm yyy ")
+                                                Format: =Text(Self.SelectedDate, "d mmm yyyy")
                                                 Height: =40
                                                 OnChange: |-
                                                   =If(

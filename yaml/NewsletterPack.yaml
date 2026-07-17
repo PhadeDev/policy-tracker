@@ -12,11 +12,10 @@ Screens:
                 AddColumns(
                     Filter(
                         'Policy Proof Tracker',
-                        Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
-                        Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
-                        Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
+                        'Planned Publish Date' >= varNewsletterTargetDate &&
+                        'Planned Publish Date' < DateAdd(varNewsletterTargetDate, 1, "Days") &&
                         (
-                            ReadyForRelease = true ||
+                            'Approved by Pillar Lead (Ready to Release)' = true ||
                             'Approved For Release By'.Value = "XO" ||
                             'Approved For Release By'.Value = "ACOS" ||
                             'Approved For Release By'.Value = "DCOMD" ||
@@ -144,11 +143,10 @@ Screens:
                                   AddColumns(
                                       Filter(
                                           'Policy Proof Tracker',
-                                          Year('Planned Publish Date') = Year(varNewsletterTargetDate) &&
-                                          Month('Planned Publish Date') = Month(varNewsletterTargetDate) &&
-                                          Day('Planned Publish Date') = Day(varNewsletterTargetDate) &&
+                                          'Planned Publish Date' >= varNewsletterTargetDate &&
+                                          'Planned Publish Date' < DateAdd(varNewsletterTargetDate, 1, "Days") &&
                                           (
-                                              ReadyForRelease = true ||
+                                              'Approved by Pillar Lead (Ready to Release)' = true ||
                                               'Approved For Release By'.Value = "XO" ||
                                               'Approved For Release By'.Value = "ACOS" ||
                                               'Approved For Release By'.Value = "DCOMD" ||

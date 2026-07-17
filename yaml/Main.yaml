@@ -3,9 +3,15 @@ Screens:
     Properties:
       LoadingSpinnerColor: =RGBA(11, 74, 54, 1)
       OnVisible: |-
-        =Set(varMainLoading, true);
-        Refresh('Policy Proof Tracker');
-        Set(varMainLoading, false)
+        =If(
+            varSkipMainInitialRefresh,
+            Set(varSkipMainInitialRefresh, false);
+            Set(varMainLoading, false),
+            Set(varMainLoading, true);
+            Refresh('Policy Proof Tracker');
+            RefreshActiveCache();
+            Set(varMainLoading, false)
+        )
     Children:
       - ScreenContainer1:
           Control: GroupContainer@1.5.0
@@ -142,6 +148,7 @@ Screens:
                           Set(varSelectedRelease, Blank());
                           Set(varSelectPolicy, "Empty");
                           Set(varOwnerDefault, Table({DisplayName: Office365Users.MyProfileV2().displayName, Mail: User().Email}));
+                          Set(varPlannedPublishDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
                           Clear(colLinks);
                           Navigate(ViewItem, ScreenTransition.Fade);
                           Set(varParentSaved, false);
@@ -344,18 +351,18 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Refresh('Policy Proof Tracker');
+                                      =Set(varMainLoading, true);
+
                                       Set(varSelectedState, "Current");
                                       Set(
                                           colTypeCounts,
                                           Filter(
-                                              'Policy Proof Tracker',
-                                              'Planned Publish Date' >= Today() &&
-                                              'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+                                              colActiveItems,
                                               (varFilterOwner = false || Owner.Email = User().Email)
                                           )
                                       );
-                                      Reset(HeaderGallery)
+                                      Reset(HeaderGallery);
+                                      Set(varMainLoading, false)
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
                                     PressedFill: =RGBA(0,128,64,0.12)
@@ -437,7 +444,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Refresh('Policy Proof Tracker');
+                                      =Set(varMainLoading, true);
+                                      Refresh('Policy Proof Tracker');
                                       Set(varSelectedState, "Future");
                                       Set(
                                           colTypeCounts,
@@ -447,7 +455,8 @@ Screens:
                                               (varFilterOwner = false || Owner.Email = User().Email)
                                           )
                                       );
-                                      Reset(HeaderGallery)
+                                      Reset(HeaderGallery);
+                                      Set(varMainLoading, false)
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
                                     PressedFill: =RGBA(0,128,64,0.12)
@@ -537,7 +546,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Refresh('Policy Proof Tracker');
+                                      =Set(varMainLoading, true);
+                                      Refresh('Policy Proof Tracker');
                                       Set(varSelectedState, "UnapprovedHistoric");
                                       Set(
                                           colTypeCounts,
@@ -548,7 +558,8 @@ Screens:
                                               (varFilterOwner = false || Owner.Email = User().Email)
                                           )
                                       );
-                                      Reset(HeaderGallery)
+                                      Reset(HeaderGallery);
+                                      Set(varMainLoading, false)
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
                                     PressedFill: =RGBA(0,128,64,0.12)
@@ -633,7 +644,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(0,128,64,0.08)
                                     OnSelect: |-
-                                      =Refresh('Policy Proof Tracker');
+                                      =Set(varMainLoading, true);
+                                      Refresh('Policy Proof Tracker');
                                       Set(varSelectedState, "Historic");
                                       Set(
                                           colTypeCounts,
@@ -646,6 +658,7 @@ Screens:
                                           )
                                       );
                                       Reset(HeaderGallery);
+                                      Set(varMainLoading, false)
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
                                     PressedFill: =RGBA(0,128,64,0.12)
@@ -743,6 +756,7 @@ Screens:
                                   Variant: VariableHeight
                                   Properties:
                                     BorderColor: =RGBA(0, 18, 107, 1)
+                                    DelayItemLoading: =false
                                     Items: |-
                                       =// HeaderGallery.Items — full replacement
                                       Switch(
@@ -751,21 +765,34 @@ Screens:
                                           "Historic",
                                           Sort(
                                               AddColumns(
-                                                  GroupBy(
-                                                      AddColumns(
+                                                  AddColumns(
+                                                      ForAll(
+                                                          Sequence(4),
+                                                          With(
+                                                              {
+                                                                  _daysSincePreviousThursday:
+                                                                      If(
+                                                                          Mod(Weekday(Today()) - 5 + 7, 7) = 0,
+                                                                          7,
+                                                                          Mod(Weekday(Today()) - 5 + 7, 7)
+                                                                      )
+                                                              },
+                                                              {PlannedDate: DateAdd(Today(), -_daysSincePreviousThursday - ((Value - 1) * 7), "Days")}
+                                                          )
+                                                      ),
+                                                      ReleaseDateText,
+                                                      Text(PlannedDate, "dddd, dd mmmm yyyy"),
+                                                      GroupedItems,
+                                                      With(
+                                                          {_targetDate: PlannedDate},
                                                           Filter(
                                                               'Policy Proof Tracker',
-                                                              'Planned Publish Date' >= DateAdd(Today(), -varHistoricLimit, "Days") &&
-                                                              'Planned Publish Date' < Today() &&
+                                                              'Planned Publish Date' = _targetDate &&
                                                               (Published = true || 'External consultation required' = true) &&
                                                               (varFilterOwner = false || Owner.Email = User().Email) &&
                                                               (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
-                                                          ),
-                                                          PlannedDate, 'Planned Publish Date',
-                                                          ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
-                                                      ),
-                                                      PlannedDate,
-                                                      GroupedItems
+                                                          )
+                                                      )
                                                   ),
                                                   ItemCount, CountRows(GroupedItems)
                                               ),
@@ -799,20 +826,23 @@ Screens:
                                           "Current",
                                           Sort(
                                               AddColumns(
-                                                  GroupBy(
-                                                      AddColumns(
+                                                  AddColumns(
+                                                      ForAll(
+                                                          Sequence(4),
+                                                          {PlannedDate: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")}
+                                                      ),
+                                                      ReleaseDateText,
+                                                      Text(PlannedDate, "dddd, dd mmmm yyyy"),
+                                                      GroupedItems,
+                                                      With(
+                                                          {_targetDate: PlannedDate},
                                                           Filter(
-                                                              'Policy Proof Tracker',
-                                                              'Planned Publish Date' >= Today() &&
-                                                              'Planned Publish Date' <= DateAdd(Today(), 28, "Days") &&
+                                                              colActiveItems,
+                                                              'Planned Publish Date' = _targetDate &&
                                                               (varFilterOwner = false || Owner.Email = User().Email) &&
                                                               (IsBlank(varTypeFilter) || varTypeFilter = "" || 'Document Type'.Value = varTypeFilter)
-                                                          ),
-                                                          PlannedDate, 'Planned Publish Date',
-                                                          ReleaseDateText, Text('Planned Publish Date', "dddd, dd mmmm yyyy")
-                                                      ),
-                                                      PlannedDate,
-                                                      GroupedItems
+                                                          )
+                                                      )
                                                   ),
                                                   ItemCount, CountRows(GroupedItems)
                                               ),
@@ -846,6 +876,7 @@ Screens:
                                           )
                                       )
                                     TemplatePadding: =20
+                                    LoadingSpinner: =LoadingSpinner.None
                                     Visible: =!varMainLoading
                                     Width: =Parent.Width
                                     Y: =1
@@ -856,7 +887,7 @@ Screens:
                                         Properties:
                                           DropShadow: =DropShadow.None
                                           Fill: =RGBA(255, 255, 255, 1)
-                                          Height: =40 + CountRows(ThisItem.GroupedItems)*110
+                                          Height: =40 + Max(CountRows(ThisItem.GroupedItems)*110, 60)
                                           Width: =1294
                                           Y: =10
                                         Children:
@@ -865,6 +896,7 @@ Screens:
                                               Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
                                               Properties:
                                                 BorderColor: =RGBA(0, 18, 107, 1)
+                                                DelayItemLoading: =false
                                                 Height: =CountRows(ThisItem.GroupedItems)*110
                                                 Items: |-
                                                   =Sort(
@@ -876,9 +908,20 @@ Screens:
                                                       ),
                                                       SortOrder.Ascending
                                                   )
+                                                LoadingSpinner: =LoadingSpinner.None
                                                 OnSelect: |-
-                                                  =Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
-                                                  Navigate(ViewItem, ScreenTransition.Fade)
+                                                  =With(
+                                                      {_selectedRelease: LookUp('Policy Proof Tracker', ID = ThisItem.ID)},
+                                                      Set(varSelectedRelease, _selectedRelease);
+                                                      Set(varSelectPolicy, "Filled");
+                                                      Set(varParentSaved, true);
+                                                      Set(varSelectedItem, _selectedRelease);
+                                                      Set(varSourceScreen, "Main");
+                                                      Set(varSelectedPerson, _selectedRelease.Owner);
+                                                      Set(varOwnerDefault, Table({DisplayName: _selectedRelease.Owner.DisplayName, Mail: _selectedRelease.Owner.Email}));
+                                                      Set(varPlannedPublishDate, _selectedRelease.'Planned Publish Date');
+                                                      Navigate(ViewItem, ScreenTransition.Fade)
+                                                  )
                                                 TemplateSize: =110
                                                 Width: =Parent.Width
                                                 Y: =40
@@ -1252,8 +1295,20 @@ Screens:
                                                             RadiusTopLeft: =8
                                                             RadiusTopRight: =8
                                                             Size: =14
-                                                            Text: =Text(CountRows(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID)))
-                                                            Visible: =CountRows(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID)) > 0
+                                                            Text: |-
+                                                              =Text(
+                                                                  If(
+                                                                      varSelectedState = "Current",
+                                                                      CountRows(Filter(colActiveLinks, PolicyTrackerSource.Id = ThisItem.ID)),
+                                                                      CountRows(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID))
+                                                                  )
+                                                              )
+                                                            Visible: |-
+                                                              =If(
+                                                                  varSelectedState = "Current",
+                                                                  CountRows(Filter(colActiveLinks, PolicyTrackerSource.Id = ThisItem.ID)),
+                                                                  CountRows(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID))
+                                                              ) > 0
                                                             Width: =35
                                                             X: =1150
                                                             Y: =60
@@ -1264,7 +1319,12 @@ Screens:
                                                             Color: =Coalesce(LookUp(colChoiceColors, ChoiceValue = ThisItem.'Document Type'.Value, ColorCode), RGBA(150, 150, 150, 1))
                                                             Height: =26
                                                             Icon: =Icon.PaperClip
-                                                            Visible: =CountRows(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID)) > 0
+                                                            Visible: |-
+                                                              =If(
+                                                                  varSelectedState = "Current",
+                                                                  CountRows(Filter(colActiveLinks, PolicyTrackerSource.Id = ThisItem.ID)),
+                                                                  CountRows(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID))
+                                                              ) > 0
                                                             Width: =26
                                                             X: =1147
                                                             Y: =65
@@ -1417,21 +1477,25 @@ Screens:
                                                       Fill: =RGBA(0, 0, 0, 0)
                                                       HoverFill: =RGBA(0,128,64,0.08)
                                                       OnSelect: |-
-                                                        =Select(Parent);
-                                                        Set(varSelectPolicy, "Filled");
-                                                        Set(varParentSaved, true);
-                                                        Set(varSelectedItem, ThisItem);
-                                                        Set(varSourceScreen, "Main");
-                                                        Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
-                                                        Set(varSelectedPerson, varSelectedRelease.Owner);
+                                                        =With(
+                                                            {_selectedRelease: LookUp('Policy Proof Tracker', ID = ThisItem.ID)},
+                                                            Set(varSelectPolicy, "Filled");
+                                                            Set(varParentSaved, true);
+                                                            Set(varSelectedItem, _selectedRelease);
+                                                            Set(varSourceScreen, "Main");
+                                                            Set(varSelectedRelease, _selectedRelease);
+                                                            Set(varSelectedPerson, _selectedRelease.Owner);
+                                                            Set(varOwnerDefault, Table({DisplayName: _selectedRelease.Owner.DisplayName, Mail: _selectedRelease.Owner.Email}));
+                                                            Set(varPlannedPublishDate, _selectedRelease.'Planned Publish Date');
 
-                                                        // Load links immediately
-                                                        Set(varLoadingLinks, true);
-                                                        BuildLinksForSource(ThisItem.ID);
-                                                        Set(varLoadingLinks, false);
+                                                            // Load links immediately
+                                                            Set(varLoadingLinks, true);
+                                                            BuildLinksForSource(_selectedRelease.ID);
+                                                            Set(varLoadingLinks, false);
 
-                                                        // Navigate to ViewItem
-                                                        Navigate(ViewItem, ScreenTransition.Fade);
+                                                            // Navigate to ViewItem
+                                                            Navigate(ViewItem, ScreenTransition.Fade)
+                                                        );
                                                       PressedFill: =RGBA(0,128,64,0.12)
                                                       Tooltip: =ThisItem.'Item summary'
                                                       Width: =1194
@@ -1462,6 +1526,7 @@ Screens:
                                                             }
                                                         );
                                                         Refresh('Policy Proof Tracker');
+                                                        RefreshActiveCache();
                                                         Notify(
                                                             "Marked as published - " & Text(varQuickPublishDate, "d mmm yyyy"),
                                                             NotificationType.Success
@@ -1661,6 +1726,7 @@ Screens:
                                                 )
                                             );
                                             Refresh('Policy Proof Tracker');
+                                            RefreshActiveCache();
                                             Notify(
                                                 "Published all " & varPublishGroupCount & " items for " & Text(varPublishGroupDate, "d mmm yyyy"),
                                                 NotificationType.Success
@@ -1681,6 +1747,20 @@ Screens:
                                           Width: =150
                                           X: =950
                                           Y: =12
+                                    - lblNoReleasesMain:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          Color: =RGBA(112, 116, 134, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =60
+                                          Size: =11
+                                          Text: =If(varSelectedState = "Historic", "No releases went out that week", "No releases this week")
+                                          Visible: =CountRows(ThisItem.GroupedItems) = 0
+                                          Width: =Parent.Width - 40
+                                          X: =20
+                                          Y: =40
                               - lblEmailEmpty_1:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1754,6 +1834,41 @@ Screens:
                                     Width: =Parent.Width
                                     Y: =1
                                   Children:
+                                    - SkelHeaderBar1:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
+                                        Properties:
+                                          Fill: =RGBA(244, 246, 243, 1)
+                                          FillPortions: =0
+                                          Height: =40
+                                          Width: =Parent.Width - 92
+                                        Children:
+                                          - SkelHeaderTitle1:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =14
+                                                RadiusBottomLeft: =4
+                                                RadiusBottomRight: =4
+                                                RadiusTopLeft: =4
+                                                RadiusTopRight: =4
+                                                Text: =""
+                                                Width: =180
+                                                X: =14
+                                                Y: =13
+                                          - SkelHeaderPill1:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =20
+                                                Text: =""
+                                                Width: =54
+                                                X: =Parent.Width - 70
+                                                Y: =10
                                     - SkeletonCard1:
                                         Control: GroupContainer@1.5.0
                                         Variant: ManualLayout
@@ -1829,6 +1944,156 @@ Screens:
                                                 Width: =46
                                                 X: =Parent.Width - 90
                                                 Y: =20
+                                    - SkeletonCard2:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
+                                        Properties:
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          FillPortions: =0
+                                          Height: =100
+                                          Width: =Parent.Width - 92
+                                        Children:
+                                          - SkelAccentBar2:
+                                              Control: Rectangle@2.3.0
+                                              Properties:
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =Parent.Height
+                                                Width: =8
+                                          - SkelAvatar2:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =25
+                                                RadiusBottomLeft: =50
+                                                RadiusBottomRight: =50
+                                                RadiusTopLeft: =50
+                                                RadiusTopRight: =50
+                                                Text: =""
+                                                Width: =25
+                                                X: =25
+                                                Y: =70
+                                          - SkelTitleBar2:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =12
+                                                RadiusBottomLeft: =4
+                                                RadiusBottomRight: =4
+                                                RadiusTopLeft: =4
+                                                RadiusTopRight: =4
+                                                Text: =""
+                                                Width: =340
+                                                X: =50
+                                                Y: =24
+                                          - SkelSubtitleBar2:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =9
+                                                RadiusBottomLeft: =4
+                                                RadiusBottomRight: =4
+                                                RadiusTopLeft: =4
+                                                RadiusTopRight: =4
+                                                Text: =""
+                                                Width: =220
+                                                X: =50
+                                                Y: =44
+                                          - SkelPill2:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =16
+                                                RadiusBottomLeft: =8
+                                                RadiusBottomRight: =8
+                                                RadiusTopLeft: =8
+                                                RadiusTopRight: =8
+                                                Text: =""
+                                                Width: =46
+                                                X: =Parent.Width - 90
+                                                Y: =20
+                                    - SkeletonCard3:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
+                                        Properties:
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          FillPortions: =0
+                                          Height: =100
+                                          Width: =Parent.Width - 92
+                                        Children:
+                                          - SkelAccentBar3:
+                                              Control: Rectangle@2.3.0
+                                              Properties:
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =Parent.Height
+                                                Width: =8
+                                          - SkelAvatar3:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =25
+                                                RadiusBottomLeft: =50
+                                                RadiusBottomRight: =50
+                                                RadiusTopLeft: =50
+                                                RadiusTopRight: =50
+                                                Text: =""
+                                                Width: =25
+                                                X: =25
+                                                Y: =70
+                                          - SkelTitleBar3:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =12
+                                                RadiusBottomLeft: =4
+                                                RadiusBottomRight: =4
+                                                RadiusTopLeft: =4
+                                                RadiusTopRight: =4
+                                                Text: =""
+                                                Width: =340
+                                                X: =50
+                                                Y: =24
+                                          - SkelSubtitleBar3:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =9
+                                                RadiusBottomLeft: =4
+                                                RadiusBottomRight: =4
+                                                RadiusTopLeft: =4
+                                                RadiusTopRight: =4
+                                                Text: =""
+                                                Width: =220
+                                                X: =50
+                                                Y: =44
+                                          - SkelPill3:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderThickness: =0
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =ColorFade(RGBA(228, 233, 229, 1), varSkeletonPulse * -0.12)
+                                                Height: =16
+                                                RadiusBottomLeft: =8
+                                                RadiusBottomRight: =8
+                                                RadiusTopLeft: =8
+                                                RadiusTopRight: =8
+                                                Text: =""
+                                                Width: =46
+                                                X: =Parent.Width - 90
+                                                Y: =20
       - MyItemsBG:
           Control: Classic/Button@2.2.0
           Properties:
@@ -1863,7 +2128,8 @@ Screens:
             Font: =Font.'Open Sans'
             Height: =26
             OnChange: |-
-              =Refresh('Policy Proof Tracker');
+              =Set(varMainLoading, true);
+              Refresh('Policy Proof Tracker');
               Set(varFilterOwner, Self.Value);
               Set(
                   colTypeCounts,
@@ -1877,7 +2143,8 @@ Screens:
                       ) &&
                       (Self.Value = false || Owner.Email = User().Email)
                   )
-              )
+              );
+              Set(varMainLoading, false)
             ShowLabel: =false
             TextPosition: =TextPosition.Left
             TrueFill: =RGBA(0, 64, 47, 1)
@@ -2045,16 +2312,21 @@ Screens:
                               HoverColor: =Color.Transparent
                               HoverFill: =RGBA(0, 64, 47, 0.07)
                               OnSelect: |-
-                                =Set(varSelectedRelease, LookUp('Policy Proof Tracker', ID = ThisItem.ID));
-                                Set(varSelectPolicy, "Filled");
-                                Set(varParentSaved, true);
-                                Set(varSelectedItem, ThisItem);
-                                Set(varSourceScreen, "Main");
-                                Set(varSelectedPerson, varSelectedRelease.Owner);
-                                Set(varLoadingLinks, true);
-                                BuildLinksForSource(ThisItem.ID);
-                                Set(varLoadingLinks, false);
-                                Navigate(ViewItem, ScreenTransition.Fade);
+                                =With(
+                                    {_selectedRelease: LookUp('Policy Proof Tracker', ID = ThisItem.ID)},
+                                    Set(varSelectedRelease, _selectedRelease);
+                                    Set(varSelectPolicy, "Filled");
+                                    Set(varParentSaved, true);
+                                    Set(varSelectedItem, _selectedRelease);
+                                    Set(varSourceScreen, "Main");
+                                    Set(varSelectedPerson, _selectedRelease.Owner);
+                                    Set(varOwnerDefault, Table({DisplayName: _selectedRelease.Owner.DisplayName, Mail: _selectedRelease.Owner.Email}));
+                                    Set(varPlannedPublishDate, _selectedRelease.'Planned Publish Date');
+                                    Set(varLoadingLinks, true);
+                                    BuildLinksForSource(_selectedRelease.ID);
+                                    Set(varLoadingLinks, false);
+                                    Navigate(ViewItem, ScreenTransition.Fade)
+                                );
                               PressedBorderColor: =Color.Transparent
                               PressedColor: =Self.Fill
                               PressedFill: =RGBA(0, 64, 47, 0.12)
@@ -2352,74 +2624,3 @@ Screens:
                                       Reset(HeaderGallery);
                                       Set(varShowTypeFilterPopover, false)
                                     Width: =Parent.Width
-
-      - ToastNotification:
-          Control: GroupContainer@1.5.0
-          Variant: ManualLayout
-          Properties:
-            DropShadow: =DropShadow.Regular
-            Fill: =RGBA(255, 255, 255, 1)
-            Height: =56
-            RadiusBottomLeft: =10
-            RadiusBottomRight: =10
-            RadiusTopLeft: =10
-            RadiusTopRight: =10
-            Visible: =varToastVisible
-            Width: =430
-            X: =16
-            Y: =16
-          Children:
-            - ToastAccentBar:
-                Control: Rectangle@2.3.0
-                Properties:
-                  Fill: =If(varToastType = "error", RGBA(194, 47, 47, 1), RGBA(11, 74, 54, 1))
-                  Height: =Parent.Height
-                  Width: =6
-            - ToastHeading:
-                Control: ModernText@1.0.0
-                Properties:
-                  Color: =RGBA(22, 33, 28, 1)
-                  Font: =Font.'Lato Black'
-                  Height: =20
-                  Size: =13
-                  Text: =varToastHeading
-                  Width: =Parent.Width - 60
-                  X: =20
-                  Y: =7
-            - ToastMessage:
-                Control: ModernText@1.0.0
-                Properties:
-                  Color: =RGBA(91, 105, 97, 1)
-                  Font: =Font.'Open Sans'
-                  Height: =20
-                  Size: =11
-                  Text: =varToastMessage
-                  Width: =Parent.Width - 60
-                  X: =20
-                  Y: =28
-            - ToastClose:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderThickness: =0
-                  Color: =RGBA(91, 105, 97, 1)
-                  DisplayMode: =DisplayMode.Edit
-                  Fill: =RGBA(0, 0, 0, 0)
-                  Font: =Font.'Open Sans'
-                  Height: =28
-                  HoverFill: =RGBA(0, 0, 0, 0.05)
-                  OnSelect: =Set(varToastVisible, false)
-                  PressedFill: =RGBA(0, 0, 0, 0.08)
-                  Size: =16
-                  Text: ="×"
-                  Width: =28
-                  X: =Parent.Width - 34
-                  Y: =6
-            - tmrToastHide:
-                Control: Timer@2.1.0
-                Properties:
-                  AutoStart: =varToastVisible
-                  Duration: =3000
-                  OnTimerEnd: =Set(varToastVisible, false)
-                  Repeat: =false
-                  Start: =varToastVisible
-                  Visible: =false

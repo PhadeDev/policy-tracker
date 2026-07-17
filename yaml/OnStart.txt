@@ -22,12 +22,6 @@ Set(
     varHistoricLimit,
     30
 );
-// Selection variables
-Set(
-    varSelectedDate,
-    Today()
-);
-// Date type
 Set(varSelectedItem, Blank());
 Set(varSelectedLink, Blank());
 Set(
@@ -38,9 +32,7 @@ Set(varSaving, false);
 Set(varUnsavedChanges, false);
 Set(varParentSaved, false);
 Set(varLoadingLinks, false);
-Set(varFormSaved, false);
 Set(varDeletingItem, false);
-Set(varSaveMode, "");
 Set(
     varDuplicating,
     false
