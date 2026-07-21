@@ -51,7 +51,7 @@
   <div class="note"><strong>Where to click:</strong> in the Tree view (left panel), open the <strong>Screens</strong> tab and click on <strong>ViewItem</strong> to open it. Click on empty screen background (not any child control) so the Properties dropdown at the top of the canvas shows <strong>ViewItem</strong> as the selected object. In the formula bar's left dropdown (next to the <code>fx</code> icon), select <strong>OnVisible</strong>. Click into the formula bar itself, select all existing text (Ctrl+A) and delete it, then paste the block below.</div>
   <p>Full replacement for <code>ViewItem.OnVisible</code> — only two new lines added (<code>Reset(dpkPublishDate1)</code>, <code>Reset(cmb_Owner1)</code>), right after <code>Reset(drpDocType1)</code>, everything else is what you already have:</p>
   <div class="warn"><strong>Correction:</strong> the version below also fixes a separate error you'd hit pasting this — <code>colThursdayItemCounts</code>'s grouping previously kept the quoted column name <code>'Planned Publish Date'</code> straight out of <code>GroupBy</code>, which Studio flagged as "Name isn't valid" when referenced later in the <code>LookUp</code>. Fixed by projecting it to a plain column called <code>GroupDate</code> first — same values, no quoted/spaced name for Studio to trip over.</div>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
 Set(varSaving, false);
 Set(varShowLinkModal, false);
 Set(varSelectedLink, Blank());
@@ -170,7 +170,7 @@ If(
   <p><code>galOverviewColumns1.Items</code> (the 4-week column grid) filters each week's items using the exact same non-delegable <code>Year</code>/<code>Month</code>/<code>Day</code> equality pattern that was fixed in <code>NewsletterPack</code> and in <code>ViewItem</code>'s <code>colThursdayOptions</code> — this is the third place it's turned up, and it's still live here. Same failure mode: correct while the table's small, silently wrong once it grows past the delegation row limit.</p>
   <div class="note"><strong>Where to click:</strong> open the <strong>Overview</strong> screen from the Tree view. Expand its tree until you find <strong>galOverviewColumns1</strong> (the horizontal gallery holding the 4 week columns) and click it directly — not one of its child controls. In the Properties dropdown, select <strong>Items</strong>. Select all in the formula bar, delete, paste the block below.</div>
   <p>Full replacement for <code>galOverviewColumns1.Items</code>:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=AddColumns(
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>AddColumns(
     ForAll(
         Sequence(4),
         {
@@ -194,7 +194,7 @@ If(
   <p>Checked the fresh export directly — the delegation/date-range fix from earlier landed, but the field-name fix (<code>ReadyForRelease</code> &rarr; <code>'Approved by Pillar Lead (Ready to Release)'</code>) did not. Repeating it here since this is meant to be the complete pre-release list — full replacements for both properties, unchanged from before:</p>
   <div class="note"><strong>Where to click (1st block):</strong> open the <strong>NewsletterPack</strong> screen, click on the empty screen background so <strong>NewsletterPack</strong> shows as the selected object, select <strong>OnVisible</strong> from the Properties dropdown, select all and replace.</div>
   <p><code>NewsletterPack.OnVisible</code>:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
 Refresh('Policy Proof Tracker');
 ClearCollect(
     colNewsletterPack,
@@ -240,7 +240,7 @@ ClearCollect(
 )</pre></div>
   <div class="note"><strong>Where to click (2nd block):</strong> still on <strong>NewsletterPack</strong>, find and click the <strong>btnRefresh_1</strong> button (top-right "Refresh" button on this screen), select <strong>OnSelect</strong> from the Properties dropdown, select all and replace.</div>
   <p><code>btnRefresh_1.OnSelect</code> (same screen, identical body):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
 Refresh('Policy Proof Tracker');
 ClearCollect(
     colNewsletterPack,
@@ -288,8 +288,8 @@ ClearCollect(
 
   <h2 id="s4">4. Formulas — GetFileExt dedup, confirmed still not applied <span class="prio prio-3">Tidy-up, zero behaviour change</span></h2>
   <p>Also still duplicated in the fresh export. Repeating for completeness.</p>
-  <div class="note"><strong>Where to click:</strong> this one isn't on a screen — click the <strong>App</strong> entry at the very top of the Tree view (above all screens), then select <strong>Formulas</strong> from the Properties dropdown. This is one long text box holding every named formula in the app (<code>BuildLinksForSource</code>, <code>RefreshActiveCache</code>, etc.) — don't select-all here, since that would delete formulas this guide isn't touching. Instead, click into the box and paste the new <code>GetFileExt</code> formula below anywhere between two existing formulas (e.g. right after the closing <code>};</code> of <code>BuildLinksForSource</code>).</div>
-  <p>Add this new formula:</p>
+  <div class="note"><strong>Where to click:</strong> click the <strong>App</strong> entry at the very top of the Tree view (above all screens), then select <strong>Formulas</strong> from the Properties dropdown. As of the current export, this box contains exactly the two formulas below and nothing else — so this time it's safe to select all (Ctrl+A) and paste the whole block below over the entire box in one go.</p>
+  <p>Full replacement for the entire <strong>Formulas</strong> box — new <code>GetFileExt</code> formula first, then both existing formulas shortened to call it instead of repeating the file-extension logic inline:</p>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>GetFileExt(LinkUrl: Text): Text = With(
     {FileParamStart: Find("file=", LinkUrl, 1)},
     With(
@@ -315,9 +315,8 @@ ClearCollect(
             ""
         )
     )
-)</pre></div>
-  <p>Then, still in that same <strong>App &rarr; Formulas</strong> box, find the existing <code>BuildLinksForSource</code> and <code>RefreshActiveCache</code> formulas (each starts with its name and ends with a closing <code>};</code>) and replace each one individually with its shortened version below — everything outside those two blocks stays exactly as it is:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>BuildLinksForSource(SourceID: Number): Boolean = {
+)
+BuildLinksForSource(SourceID: Number): Boolean = {
     ClearCollect(
         colLinks,
         AddColumns(
@@ -328,8 +327,8 @@ ClearCollect(
     );
     Set(varLinksSourceID, SourceID);
     true
-};</pre></div>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>RefreshActiveCache(): Boolean = {
+};
+RefreshActiveCache(): Boolean = {
     ClearCollect(
         colActiveItems,
         Filter(

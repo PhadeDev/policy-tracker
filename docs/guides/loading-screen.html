@@ -49,7 +49,7 @@
   <h2 id="s1">1. Fix colThursdayOptions — same delegation bug as NewsletterPack, worse <span class="prio prio-1">Do first</span></h2>
   <p>In <code>ViewItem.OnVisible</code>, the date-picker's per-Thursday item count is built with the exact same non-delegable <code>Year</code>/<code>Month</code>/<code>Day</code> pattern that broke <code>NewsletterPack</code>, except run <strong>104 times</strong>, once per upcoming Thursday for the next two years, every single time <code>ViewItem</code> loads. Below is the <strong>entire <code>ViewItem.OnVisible</code> property</strong>, old and new in full — not the block in isolation — so there's no hunting for where it sits among the resets and the deep-link handling around it.</p>
   <p>Old — full current <code>ViewItem.OnVisible</code>:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
 Set(varSaving, false);
 Set(varShowLinkModal, false);
 Set(varSelectedLink, Blank());
@@ -151,7 +151,7 @@ If(
     Set(varLoadingLinks, false)
 );</pre></div>
   <p>New — full replacement <code>ViewItem.OnVisible</code>, everything identical except the <code>colThursdayOptions</code> section (now two <code>ClearCollect</code>s instead of one):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
 Set(varSaving, false);
 Set(varShowLinkModal, false);
 Set(varSelectedLink, Blank());
@@ -284,7 +284,7 @@ If(
 
   <h3>2c. StartScreen.OnVisible — kick off the cache build, don't navigate yet</h3>
   <p>This is a brand new screen, so this is the entire property from scratch, not a replacement of anything:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(
     varStartDestination,
     If(!IsBlank(Param("ID")), "ViewItem", "Main")
 );
