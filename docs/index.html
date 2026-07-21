@@ -500,8 +500,8 @@ Set(
     <div>
       <div class="status-pill pill-done">New build, not yet started</div>
       <div class="screen-number">Multiple</div>
-      <div class="screen-name">Pre-Release Scrub — Stale Field Bug, Delegation Fixes, Dedup</div>
-      <div class="screen-desc">Full pass across all 8 screens from the issue #32 export. Top priority: ViewItem.OnVisible missing Reset(dpkPublishDate1)/Reset(cmb_Owner1) -- a regression of a previously-fixed bug, causing stale Owner/Release Date state (and the red validation hint) to persist after visiting a blank new entry. Also: the same non-delegable Year/Month/Day bug found in NewsletterPack, now also fixed in Overview's 4-week grid; the NewsletterPack field-name fix and Formulas dedup from the last guide, confirmed still not applied.</div>
+      <div class="screen-name">Pre-Release Scrub — Save/Delete/Duplicate Integrity Pass</div>
+      <div class="screen-desc">Targeted scrub of every Patch/Remove/SubmitForm path for silent failures and double-submit risk. Top priority: Main's Publish and Publish All buttons showed a "success" toast even when the underlying Patch failed. Also: ViewItem's Duplicate button had a double-click window that could create two copies, the delete-link confirm button checked the wrong busy flag, and the Add/Edit Link form had no OnFailure handler at all -- link save failures were completely silent.</div>
     </div>
     <div class="screen-cta green">Open guide &rarr;</div>
   </a>
