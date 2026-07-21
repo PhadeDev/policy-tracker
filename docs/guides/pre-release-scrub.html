@@ -50,6 +50,7 @@
   <p><strong>Why this causes exactly what you saw:</strong> <code>ViewItem.OnVisible</code> explicitly <code>Reset()</code>s 14 input controls so their <code>Default</code> re-evaluates against whichever item you just opened — <code>Reset()</code> is the only thing that forces a control's <code>Default</code> to re-apply; without it, a control's displayed value just sits at whatever it last was. <code>cmb_Owner1</code> and <code>dpkPublishDate1</code> were both left out. So: open a blank new entry (Owner/Date picker sit however they render for a new item) &rarr; try to save without filling everything &rarr; close without saving &rarr; open a real item with real data &rarr; <code>cmb_Owner1</code> and <code>dpkPublishDate1</code> don't refresh, they carry over stale state from the blank entry. The "Fill in Title, Document Type and Planned Publish Date to add document links" red hint text near the link list is computed <em>live</em> from these exact controls' current values (not from the <code>varErr*</code> flags), so a stale/blank picker makes that warning show even though the record you're looking at is completely valid. Clicking Save re-reads the actual field values at that moment and clears it — which is exactly the "hit Save and it clears" behaviour you found as the only workaround.</p>
   <div class="note"><strong>Where to click:</strong> in the Tree view (left panel), open the <strong>Screens</strong> tab and click on <strong>ViewItem</strong> to open it. Click on empty screen background (not any child control) so the Properties dropdown at the top of the canvas shows <strong>ViewItem</strong> as the selected object. In the formula bar's left dropdown (next to the <code>fx</code> icon), select <strong>OnVisible</strong>. Click into the formula bar itself, select all existing text (Ctrl+A) and delete it, then paste the block below.</div>
   <p>Full replacement for <code>ViewItem.OnVisible</code> — only two new lines added (<code>Reset(dpkPublishDate1)</code>, <code>Reset(cmb_Owner1)</code>), right after <code>Reset(drpDocType1)</code>, everything else is what you already have:</p>
+  <div class="warn"><strong>Correction:</strong> the version below also fixes a separate error you'd hit pasting this — <code>colThursdayItemCounts</code>'s grouping previously kept the quoted column name <code>'Planned Publish Date'</code> straight out of <code>GroupBy</code>, which Studio flagged as "Name isn't valid" when referenced later in the <code>LookUp</code>. Fixed by projecting it to a plain column called <code>GroupDate</code> first — same values, no quoted/spaced name for Studio to trip over.</div>
   <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
 Set(varSaving, false);
 Set(varShowLinkModal, false);
@@ -120,12 +121,15 @@ ClearCollect(
     colThursdayItemCounts,
     AddColumns(
         GroupBy(
-            Filter(
-                'Policy Proof Tracker',
-                'Planned Publish Date' >= Today() &&
-                'Planned Publish Date' <= DateAdd(Today(), 104 * 7, "Days")
+            AddColumns(
+                Filter(
+                    'Policy Proof Tracker',
+                    'Planned Publish Date' >= Today() &&
+                    'Planned Publish Date' <= DateAdd(Today(), 104 * 7, "Days")
+                ),
+                GroupDate, 'Planned Publish Date'
             ),
-            'Planned Publish Date',
+            GroupDate,
             GroupedItems
         ),
         DayItemCount,
@@ -140,7 +144,7 @@ ClearCollect(
             {_thu: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")},
             {
                 ThursdayDate: _thu,
-                ItemCount: Coalesce(LookUp(colThursdayItemCounts, 'Planned Publish Date' = _thu, DayItemCount), 0)
+                ItemCount: Coalesce(LookUp(colThursdayItemCounts, GroupDate = _thu, DayItemCount), 0)
             }
         )
     )
