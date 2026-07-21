@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Release Scrub — Stale Field Bug, Delegation Fixes, Dedup</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
+    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
+    a { color: #8dc3ff; }
+    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
+    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    p, li { color: #b9c2cf; }
+    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note { background: #11291e; border-left: 4px solid #52b788; }
+    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .code-block { position: relative; margin: 10px 0 22px; }
+    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
+    button.copy.ok { background: #40916c; }
+    button.copy.err { background: #b3542e; }
+    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
+    .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+    .toc a { display: block; padding: 4px 0; font-size: .9rem; }
+    .toc .toc-num { color: #8a94a6; display: inline-block; width: 22px; }
+    .prio { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+    .prio-1 { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
+    .prio-2 { background: #11291e; color: #8fd6ab; border: 1px solid #2f6b4a; }
+    .prio-3 { background: #141a26; color: #9aa7bb; border: 1px solid #2b3546; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
+  <h1>Pre-Release Scrub — Stale Field Bug, Delegation Fixes, Dedup</h1>
+  <p>Full pass across all 8 files from the "NEW YAMLS" export (issue #32): <code>Main</code>, <code>ViewItem</code>, <code>NewsletterPack</code>, <code>Historic</code>, <code>Overview</code>, <code>StartScreen</code>, <code>Formulas</code>, <code>OnStart</code>. Four items found, in priority order — the first is the "serious issue" reported directly (stale red validation state), the next two are the same non-delegable-filter bug class fixed twice already elsewhere in this app, still open in one more place, and the last is a pure tidy-up.</p>
+
+  <div class="toc">
+    <strong>Jump to:</strong>
+    <a href="#s1"><span class="toc-num">1.</span> ViewItem — stale field state after visiting a blank entry <span class="prio prio-1">The reported bug</span></a>
+    <a href="#s2"><span class="toc-num">2.</span> Overview — same delegation bug as NewsletterPack, still open here <span class="prio prio-1">Real bug</span></a>
+    <a href="#s3"><span class="toc-num">3.</span> NewsletterPack — ReadyForRelease field-name fix, still not applied <span class="prio prio-2">Confirmed open</span></a>
+    <a href="#s4"><span class="toc-num">4.</span> Formulas — GetFileExt dedup, still not applied <span class="prio prio-3">Tidy-up</span></a>
+  </div>
+
+  <h2 id="s1">1. ViewItem — stale Owner/Release Date after visiting a blank entry <span class="prio prio-1">The reported bug</span></h2>
+  <p>This is a real regression, not a new bug — it's the exact same fault class as a bug fixed once already (<code>cmb_Owner1</code> missing from the <code>Reset()</code> chain, commit <code>2a75945</code>, "Find real cause of Owner bug"), except it's now missing again <em>and</em> a second control (<code>dpkPublishDate1</code>, the Planned Publish Date picker) has the identical gap and may never have been in the list at all.</p>
+  <p><strong>Why this causes exactly what you saw:</strong> <code>ViewItem.OnVisible</code> explicitly <code>Reset()</code>s 14 input controls so their <code>Default</code> re-evaluates against whichever item you just opened — <code>Reset()</code> is the only thing that forces a control's <code>Default</code> to re-apply; without it, a control's displayed value just sits at whatever it last was. <code>cmb_Owner1</code> and <code>dpkPublishDate1</code> were both left out. So: open a blank new entry (Owner/Date picker sit however they render for a new item) &rarr; try to save without filling everything &rarr; close without saving &rarr; open a real item with real data &rarr; <code>cmb_Owner1</code> and <code>dpkPublishDate1</code> don't refresh, they carry over stale state from the blank entry. The "Fill in Title, Document Type and Planned Publish Date to add document links" red hint text near the link list is computed <em>live</em> from these exact controls' current values (not from the <code>varErr*</code> flags), so a stale/blank picker makes that warning show even though the record you're looking at is completely valid. Clicking Save re-reads the actual field values at that moment and clears it — which is exactly the "hit Save and it clears" behaviour you found as the only workaround.</p>
+  <div class="note"><strong>Where to click:</strong> in the Tree view (left panel), open the <strong>Screens</strong> tab and click on <strong>ViewItem</strong> to open it. Click on empty screen background (not any child control) so the Properties dropdown at the top of the canvas shows <strong>ViewItem</strong> as the selected object. In the formula bar's left dropdown (next to the <code>fx</code> icon), select <strong>OnVisible</strong>. Click into the formula bar itself, select all existing text (Ctrl+A) and delete it, then paste the block below.</div>
+  <p>Full replacement for <code>ViewItem.OnVisible</code> — only two new lines added (<code>Reset(dpkPublishDate1)</code>, <code>Reset(cmb_Owner1)</code>), right after <code>Reset(drpDocType1)</code>, everything else is what you already have:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
+Set(varSaving, false);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank());
+Set(varErrTitle, false);
+Set(varErrOwner, false);
+Set(varErrDocType, false);
+Set(varErrPublishDate, false);
+Set(
+    varOwnerDefault,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.Owner.Email),
+        Table({DisplayName: User().FullName, Mail: User().Email}),
+        Table({DisplayName: varSelectedRelease.Owner.DisplayName, Mail: varSelectedRelease.Owner.Email})
+    )
+);
+Set(
+    varPlannedPublishDate,
+    If(
+        IsBlank(varSelectedRelease) || IsBlank(varSelectedRelease.'Planned Publish Date'),
+        DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"),
+        varSelectedRelease.'Planned Publish Date'
+    )
+);
+If(
+    !varDeepLinkHandled && !IsBlank(Param("ID")),
+    Set(varDeepLinkHandled, true);
+    Set(varItemID, Param("ID"));
+    Set(varLoading, true);
+    Refresh('Policy Proof Tracker');
+    Set(varDeepLinkItem, LookUp('Policy Proof Tracker', ID = Value(varItemID)));
+    If(
+        !IsBlank(varDeepLinkItem),
+        Set(varSelectedRelease, varDeepLinkItem);
+        Set(varSelectPolicy, "Filled");
+        Set(varParentSaved, true);
+        Set(varSelectedItem, varDeepLinkItem);
+        Set(varSourceScreen, "Main");
+        Set(varSelectedPerson, varDeepLinkItem.Owner);
+        Refresh(PolicyLinks);
+        BuildLinksForSource(varDeepLinkItem.ID);
+        Set(varOwnerDefault, Table({DisplayName: varDeepLinkItem.Owner.DisplayName, Mail: varDeepLinkItem.Owner.Email}));
+        Set(varPlannedPublishDate, varDeepLinkItem.'Planned Publish Date'),
+        Notify("This item could not be found. It may have been deleted or the link may be incorrect.", NotificationType.Error);
+        Set(varDeepLinkNotFound, true)
+    );
+    Set(varLoading, false)
+);
+Reset(txtTitle1);
+Reset(drpDocType1);
+Reset(dpkPublishDate1);
+Reset(cmb_Owner1);
+Reset(ckbHighPriority1);
+Reset(txtReasonHighPri1);
+Reset(ckbExtConsult1);
+Reset(txtExtConsultDetails1);
+Reset(ckbTopItem1);
+Reset(txtNewsletterTitle1);
+Reset(txtAudience1);
+Reset(txtSummary1);
+Reset(txtRemarks1);
+Reset(ckbPillarLead1);
+Reset(radApproval1);
+Reset(ckbPublished1);
+Reset(dpkPublishedDate1);
+Set(varShowThursdayPicker, false);
+ClearCollect(
+    colThursdayItemCounts,
+    AddColumns(
+        GroupBy(
+            Filter(
+                'Policy Proof Tracker',
+                'Planned Publish Date' >= Today() &&
+                'Planned Publish Date' <= DateAdd(Today(), 104 * 7, "Days")
+            ),
+            'Planned Publish Date',
+            GroupedItems
+        ),
+        DayItemCount,
+        CountRows(GroupedItems)
+    )
+);
+ClearCollect(
+    colThursdayOptions,
+    ForAll(
+        Sequence(104),
+        With(
+            {_thu: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")},
+            {
+                ThursdayDate: _thu,
+                ItemCount: Coalesce(LookUp(colThursdayItemCounts, 'Planned Publish Date' = _thu, DayItemCount), 0)
+            }
+        )
+    )
+);
+If(
+    !IsBlank(varSelectedRelease.ID),
+    If(
+        !IsBlank(LookUp(colActiveItems, ID = varSelectedRelease.ID)),
+        ClearCollect(colLinks, Filter(colActiveLinks, PolicyTrackerSource.Id = varSelectedRelease.ID));
+        Set(varLinksSourceID, varSelectedRelease.ID),
+        If(
+            varLinksSourceID <> varSelectedRelease.ID,
+            BuildLinksForSource(varSelectedRelease.ID)
+        )
+    );
+    Set(varLoadingLinks, false),
+    Clear(colLinks);
+    Set(varLoadingLinks, false)
+);</pre></div>
+  <div class="test">Test the exact repro: open a brand-new blank entry, click Save without filling anything (confirm the red state appears, as expected), click Close without saving, then open a completely different, fully-filled item. Confirm no red hint text, no leftover error state, and that the Owner and Planned Publish Date fields show that item's real values immediately, not the blank entry's.</div>
+
+  <h2 id="s2">2. Overview — same delegation bug as NewsletterPack, still open here <span class="prio prio-1">Real bug</span></h2>
+  <p><code>galOverviewColumns1.Items</code> (the 4-week column grid) filters each week's items using the exact same non-delegable <code>Year</code>/<code>Month</code>/<code>Day</code> equality pattern that was fixed in <code>NewsletterPack</code> and in <code>ViewItem</code>'s <code>colThursdayOptions</code> — this is the third place it's turned up, and it's still live here. Same failure mode: correct while the table's small, silently wrong once it grows past the delegation row limit.</p>
+  <div class="note"><strong>Where to click:</strong> open the <strong>Overview</strong> screen from the Tree view. Expand its tree until you find <strong>galOverviewColumns1</strong> (the horizontal gallery holding the 4 week columns) and click it directly — not one of its child controls. In the Properties dropdown, select <strong>Items</strong>. Select all in the formula bar, delete, paste the block below.</div>
+  <p>Full replacement for <code>galOverviewColumns1.Items</code>:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=AddColumns(
+    ForAll(
+        Sequence(4),
+        {
+            PublishDate: DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7) + (Value - 1) * 7, "Days")
+        }
+    ),
+    ItemsForDate,
+    With(
+        {_targetDate: PublishDate},
+        Filter(
+            'Policy Proof Tracker',
+            'Planned Publish Date' >= _targetDate &&
+            'Planned Publish Date' < DateAdd(_targetDate, 1, "Days")
+        )
+    )
+)</pre></div>
+  <p>Same meaning ("items landing on this exact date"), fully delegable, same shape as everywhere else this pattern's already been fixed. Nothing else in the property changes — the 4 upcoming Thursdays are generated the same way as before, only the inner <code>Filter</code> condition changes.</p>
+  <div class="test">Test: open Overview, confirm all 4 week columns still show the right items and the right "No releases planned" empty state where applicable.</div>
+
+  <h2 id="s3">3. NewsletterPack — ReadyForRelease field-name fix, confirmed still not applied <span class="prio prio-2">Confirmed open</span></h2>
+  <p>Checked the fresh export directly — the delegation/date-range fix from earlier landed, but the field-name fix (<code>ReadyForRelease</code> &rarr; <code>'Approved by Pillar Lead (Ready to Release)'</code>) did not. Repeating it here since this is meant to be the complete pre-release list — full replacements for both properties, unchanged from before:</p>
+  <div class="note"><strong>Where to click (1st block):</strong> open the <strong>NewsletterPack</strong> screen, click on the empty screen background so <strong>NewsletterPack</strong> shows as the selected object, select <strong>OnVisible</strong> from the Properties dropdown, select all and replace.</div>
+  <p><code>NewsletterPack.OnVisible</code>:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+Refresh('Policy Proof Tracker');
+ClearCollect(
+    colNewsletterPack,
+    Sort(
+        AddColumns(
+            Filter(
+                'Policy Proof Tracker',
+                'Planned Publish Date' >= varNewsletterTargetDate &&
+                'Planned Publish Date' < DateAdd(varNewsletterTargetDate, 1, "Days") &&
+                (
+                    'Approved by Pillar Lead (Ready to Release)' = true ||
+                    'Approved For Release By'.Value = "XO" ||
+                    'Approved For Release By'.Value = "ACOS" ||
+                    'Approved For Release By'.Value = "DCOMD" ||
+                    'Approved For Release By'.Value = "D Commander"
+                ) &&
+                Published = false &&
+                'External consultation required' = false
+            ),
+            SortKey,
+            If(
+                'Top Item',
+                -1000,
+                Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
+            ),
+            IsFinalApproved,
+            Or(
+                'Approved For Release By'.Value = "XO",
+                'Approved For Release By'.Value = "ACOS",
+                'Approved For Release By'.Value = "DCOMD",
+                'Approved For Release By'.Value = "D Commander"
+            ),
+            PackTitle,
+            Coalesce('Title for Newsletter', Title),
+            PackAudience,
+            Coalesce(Audience, ""),
+            PackSummary,
+            Coalesce('Item summary', "")
+        ),
+        SortKey,
+        SortOrder.Ascending
+    )
+)</pre></div>
+  <div class="note"><strong>Where to click (2nd block):</strong> still on <strong>NewsletterPack</strong>, find and click the <strong>btnRefresh_1</strong> button (top-right "Refresh" button on this screen), select <strong>OnSelect</strong> from the Properties dropdown, select all and replace.</div>
+  <p><code>btnRefresh_1.OnSelect</code> (same screen, identical body):</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>=Set(varNewsletterTargetDate, DateAdd(Today(), Mod(5 - Weekday(Today()) + 7, 7), "Days"));
+Refresh('Policy Proof Tracker');
+ClearCollect(
+    colNewsletterPack,
+    Sort(
+        AddColumns(
+            Filter(
+                'Policy Proof Tracker',
+                'Planned Publish Date' >= varNewsletterTargetDate &&
+                'Planned Publish Date' < DateAdd(varNewsletterTargetDate, 1, "Days") &&
+                (
+                    'Approved by Pillar Lead (Ready to Release)' = true ||
+                    'Approved For Release By'.Value = "XO" ||
+                    'Approved For Release By'.Value = "ACOS" ||
+                    'Approved For Release By'.Value = "DCOMD" ||
+                    'Approved For Release By'.Value = "D Commander"
+                ) &&
+                Published = false &&
+                'External consultation required' = false
+            ),
+            SortKey,
+            If(
+                'Top Item',
+                -1000,
+                Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
+            ),
+            IsFinalApproved,
+            Or(
+                'Approved For Release By'.Value = "XO",
+                'Approved For Release By'.Value = "ACOS",
+                'Approved For Release By'.Value = "DCOMD",
+                'Approved For Release By'.Value = "D Commander"
+            ),
+            PackTitle,
+            Coalesce('Title for Newsletter', Title),
+            PackAudience,
+            Coalesce(Audience, ""),
+            PackSummary,
+            Coalesce('Item summary', "")
+        ),
+        SortKey,
+        SortOrder.Ascending
+    )
+)</pre></div>
+  <div class="test">Test: an item approved only by Pillar Lead (not yet by XO/ACOS/DCOMD/D Commander), due this Thursday, should now show up in the Newsletter Pack.</div>
+
+  <h2 id="s4">4. Formulas — GetFileExt dedup, confirmed still not applied <span class="prio prio-3">Tidy-up, zero behaviour change</span></h2>
+  <p>Also still duplicated in the fresh export. Repeating for completeness.</p>
+  <div class="note"><strong>Where to click:</strong> this one isn't on a screen — click the <strong>App</strong> entry at the very top of the Tree view (above all screens), then select <strong>Formulas</strong> from the Properties dropdown. This is one long text box holding every named formula in the app (<code>BuildLinksForSource</code>, <code>RefreshActiveCache</code>, etc.) — don't select-all here, since that would delete formulas this guide isn't touching. Instead, click into the box and paste the new <code>GetFileExt</code> formula below anywhere between two existing formulas (e.g. right after the closing <code>};</code> of <code>BuildLinksForSource</code>).</div>
+  <p>Add this new formula:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>GetFileExt(LinkUrl: Text): Text = With(
+    {FileParamStart: Find("file=", LinkUrl, 1)},
+    With(
+        {
+            FileNamePart: If(
+                FileParamStart > 0,
+                With(
+                    {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                ),
+                If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+            )
+        },
+        Switch(
+            true,
+            Right(FileNamePart, 5) = ".docx", "docx",
+            Right(FileNamePart, 4) = ".doc", "doc",
+            Right(FileNamePart, 5) = ".xlsx", "xlsx",
+            Right(FileNamePart, 4) = ".xls", "xls",
+            Right(FileNamePart, 5) = ".pptx", "pptx",
+            Right(FileNamePart, 4) = ".ppt", "ppt",
+            Right(FileNamePart, 4) = ".pdf", "pdf",
+            ""
+        )
+    )
+)</pre></div>
+  <p>Then, still in that same <strong>App &rarr; Formulas</strong> box, find the existing <code>BuildLinksForSource</code> and <code>RefreshActiveCache</code> formulas (each starts with its name and ends with a closing <code>};</code>) and replace each one individually with its shortened version below — everything outside those two blocks stays exactly as it is:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>BuildLinksForSource(SourceID: Number): Boolean = {
+    ClearCollect(
+        colLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id = SourceID),
+            FileExt,
+            GetFileExt(LinkUrl)
+        )
+    );
+    Set(varLinksSourceID, SourceID);
+    true
+};</pre></div>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>RefreshActiveCache(): Boolean = {
+    ClearCollect(
+        colActiveItems,
+        Filter(
+            'Policy Proof Tracker',
+            'Planned Publish Date' >= Today() &&
+            'Planned Publish Date' <= DateAdd(Today(), 28, "Days")
+        )
+    );
+    ClearCollect(
+        colActiveLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id in colActiveItems.ID),
+            FileExt,
+            GetFileExt(LinkUrl)
+        )
+    );
+    Set(varActiveCacheReady, true);
+    true
+};</pre></div>
+  <div class="test">Test: open any item's link list, confirm file icons/extensions still show correctly — pure refactor, behaviour should be identical.</div>
+
+  <div class="note"><strong>Clean on everything else checked:</strong> no <code>Reset(Self)</code> validation antipatterns, no ambiguous <code>LookUp</code> ID matches, no TODO/debug/test artifacts left in, no <code>Switch</code>/<code>If</code> nested inside a <code>Filter</code> predicate. <code>Historic</code>'s own <code>Year</code>/<code>Month</code>/<code>Day</code> usage (building <code>MonthStart</code> for grouping) is safe — it runs on already-fetched rows after a delegable <code>Filter</code>, not as a filter condition itself, so it's a different, harmless shape from the three bugs above. The 5 pre-existing <code>FillPortions</code> gaps in <code>Main</code>'s dashboard tab containers are unchanged from earlier scrubs and already known/accepted, not re-flagged here.</div>
+
+</main>
+<script>
+function copyBlock(btn) {
+  var pre = btn.nextElementSibling;
+  var text = pre.innerText || pre.textContent;
+  function showResult(ok) {
+    btn.classList.remove('ok', 'err');
+    if (ok) { btn.classList.add('ok'); btn.textContent = 'Copied'; }
+    else { btn.classList.add('err'); btn.textContent = 'Select + Ctrl+C'; }
+    setTimeout(function () { btn.classList.remove('ok', 'err'); btn.textContent = 'Copy'; }, 1600);
+  }
+  var range = document.createRange();
+  range.selectNodeContents(pre);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  var legacyCopied = false;
+  try { legacyCopied = document.execCommand('copy'); } catch (e) { legacyCopied = false; }
+  if (legacyCopied) { showResult(true); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { showResult(true); }, function () { showResult(false); });
+  } else { showResult(false); }
+}
+</script>
+</body>
+</html>
