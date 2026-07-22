@@ -500,8 +500,8 @@ Set(
     <div>
       <div class="status-pill pill-done">New build, not yet started</div>
       <div class="screen-number">Multiple</div>
-      <div class="screen-name">Pre-Release Scrub — Save/Delete/Duplicate Integrity Pass</div>
-      <div class="screen-desc">Targeted scrub of every Patch/Remove/SubmitForm path for silent failures and double-submit risk. Top priority: Main's Publish and Publish All buttons showed a "success" toast even when the underlying Patch failed. Also: ViewItem's Duplicate button had a double-click window that could create two copies, the delete-link confirm button checked the wrong busy flag, and the Add/Edit Link form had no OnFailure handler at all -- link save failures were completely silent.</div>
+      <div class="screen-name">Document Link Modal — Manual Rebuild Guide</div>
+      <div class="screen-desc">Step-by-step, click-by-click fixes for the Add/Edit Document Link modal -- no YAML paste of any kind. Part 1 (do first): the display name field was getting silently overwritten by a URL-derived filename, and stale text was left behind after Cancel then Add. Part 2 (optional): restyles the modal to match the rest of the screen's dark-overlay/rounded-card look, entirely via existing-control property edits plus two small new Insert-panel controls.</div>
     </div>
     <div class="screen-cta green">Open guide &rarr;</div>
   </a>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pre-Release Scrub — Save/Delete/Duplicate Integrity Pass</title>
+  <title>Document Link Modal — Manual Rebuild Guide</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
@@ -11,11 +11,13 @@
     a { color: #8dc3ff; }
     h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
     h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
+    h3 { margin: 26px 0 6px; color: #e7ebf0; font-size: 1.05rem; }
     p, li { color: #b9c2cf; }
     code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
-    .note, .warn { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+    .note, .warn, .danger { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
     .note { background: #11291e; border-left: 4px solid #52b788; }
     .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
+    .danger { background: #2b1418; border-left: 4px solid #e15353; }
     .code-block { position: relative; margin: 10px 0 22px; }
     pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
     button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
@@ -29,175 +31,169 @@
     .prio-1 { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
     .prio-2 { background: #11291e; color: #8fd6ab; border: 1px solid #2f6b4a; }
     .prio-3 { background: #141a26; color: #9aa7bb; border: 1px solid #2b3546; }
+    table.steps { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .88rem; }
+    table.steps th, table.steps td { border: 1px solid #28354a; padding: 8px 10px; text-align: left; vertical-align: top; }
+    table.steps th { background: #141a26; color: #cdd6e4; }
+    table.steps td { background: #0d111a; color: #b9c2cf; }
+    table.steps code { display: block; margin: 2px 0; }
+    .tag { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
+    .tag-modern { background: #11291e; color: #8fd6ab; border: 1px solid #2f6b4a; }
+    .tag-classic { background: #1e2230; color: #a9b6d6; border: 1px solid #3a4260; }
+    .tag-new { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
+    .tag-existing { background: #141a26; color: #9aa7bb; border: 1px solid #2b3546; }
   </style>
 </head>
 <body>
 <main>
   <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
-  <h1>Pre-Release Scrub — Save/Delete/Duplicate Integrity Pass</h1>
-  <p>Targeted scrub of every Patch / Remove / SubmitForm path in the app, looking specifically for ways a save, delete, or duplicate could fail silently or fire twice. Four issues found, all fixed in the local files already — this guide is just what to paste into Studio. In priority order:</p>
+  <h1>Document Link Modal — Manual Rebuild Guide</h1>
+  <p>This replaces the previous version of this guide entirely. The previous approach tried to paste the whole redesigned modal in as one block of YAML — Studio rejected it (<code>PA1001 / YamlInvalidSyntax</code>) because a single-control YAML fragment pasted from outside Studio isn't something its clipboard-paste feature reliably accepts; it expects either a full <code>Screens:</code> document or a control it copied itself. That's on the guide, not on anything you did.</p>
+  <p><strong>Nothing here needs a paste of any kind.</strong> Every step below is either: select a control already in your app, change one property in the formula bar, or insert one new control from the Insert panel and set a couple of properties on it by hand. Nothing is deleted that doesn't already need deleting (nothing does, as it turns out), and nothing needs renaming except the two brand-new controls in Part 2.</p>
+
+  <div class="danger"><strong>You already have <code>ctnLinkModal_2</code> back (the version from before tonight's edits).</strong> That means the two real bugs from earlier — the display name field getting silently overwritten, and stale text showing up after Cancel — are <strong>still present</strong> in what you have right now. Part 1 below fixes those two things. Do Part 1 tonight regardless of anything else. Part 2 (visual restyle to match the rest of the screen) is lower priority — nice to have before the demo, not required for it to work correctly.</p>
 
   <div class="toc">
     <strong>Jump to:</strong>
-    <a href="#s1"><span class="toc-num">1.</span> Main — Publish buttons show "success" even when the write fails <span class="prio prio-1">Highest risk, on the demo screen</span></a>
-    <a href="#s2"><span class="toc-num">2.</span> ViewItem — Duplicate button has a double-click window that can create two copies <span class="prio prio-2">Real bug</span></a>
-    <a href="#s3"><span class="toc-num">3.</span> ViewItem — Delete-link button never actually disables during delete <span class="prio prio-3">Minor</span></a>
-    <a href="#s4"><span class="toc-num">4.</span> ViewItem — Add/Edit Link form has no failure handling at all <span class="prio prio-2">Real bug</span></a>
-    <a href="#s5"><span class="toc-num">5.</span> ViewItem — Document Link modal restyled to match the rest of the new design <span class="prio prio-3">Cosmetic, whole control</span></a>
+    <a href="#p1"><span class="toc-num">1.</span> Fix the two real bugs <span class="prio prio-1">Do this tonight</span></a>
+    <a href="#p2"><span class="toc-num">2.</span> Visual restyle to match the rest of the screen <span class="prio prio-3">Optional, if there's time</span></a>
   </div>
 
-  <h2 id="s1">1. Main — Publish buttons show "success" even when the write fails <span class="prio prio-1">Highest risk, on the demo screen</span></h2>
-  <p><strong>What was wrong:</strong> both the single "⚡ Publish" button and "Publish All" ran their <code>Patch(...)</code> calls with no error checking whatsoever. If a Patch failed for any reason (dropped connection, a permissions blip, SharePoint hiccup), the code carried straight on to <code>Refresh</code> and showed a green "Published successfully" toast anyway — telling you it worked when it didn't. For Publish All specifically, this is worse: it loops over every item in a week's group, and if 3 of 5 patch calls fail, you're told all 5 succeeded with no way to know which two didn't actually go through.</p>
-  <div class="warn"><strong>Update after testing (two rounds):</strong> the first version of the Publish All fix counted failures with <code>Set(varPublishFailCount, varPublishFailCount + 1)</code> run from inside the <code>ForAll</code> loop. Studio rejected that on paste with "This function cannot be invoked within ForAll" — that's a real, current Power Apps platform rule, not a mistake in the formula: <code>ForAll</code> iterations aren't guaranteed to run in strict order, so Microsoft blocks <code>Set()</code> on a global variable from inside the loop to avoid race conditions. Swapping to <code>Collect()</code> into a new collection <code>colPublishFailures</code> fixed that, but caused a second, different error: "Invalid argument type (Table). Expecting a Record value instead." That one's a type conflict inside <code>IfError</code> — <code>Patch(...)</code> returns a <strong>Record</strong>, but <code>Collect(...)</code> returns the whole <strong>Table</strong> it just collected into, and <code>IfError</code>'s two branches (the normal result and the error fallback) have to resolve to the same type. Fix: end both branches with <code>; true</code>, so both sides evaluate to a plain Boolean instead of their natural Record/Table return values — this is the same trick already used safely elsewhere (a branch ending in a chain of statements just returns whatever the last statement evaluates to). The block below has both fixes applied.</div>
-  <div class="note"><strong>Where to click (1st block):</strong> open the <strong>Main</strong> screen. In the Tree view, find <strong>BossPublishBtn</strong> (the small green "⚡ Publish" button on each item row — only visible to boss-button users) and click it directly. Select <strong>OnSelect</strong> from the Properties dropdown, select all (Ctrl+A), delete, paste the block below.</div>
-  <p>Full replacement for <code>BossPublishBtn.OnSelect</code>:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(
-    varQuickPublishDate,
-    Coalesce(ThisItem.'Planned Publish Date', Today())
-);
-IfError(
-    Patch(
-        'Policy Proof Tracker',
-        LookUp('Policy Proof Tracker', ID = ThisItem.ID),
-        {
-            Published: true,
-            'Published Date': varQuickPublishDate
-        }
-    ),
-    Notify("Publish failed. Please check your connection and try again.", NotificationType.Error),
-    Refresh('Policy Proof Tracker');
-    RefreshActiveCache();
-    Notify(
-        "Marked as published - " & Text(varQuickPublishDate, "d mmm yyyy"),
-        NotificationType.Success
-    )
-)</pre></div>
-  <div class="note"><strong>Where to click (2nd block):</strong> still on <strong>Main</strong>, find <strong>PublishAllBtn</strong> (the "Publish All (N)" button at the top of each week's group) and click it directly. Select <strong>OnSelect</strong>, select all, replace.</div>
-  <p>Full replacement for <code>PublishAllBtn.OnSelect</code> — now counts failures and tells you if any items didn't go through:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>// PublishAllBtn.OnSelect
-Set(varPublishGroupDate, ThisItem.PlannedDate);
-Set(varPublishGroupCount, CountRows(Filter(ThisItem.GroupedItems, 'External consultation required' = false)));
-Clear(colPublishFailures);
-ForAll(
-    Filter(ThisItem.GroupedItems, 'External consultation required' = false) As PubItem,
-    IfError(
-        Patch(
-            'Policy Proof Tracker',
-            LookUp('Policy Proof Tracker', ID = PubItem.ID),
-            {
-                Published: true,
-                'Published Date': varPublishGroupDate
-            }
-        ); true,
-        Collect(colPublishFailures, {ID: PubItem.ID}); true
-    )
-);
-Set(varPublishFailCount, CountRows(colPublishFailures));
-Refresh('Policy Proof Tracker');
-RefreshActiveCache();
-If(
-    varPublishFailCount = 0,
-    Notify(
-        "Published all " & varPublishGroupCount & " items for " & Text(varPublishGroupDate, "d mmm yyyy"),
-        NotificationType.Success
-    ),
-    Notify(
-        varPublishFailCount & " of " & varPublishGroupCount & " items failed to publish for " & Text(varPublishGroupDate, "d mmm yyyy") & ". Please retry.",
-        NotificationType.Error
-    )
-)</pre></div>
-  <div class="test">Test: publish a single item normally, confirm the green toast and that it moves out of the unpublished list. Can't easily fake a network failure to test the error path directly — the important thing is it no longer silently lies about success if one ever does fail.</div>
+  <h2 id="p1">Part 1 — Fix the two real bugs <span class="prio prio-1">~10 minutes, zero risk</span></h2>
+  <p>Every change below is a property edit on a control that already exists. No inserting, no deleting, no renaming.</p>
 
-  <h2 id="s2">2. ViewItem — Duplicate button has a double-click window that can create two copies <span class="prio prio-2">Real bug</span></h2>
-  <p><strong>What was wrong:</strong> the Duplicate confirm button set its own "busy" flag (<code>varDuplicating</code>) back to <code>false</code> immediately after the <code>Patch</code> call finished, but <em>before</em> checking whether it actually succeeded and before closing the modal. That leaves a short window where the button re-enables itself while the modal is still open. A fast double-click in that window fires a second <code>Patch</code> — creating two duplicate entries instead of one. Also tightened the error check to look at the whole table's errors (same pattern used everywhere else in the app for Save) rather than a check scoped to the specific new record, which is the safer of the two ways to detect a failed write.</p>
-  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, open any real item, click <strong>Duplicate</strong> (the copy icon top-right) to open the Duplicate modal, then in the Tree view find <strong>btnDuplicateConfirm1</strong> inside <strong>DuplicateModal1</strong> and click it directly. Select <strong>OnSelect</strong> from the Properties dropdown, select all, replace.</div>
-  <p>Full replacement for <code>btnDuplicateConfirm1.OnSelect</code>:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varDuplicating, true);
-Set(
-    varNewDuplicate,
-    Patch(
-        'Policy Proof Tracker',
-        Defaults('Policy Proof Tracker'),
-        {
-            Title: varSelectedRelease.Title,
-            'Document Type': varSelectedRelease.'Document Type',
-            'Item summary': varSelectedRelease.'Item summary',
-            Owner: varSelectedRelease.Owner,
-            Audience: varSelectedRelease.Audience,
-            'External consultation details': varSelectedRelease.'External consultation details',
-            'External consultation required': varSelectedRelease.'External consultation required',
-            Remarks: varSelectedRelease.Remarks,
-            'Title for Newsletter': varSelectedRelease.'Title for Newsletter',
-            'High Priority': varSelectedRelease.'High Priority',
-            'Reason for High Priority': varSelectedRelease.'Reason for High Priority',
-            'Top Item': varSelectedRelease.'Top Item',
-            'Planned Publish Date': varSelectedDuplicateDate,
-            Published: false,
-            'Published Date': Blank(),
-            'Approved by Pillar Lead (Ready to Release)': false,
-            'Approved For Release By': Blank(),
-            EmailSent: false
-        }
-    )
-);
-If(
-    IsEmpty(Errors('Policy Proof Tracker')),
-    Set(varDuplicating, false);
-    Set(varShowDuplicateModal1, false);
-    ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
-    Notify(
-        "Duplicated to " & LookUp(colThursdays, ThursdayDate = varSelectedDuplicateDate).ThursdayLabel & ". Find it on the main screen.",
-        NotificationType.Success
-    ),
-    Set(varDuplicating, false);
-    Notify(
-        "Error: " & First(Errors('Policy Proof Tracker')).Message,
-        NotificationType.Error
-    )
-)</pre></div>
-  <div class="test">Test: duplicate a real item to a future Thursday, confirm exactly one new entry appears on Main for that date, not two. Also try clicking Duplicate twice quickly to confirm the button now stays disabled the whole way through.</div>
+  <h3>1a. Display name field gets silently overwritten</h3>
+  <p><strong>What's wrong:</strong> the "Link Display Name" box falls back to a filename auto-guessed from the URL field whenever a context variable called <code>DisplayNamePrefill</code> changes — which happens live as you type the URL, even after you've already typed your own name in first.</p>
+  <table class="steps">
+    <tr><th>Where to click</th><th>What to do</th></tr>
+    <tr>
+      <td>Open <strong>ViewItem</strong> → open any item → click <strong>Add Link</strong> (or Edit on an existing link) to open the modal → in the Tree view, expand into <code>ctnLinkModal_2 → cardLinkModal_2 → frmLink_2 → LinkText_DataCard2_2</code> and click <strong>DataCardValue28_2</strong> (the actual text input, not the data card or its label).</td>
+      <td>In the Properties dropdown at the top of the formula bar, select <code>Default</code>. Select all in the formula bar (Ctrl+A), delete, and type exactly:
+        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Parent.Default</pre></div>
+      </td>
+    </tr>
+  </table>
 
-  <h2 id="s3">3. ViewItem — Delete-link confirm button never actually disables during delete <span class="prio prio-3">Minor</span></h2>
-  <p><strong>What was wrong:</strong> the "Delete" confirm button in the delete-link popup checked <code>varDeletingItem</code> to decide whether to disable itself — but that variable belongs to the whole-<em>item</em> delete flow, not link deletion, and is never set by this button. So the button was never actually disabled while a link delete was in progress, and a fast double-click could fire <code>Remove(PolicyLinks, ...)</code> twice. The second call fails harmlessly since the link's already gone, but it throws an unnecessary error toast. Fixed by introducing a real <code>varDeletingLink</code> flag used only by this flow.</p>
-  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, open any item with at least one document link, click the link's <strong>Delete</strong> icon to open the delete-link popup, then in the Tree view find <strong>btnModalAction1_1</strong> inside that popup and click it directly. You'll need to change two properties on this control:</div>
-  <p>1. Select <strong>DisplayMode</strong> from the Properties dropdown, select all, replace with:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(varDeletingLink, DisplayMode.Disabled, DisplayMode.Edit)</pre></div>
-  <p>2. Select <strong>OnSelect</strong>, select all, replace with:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varDeletingLink, true);
-IfError(
-    Remove(PolicyLinks, varSelectedLink),
-    Set(varDeletingLink, false);
-    UpdateContext({locDisplayAttDeletePopUp: false});
-    Notify("Delete failed. Please check your connection and try again.", NotificationType.Error),
-    Set(varLoadingLinks, true);
-    BuildLinksForSource(varSelectedRelease.ID);
-    Set(varLoadingLinks, false);
-    Set(varDeletingLink, false);
-    UpdateContext({locDisplayAttDeletePopUp: false});
-    Set(varSelectedLink, Blank());
-    Notify("Link deleted.", NotificationType.Success)
-)</pre></div>
-  <div class="test">Test: delete a document link, confirm the toast and that it disappears from the list. Not a big deal if you skip this one before the demo — cosmetic edge case only.</div>
+  <h3>1b. URL field OnChange (the thing that was pushing the bad value in) — remove it</h3>
+  <p>The <code>Default</code> fix above stops <code>DataCardValue28_2</code> from listening to <code>DisplayNamePrefill</code>, but the URL field is still setting that variable on every keystroke for no reason now. Clean it out so nothing's left half-wired.</p>
+  <table class="steps">
+    <tr><th>Where to click</th><th>What to do</th></tr>
+    <tr>
+      <td>Still inside the modal's Tree: <code>frmLink_2 → LinkUrl_DataCard2_2</code>, click <strong>DataCardValue29_2</strong> (the URL text input).</td>
+      <td>In the Properties dropdown, select <code>OnChange</code>. Select all in the formula bar (Ctrl+A) and press Delete, leaving it completely blank. Click away from the control to commit the blank formula.</td>
+    </tr>
+  </table>
 
-  <h2 id="s4">4. ViewItem — Add/Edit Link form has no failure handling at all <span class="prio prio-2">Real bug</span></h2>
-  <p><strong>What was wrong:</strong> the link form (<code>frmLink_2</code>) only has an <code>OnSuccess</code> property wired up — there's no <code>OnFailure</code>. If <code>SubmitForm</code> fails (bad connection, permissions issue), the user gets zero feedback: no error toast, the modal just stays open with no explanation. They'd have no way to know the link wasn't actually saved short of noticing it themselves.</p>
-  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, open any item, click <strong>Add Link</strong> (or Edit on an existing link) to open the link modal, then in the Tree view click on <strong>frmLink_2</strong> directly (the form itself, not one of its data cards). In the Properties dropdown, click the small <strong>+</strong> / "Add property" control if <code>OnFailure</code> isn't already listed, and add it. Select all in that property's formula bar and paste the line below.</div>
-  <p><code>frmLink_2.OnFailure</code> (new property):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Notify("Save failed. Please check your connection and try again.", NotificationType.Error)</pre></div>
-  <div class="test">Test: save a link normally, confirm nothing changed about the success path. Can't easily force a failure to test directly, but the important part is a real error message now exists where there was silence before.</div>
+  <h3>1c. Stale text left over after Cancel, then Add</h3>
+  <p><strong>What's wrong:</strong> when you open the modal fresh (via Edit or Add), Power Apps doesn't automatically clear the text boxes just because the underlying record changed — you have to explicitly tell the form to refresh with <code>ResetForm(frmLink_2)</code>. Only the Cancel button does this today. The three places that <em>open</em> the modal don't, so whatever was last typed/shown just sits there.</p>
+  <table class="steps">
+    <tr><th>Where to click</th><th>What to do</th></tr>
+    <tr>
+      <td>On the links list, click the <strong>Edit</strong> icon (pencil) on any existing link row to select <strong>EditLink_2</strong> in the tree.</td>
+      <td>Select <code>OnSelect</code> in the Properties dropdown. Find the line <code>Set(varShowLinkModal, true)</code> at the end and add a new line <em>directly above it</em> reading:
+        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ResetForm(frmLink_2);</pre></div>
+        So the formula ends with:
+        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedLink, LookUp(PolicyLinks, ID = ThisItem.ID));
+ResetForm(frmLink_2);
+Set(varShowLinkModal, true)</pre></div>
+      </td>
+    </tr>
+    <tr>
+      <td>Select <strong>btnNewLink_1</strong> (the "Add Document Link" pill button near the link list).</td>
+      <td>Same fix: in <code>OnSelect</code>, find <code>Set(varSelectedLink, Defaults(PolicyLinks));</code> followed by <code>Set(varShowLinkModal, true)</code>, and insert the <code>ResetForm</code> line between them:
+        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedLink, Defaults(PolicyLinks));
+ResetForm(frmLink_2);
+Set(varShowLinkModal, true)</pre></div>
+      </td>
+    </tr>
+    <tr>
+      <td>Select <strong>btnAddLinkEmpty1</strong> (the "Add Document Link" button shown when the link list is empty).</td>
+      <td>This one has <em>two</em> spots with the same <code>Set(varSelectedLink, Defaults(PolicyLinks)); Set(varShowLinkModal, true)</code> pair inside its <code>OnSelect</code> — one near the top of the formula, one further down inside the nested save-then-open-modal branch. Add the same <code>ResetForm(frmLink_2);</code> line between the two <code>Set(...)</code> calls in <strong>both</strong> spots.</td>
+    </tr>
+  </table>
+  <div class="test">Test all three: (1) type a display name, then paste a SharePoint URL — the name you typed should stay put. (2) Edit a link, note its text, hit Cancel, then click Add — the Add form should be completely blank, not showing the link you just cancelled out of.</div>
 
-  <div class="note"><strong>Everything else checked, no further issues found:</strong> the main Save/Save &amp; Close flows on ViewItem already check the whole table's <code>Errors()</code> and show a proper failure toast — those are fine as-is. The item-level Delete flow already wraps its <code>Remove()</code> in <code>IfError</code> correctly. Nothing else in <code>Main</code>, <code>Historic</code>, <code>Overview</code>, or <code>NewsletterPack</code> writes to the data source at all — they're read-only screens, so there's no equivalent risk there.</div>
+  <h2 id="p2">Part 2 — Visual restyle to match the rest of the screen <span class="prio prio-3">Optional</span></h2>
+  <p>This brings the look in line with the Duplicate/Delete popups elsewhere on this screen (dark dimmed background, rounded card, a proper title + close button) — but it's cosmetic. Skip this section entirely tonight if you're short on time; Part 1 is what actually matters for the demo working correctly.</p>
+  <p>To keep this low-risk, <strong>nothing gets deleted or converted</strong>. The modal stays a <code>ManualLayout</code> container (converting it to <code>AutoLayout</code> would mean deleting and rebuilding the whole thing from scratch, which is exactly the kind of risk we're avoiding tonight) — instead we restyle the existing pieces in place and add two small new controls for the title bar.</p>
 
+  <h3>2a. Restyle the dark background and the card</h3>
+  <table class="steps">
+    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
+    <tr><td><code>ctnLinkModal_2</code></td><td><code>Fill</code></td><td><code>RGBA(53, 61, 63, 0.84)</code></td></tr>
+    <tr><td><code>ctnLinkModal_2</code></td><td><code>Height</code></td><td><code>Parent.Height</code></td></tr>
+    <tr><td><code>ctnLinkModal_2</code></td><td><code>Y</code></td><td><code>0</code></td></tr>
+    <tr><td><code>cardLinkModal_2</code></td><td><code>Fill</code></td><td><code>RGBA(244, 246, 243, 1)</code></td></tr>
+    <tr><td><code>cardLinkModal_2</code></td><td><code>RadiusTopLeft</code>, <code>RadiusTopRight</code>, <code>RadiusBottomLeft</code>, <code>RadiusBottomRight</code></td><td><code>16</code> on all four (use "+ Add property" if not already listed)</td></tr>
+    <tr><td><code>cardLinkModal_2</code></td><td><code>DropShadow</code></td><td><code>DropShadow.Regular</code></td></tr>
+    <tr><td><code>cardLinkModal_2</code></td><td><code>Height</code></td><td><code>350</code> (was 303 — a bit taller to make room for the new title bar below)</td></tr>
+  </table>
+  <div class="note">Radius and DropShadow are ordinary properties on <code>GroupContainer@1.5.0</code> regardless of whether it's <code>ManualLayout</code> or <code>AutoLayout</code>, so these work without touching the container's Variant at all.</div>
 
-  <h2 id="s5">5. ViewItem — Document Link modal restyled to match the rest of the new design</h2>
-  <p><strong>What changed:</strong> the "Add/Edit Document Link" popup (<code>ctnLinkModal_2</code>) was the one part of ViewItem still on the old plain-white, sharp-corner, no-overlay look, while every other popup on this screen (Duplicate, Delete item, Delete link, Discard changes) already uses the dark dimmed-overlay + rounded centred card style. This brings it in line: dark overlay, rounded card, a proper title bar with an "Add Document Link" / "Edit Document Link" heading that switches automatically plus a &#10005; close button, ALL-CAPS field labels, and Cancel/Save buttons restyled to match the Duplicate modal's grey/dark-green pair. The two bugs fixed above (free-typed display name, and the stale-text-after-cancel fix) are both already baked into this version.</p>
-  <div class="warn"><strong>This one is different from the property pastes above — it's a whole control, not a single formula.</strong> It's about 450 lines of YAML replacing the entire <code>ctnLinkModal_2</code> container, not a value you paste into one property's formula bar. A plain copy-paste box (like the ones above) risks corrupting line endings on a paste this size, which is exactly the failure mode <code>pa-yaml-wrap</code> exists to avoid for full-screen exports. The button below uses that same safe method (forces real CRLF line endings) scoped to just this one control, so it can live right here in the guide instead of a separate file.</div>
-  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>. In the Tree view, expand down to find <strong>ctnLinkModal_2</strong> (it sits inside a container called <strong>Attachments_1</strong>). Click <strong>ctnLinkModal_2</strong> and delete it. Then click <strong>Attachments_1</strong> (the parent) to select it, click the button below to copy, and press <strong>Ctrl+V</strong> with <code>Attachments_1</code> selected — this inserts the new <code>ctnLinkModal_2</code> as its child again.</div>
-  <div style="margin:14px 0 22px;padding:16px;background:#0b1020;border:1px solid #28354a;border-radius:8px;">
-    <button id="copyLinkModalBtn" onclick="copyLinkModalYAML()" style="padding:10px 22px;font-size:1rem;background:#0b4a36;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy ctnLinkModal_2 YAML to Clipboard</button>
-    <div id="linkModalStatus" style="margin-top:10px;font-size:0.85rem;color:#8fa0c0;">Click to copy — CRLF-safe, ready for Studio paste</div>
-  </div>
-  <div class="test">Test: after pasting, click "Add Document Link" — confirm the dark overlay, rounded card, "Add Document Link" title, and that the display name field is empty (not carrying over a previous link's text). Edit an existing link and confirm the title reads "Edit Document Link" and both fields are pre-filled correctly. Click the &#10005; and confirm it closes cleanly same as Cancel.</div>
+  <h3>2b. Add the title bar — two new controls</h3>
+  <table class="steps">
+    <tr><th>Insert</th><th>Type</th><th>Rename to</th><th>Properties to set</th></tr>
+    <tr>
+      <td>With <strong>cardLinkModal_2</strong> selected, go to <strong>Insert → Text → Text label</strong> (in the <em>Text</em> group, not "Classic label" — use the <span class="tag tag-modern">Modern</span> Text control, same one already used elsewhere on this screen for pill-style labels)</td>
+      <td><span class="tag tag-modern">Modern</span><br><code>ModernText</code></td>
+      <td>Right-click in the Tree → Rename → <code>lblLinkModalTitle1</code></td>
+      <td>
+        <code>Text: =If(IsBlank(varSelectedLink.ID), "Add Document Link", "Edit Document Link")</code><br>
+        <code>Font: =Font.'Lato Black'</code><br>
+        <code>FontWeight: =FontWeight.Bold</code><br>
+        <code>Size: =16</code><br>
+        <code>Color: =RGBA(22, 33, 28, 1)</code><br>
+        <code>X: =0</code>  <code>Y: =0</code>
+      </td>
+    </tr>
+    <tr>
+      <td>With <strong>cardLinkModal_2</strong> selected again, go to <strong>Insert → Icons/Buttons</strong> and choose the <span class="tag tag-modern">Modern</span> <strong>Button</strong> (icon-only style — the same control already used for <code>EditLink_2</code>/<code>DeleteLink_2</code> on this screen)</td>
+      <td><span class="tag tag-modern">Modern</span><br><code>ModernButton</code></td>
+      <td>Rename to <code>btnLinkModalClose1</code></td>
+      <td>
+        <code>Icon: ="Dismiss"</code><br>
+        <code>Layout: =ButtonLayout.IconOnly</code><br>
+        <code>Appearance: =ButtonAppearance.Subtle</code><br>
+        <code>OnSelect:</code>
+        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ResetForm(frmLink_2);
+Set(varShowLinkModal, false);
+Set(varSelectedLink, Blank())</pre></div>
+        <code>X: =Parent.Width - 40</code>  <code>Y: =0</code>
+      </td>
+    </tr>
+  </table>
+
+  <h3>2c. Make room for the title bar — shift the form and buttons down</h3>
+  <table class="steps">
+    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
+    <tr><td><code>frmLink_2</code></td><td><code>Y</code> (add via "+ Add property" if not listed)</td><td><code>45</code></td></tr>
+    <tr><td><code>btnSaveLink_2</code></td><td><code>Y</code></td><td><code>285</code> (was 240 — shifted down by the same 45px)</td></tr>
+    <tr><td><code>btnCnlLink_2</code></td><td><code>Y</code></td><td><code>285</code></td></tr>
+  </table>
+  <div class="warn">These exact numbers are estimates based on the original layout — I can't preview this live. If the buttons or form look cramped or overlap the title bar, nudge the <code>Y</code> values and <code>cardLinkModal_2.Height</code> a little; nothing here is fragile, it's just spacing.</div>
+
+  <h3>2d. Restyle the field labels (ALL CAPS, grey, smaller)</h3>
+  <table class="steps">
+    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
+    <tr><td><code>DataCardKey28_2</code></td><td><code>Text</code></td><td><code>"LINK DISPLAY NAME"</code></td></tr>
+    <tr><td><code>DataCardKey28_2</code></td><td><code>Color</code></td><td><code>RGBA(91, 105, 97, 1)</code></td></tr>
+    <tr><td><code>DataCardKey28_2</code></td><td><code>FontWeight</code></td><td><code>FontWeight.Bold</code></td></tr>
+    <tr><td><code>DataCardKey28_2</code></td><td><code>Size</code></td><td><code>9</code></td></tr>
+    <tr><td><code>DataCardKey29_2</code></td><td><code>Text</code></td><td><code>"DIRECT URL TO DOCUMENT"</code></td></tr>
+    <tr><td><code>DataCardKey29_2</code></td><td><code>Color</code></td><td><code>RGBA(91, 105, 97, 1)</code></td></tr>
+    <tr><td><code>DataCardKey29_2</code></td><td><code>FontWeight</code></td><td><code>FontWeight.Bold</code></td></tr>
+    <tr><td><code>DataCardKey29_2</code></td><td><code>Size</code></td><td><code>9</code></td></tr>
+    <tr><td><code>DataCardValue28_2</code>, <code>DataCardValue29_2</code></td><td><code>RadiusTopLeft</code>/<code>RadiusTopRight</code>/<code>RadiusBottomLeft</code>/<code>RadiusBottomRight</code></td><td><code>8</code> on all four, both controls</td></tr>
+  </table>
+
+  <h3>2e. Restyle Save/Cancel to the app's green/grey palette</h3>
+  <p>These stay exactly as they are — <span class="tag tag-classic">Button@0.0.45</span> — no need to swap control types, just recolour them.</p>
+  <table class="steps">
+    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
+    <tr><td><code>btnSaveLink_2</code></td><td><code>BasePaletteColor</code></td><td><code>RGBA(11, 74, 54, 1)</code></td></tr>
+    <tr><td><code>btnCnlLink_2</code></td><td><code>BasePaletteColor</code></td><td><code>RGBA(200, 200, 200, 1)</code></td></tr>
+  </table>
+
+  <div class="test">Test: open the modal (Add and Edit both) — dark dimmed background, rounded card, title reading "Add Document Link" or "Edit Document Link" correctly, &#10005; closes it the same as Cancel. Nothing here changes any Save/Delete/Duplicate behaviour — that's all still whatever Part 1 above left it as.</div>
 
 </main>
 <script>
@@ -223,26 +219,5 @@ function copyBlock(btn) {
   } else { showResult(false); }
 }
 </script>
-
-<script>
-const linkModalYAML = "ctnLinkModal_2:\r\n  Control: GroupContainer@1.5.0\r\n  Variant: AutoLayout\r\n  Properties:\r\n    Fill: =RGBA(53, 61, 63, 0.84)\r\n    Height: =Parent.Height\r\n    LayoutAlignItems: =LayoutAlignItems.Center\r\n    LayoutDirection: =LayoutDirection.Vertical\r\n    LayoutJustifyContent: =LayoutJustifyContent.Center\r\n    Visible: =varShowLinkModal\r\n    Width: =Parent.Width\r\n  Children:\r\n    - cardLinkModal_2:\r\n        Control: GroupContainer@1.5.0\r\n        Variant: AutoLayout\r\n        Properties:\r\n          AlignInContainer: =AlignInContainer.SetByContainer\r\n          DropShadow: =DropShadow.Regular\r\n          Fill: =RGBA(244, 246, 243, 1)\r\n          FillPortions: =0\r\n          Height: =440\r\n          LayoutDirection: =LayoutDirection.Vertical\r\n          LayoutGap: =16\r\n          PaddingBottom: =16\r\n          PaddingLeft: =16\r\n          PaddingRight: =16\r\n          PaddingTop: =16\r\n          RadiusBottomLeft: =16\r\n          RadiusBottomRight: =16\r\n          RadiusTopLeft: =16\r\n          RadiusTopRight: =16\r\n          Width: =480\r\n        Children:\r\n          - conLinkModalHeader1:\r\n              Control: GroupContainer@1.5.0\r\n              Variant: AutoLayout\r\n              Properties:\r\n                FillPortions: =0\r\n                Height: =28\r\n                LayoutAlignItems: =LayoutAlignItems.Center\r\n                LayoutDirection: =LayoutDirection.Horizontal\r\n                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween\r\n                Width: =Parent.Width\r\n              Children:\r\n                - lblLinkModalTitle1:\r\n                    Control: ModernText@1.0.0\r\n                    Properties:\r\n                      Color: =RGBA(22, 33, 28, 1)\r\n                      Font: =Font.'Lato Black'\r\n                      FontWeight: =FontWeight.Bold\r\n                      Size: =16\r\n                      Text: =If(IsBlank(varSelectedLink.ID), \"Add Document Link\", \"Edit Document Link\")\r\n                - btnLinkModalClose1:\r\n                    Control: ModernButton@1.0.0\r\n                    Properties:\r\n                      Appearance: =ButtonAppearance.Subtle\r\n                      Icon: =\"Dismiss\"\r\n                      Layout: =ButtonLayout.IconOnly\r\n                      OnSelect: |-\r\n                        =ResetForm(frmLink_2);\r\n                        Set(varShowLinkModal, false);\r\n                        Set(varSelectedLink, Blank())\r\n          - frmLink_2:\r\n              Control: Form@2.4.4\r\n              Variant: Classic\r\n              Layout: Vertical\r\n              Properties:\r\n                DataSource: =PolicyLinks\r\n                FillPortions: =0\r\n                Height: =300\r\n                Item: =varSelectedLink\r\n                NumberOfColumns: =1\r\n                OnFailure: |-\r\n                  =Notify(\"Save failed. Please check your connection and try again.\", NotificationType.Error)\r\n                OnSuccess: |-\r\n                  =// Refresh PolicyLinks after successful save\r\n                  Refresh(PolicyLinks);\r\n\r\n                  // Reload colLinks so the gallery updates immediately\r\n                  Set(varLoadingLinks, true);\r\n                  BuildLinksForSource(varSelectedRelease.ID);\r\n                  Set(varLoadingLinks, false);\r\n\r\n                  // Close modal and reset variables\r\n                  Set(varSelectedItem, varSelectedRelease);\r\n                  Set(varShowLinkModal, false);\r\n                  Set(varSelectedLink, Blank());\r\n\r\n                  // Notify user\r\n                  Notify(\"Link saved successfully!\", NotificationType.Success);\r\n                Width: =Parent.Width\r\n              Children:\r\n                - LinkText_DataCard2_2:\r\n                    Control: TypedDataCard@1.0.7\r\n                    Variant: ClassicTextualEdit\r\n                    Properties:\r\n                      BorderColor: =RGBA(223, 229, 224, 1)\r\n                      DataField: =\"LinkText\"\r\n                      Default: =ThisItem.LinkText\r\n                      DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,LinkText)\r\n                      MaxLength: =DataSourceInfo([@PolicyLinks], DataSourceInfo.MaxLength, LinkText)\r\n                      Required: =true\r\n                      Update: =DataCardValue28_2.Text\r\n                      Width: =500\r\n                      X: =0\r\n                      Y: =0\r\n                    Children:\r\n                      - DataCardKey28_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            AutoHeight: =true\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(91, 105, 97, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            FontWeight: =FontWeight.Bold\r\n                            Height: =18\r\n                            Size: =9\r\n                            Text: =\"LINK DISPLAY NAME\"\r\n                            Width: =Parent.Width - 60\r\n                            Wrap: =false\r\n                            X: =0\r\n                            Y: =0\r\n                      - DataCardValue28_2:\r\n                          Control: Classic/TextInput@2.3.2\r\n                          Properties:\r\n                            BorderColor: =If(IsBlank(Parent.Error), RGBA(223, 229, 224, 1), Color.Red)\r\n                            BorderThickness: =1\r\n                            Default: =Parent.Default\r\n                            DelayOutput: =true\r\n                            DisplayMode: =Parent.DisplayMode\r\n                            Font: =Font.'Open Sans'\r\n                            HoverBorderColor: =RGBA(11, 74, 54, 1)\r\n                            HoverFill: =RGBA(0,128,64,0.08)\r\n                            MaxLength: =Parent.MaxLength\r\n                            PaddingLeft: =8\r\n                            RadiusBottomLeft: =8\r\n                            RadiusBottomRight: =8\r\n                            RadiusTopLeft: =8\r\n                            RadiusTopRight: =8\r\n                            Tooltip: =Parent.DisplayName\r\n                            Width: =Parent.Width - 60\r\n                            X: =0\r\n                            Y: =DataCardKey28_2.Y + DataCardKey28_2.Height + 4\r\n                      - ErrorMessage28_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            AutoHeight: =true\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(163, 45, 45, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            FontWeight: =FontWeight.Semibold\r\n                            Height: =14\r\n                            Live: =Live.Assertive\r\n                            PaddingBottom: =0\r\n                            PaddingLeft: =0\r\n                            PaddingRight: =0\r\n                            PaddingTop: =0\r\n                            Size: =9\r\n                            Text: |\r\n                              =If(\r\n                                  frmLink_2.Valid = false && !IsBlank(frmLink_2.Error),\r\n                                  \"Link Display Name is required.\",\r\n                                  \"\"\r\n                              )\r\n                            Visible: =Parent.DisplayMode=DisplayMode.Edit\r\n                            Width: =Parent.Width - 60\r\n                            X: =0\r\n                            Y: =DataCardValue28_2.Y + DataCardValue28_2.Height\r\n                      - StarVisible28_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            Align: =Align.Center\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(11, 74, 54, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            Height: =DataCardKey28_2.Height\r\n                            Text: =\"*\"\r\n                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)\r\n                            Width: =14\r\n                            Wrap: =false\r\n                            X: =Parent.Width - 74\r\n                            Y: =DataCardKey28_2.Y\r\n                      - InfoButtonCanvas2_2:\r\n                          Control: InfoButton@0.0.33\r\n                          Properties:\r\n                            Content: =\"This should be a short and easy to understand title for the document. \"\r\n                            X: =Parent.Width - 60\r\n                            Y: =0\r\n                - LinkUrl_DataCard2_2:\r\n                    Control: TypedDataCard@1.0.7\r\n                    Variant: ClassicUrlEdit\r\n                    Properties:\r\n                      BorderColor: =RGBA(223, 229, 224, 1)\r\n                      DataField: =\"LinkUrl\"\r\n                      Default: =ThisItem.LinkUrl\r\n                      DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,LinkUrl)\r\n                      Required: =true\r\n                      Update: |\r\n                        =If(\r\n                            IsBlank(DataCardValue29_2.Text),\r\n                            Blank(),\r\n                            Left(DataCardValue29_2.Text, \r\n                                If(\r\n                                    Find(\"&action\", DataCardValue29_2.Text) > 0,\r\n                                    Find(\"&action\", DataCardValue29_2.Text) - 1,\r\n                                    Len(DataCardValue29_2.Text)\r\n                                )\r\n                            )\r\n                        )\r\n                      Width: =500\r\n                      X: =0\r\n                      Y: =1\r\n                    Children:\r\n                      - DataCardKey29_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            AutoHeight: =true\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(91, 105, 97, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            FontWeight: =FontWeight.Bold\r\n                            Height: =18\r\n                            Size: =9\r\n                            Text: =\"DIRECT URL TO DOCUMENT\"\r\n                            Width: =Parent.Width - 60\r\n                            Wrap: =false\r\n                            X: =0\r\n                            Y: =0\r\n                      - StarVisible29_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            Align: =Align.Center\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(11, 74, 54, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            Height: =DataCardKey29_2.Height\r\n                            Text: =\"*\"\r\n                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)\r\n                            Width: =14\r\n                            Wrap: =false\r\n                            X: =Parent.Width - 74\r\n                            Y: =DataCardKey29_2.Y\r\n                      - DataCardValue29_2:\r\n                          Control: Classic/TextInput@2.3.2\r\n                          Properties:\r\n                            BorderColor: =If(IsBlank(Parent.Error), RGBA(223, 229, 224, 1), Color.Red)\r\n                            BorderThickness: =1\r\n                            Default: =Parent.Default\r\n                            DelayOutput: =true\r\n                            DisplayMode: =Parent.DisplayMode\r\n                            Font: =Font.'Open Sans'\r\n                            HoverBorderColor: =RGBA(11, 74, 54, 1)\r\n                            HoverFill: =RGBA(0,128,64,0.08)\r\n                            PaddingLeft: =8\r\n                            RadiusBottomLeft: =8\r\n                            RadiusBottomRight: =8\r\n                            RadiusTopLeft: =8\r\n                            RadiusTopRight: =8\r\n                            Tooltip: =Parent.DisplayName\r\n                            Width: =Parent.Width - 60\r\n                            X: =0\r\n                            Y: =DataCardKey29_2.Y + DataCardKey29_2.Height + 4\r\n                      - ErrorMessage29_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            AutoHeight: =true\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(163, 45, 45, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            FontWeight: =FontWeight.Semibold\r\n                            Height: =14\r\n                            Live: =Live.Assertive\r\n                            PaddingBottom: =0\r\n                            PaddingLeft: =0\r\n                            PaddingRight: =0\r\n                            PaddingTop: =0\r\n                            Size: =9\r\n                            Text: |\r\n                              =If(\r\n                                  frmLink_2.Valid = false && !IsBlank(frmLink_2.Error),\r\n                                  \"URL is required.\",\r\n                                  \"\"\r\n                              )\r\n                            Visible: =Parent.DisplayMode=DisplayMode.Edit\r\n                            Width: =Parent.Width - 60\r\n                            X: =0\r\n                            Y: =DataCardValue29_2.Y + DataCardValue29_2.Height\r\n                      - InfoButtonCanvas2_3:\r\n                          Control: InfoButton@0.0.33\r\n                          Properties:\r\n                            Content: =\"Paste here the full url to the document by grabbing its share URL from SharePoint.\"\r\n                            X: =Parent.Width - 60\r\n                            Y: =0\r\n                - ParentPolicy_DataCard3_2:\r\n                    Control: TypedDataCard@1.0.7\r\n                    Variant: ClassicComboBoxEdit\r\n                    Properties:\r\n                      BorderColor: =RGBA(0, 18, 107, 1)\r\n                      DataField: =\"PolicyTrackerSource\"\r\n                      Default: =ThisItem.PolicyTrackerSource\r\n                      DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,PolicyTrackerSource)\r\n                      Required: =false\r\n                      Update: |-\r\n                        = {\r\n                           '@odata.type': \"#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference\",\r\n                           Id: varSelectedRelease.ID,\r\n                           Value: varSelectedRelease.Title\r\n                        }\r\n                      Visible: =false\r\n                      Width: =500\r\n                      X: =0\r\n                      Y: =2\r\n                    Children:\r\n                      - DataCardKey32_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            AutoHeight: =true\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(0, 18, 107, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            Height: =34\r\n                            Text: =Parent.DisplayName\r\n                            Width: =Parent.Width - 60\r\n                            Wrap: =false\r\n                            X: =30\r\n                            Y: =10\r\n                      - DataCardValue32_2:\r\n                          Control: Classic/ComboBox@2.4.0\r\n                          Properties:\r\n                            BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)\r\n                            ChevronBackground: =RGBA(56, 96, 178, 1)\r\n                            ChevronFill: =RGBA(255, 255, 255, 1)\r\n                            ChevronHoverBackground: =ColorFade(RGBA(56, 96, 178, 1), -20%)\r\n                            ChevronHoverFill: =RGBA(255, 255, 255, 1)\r\n                            DefaultSelectedItems: |\r\n                              =If(\r\n                                  IsBlank(varSelectedLink.ID),\r\n                                  Filter(Choices([@PolicyLinks].PolicyTrackerSource), Id = varSelectedItem.ID),\r\n                                  [Parent.Default]\r\n                              )\r\n                            DisplayFields: =[\"Value\"]\r\n                            DisplayMode: =Parent.DisplayMode\r\n                            Font: =Font.'Open Sans'\r\n                            HoverFill: =RGBA(186, 202, 226, 1)\r\n                            Items: |\r\n                              =Choices([@PolicyLinks].PolicyTrackerSource)\r\n                            PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)\r\n                            PressedColor: =RGBA(255, 255, 255, 1)\r\n                            PressedFill: =RGBA(0, 18, 107, 1)\r\n                            SearchFields: =[\"Value\"]\r\n                            SelectMultiple: =false\r\n                            SelectionColor: =RGBA(255, 255, 255, 1)\r\n                            SelectionFill: =RGBA(56, 96, 178, 1)\r\n                            Tooltip: =Parent.DisplayName\r\n                            Width: =Parent.Width - 60\r\n                            X: =30\r\n                            Y: =DataCardKey32_2.Y + DataCardKey32_2.Height + 5\r\n                      - ErrorMessage32_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            AutoHeight: =true\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(168, 0, 0, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            FontWeight: =FontWeight.Semibold\r\n                            Height: =10\r\n                            Live: =Live.Assertive\r\n                            PaddingBottom: =0\r\n                            PaddingLeft: =0\r\n                            PaddingRight: =0\r\n                            PaddingTop: =0\r\n                            Size: =14\r\n                            Text: =Parent.Error\r\n                            Visible: =Parent.DisplayMode=DisplayMode.Edit\r\n                            Width: =Parent.Width - 60\r\n                            X: =30\r\n                            Y: =DataCardValue32_2.Y + DataCardValue32_2.Height\r\n                      - StarVisible32_2:\r\n                          Control: Label@2.5.1\r\n                          Properties:\r\n                            Align: =Align.Center\r\n                            BorderColor: =RGBA(0, 0, 0, 1)\r\n                            Color: =RGBA(0, 18, 107, 1)\r\n                            Font: =Font.'Open Sans'\r\n                            Height: =DataCardKey32_2.Height\r\n                            Text: =\"*\"\r\n                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)\r\n                            Width: =30\r\n                            Wrap: =false\r\n                            Y: =DataCardKey32_2.Y\r\n          - conLinkModalButtonRow1:\r\n              Control: GroupContainer@1.5.0\r\n              Variant: AutoLayout\r\n              Properties:\r\n                FillPortions: =0\r\n                Height: =44\r\n                LayoutDirection: =LayoutDirection.Horizontal\r\n                LayoutGap: =12\r\n                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween\r\n                Width: =Parent.Width\r\n              Children:\r\n                - btnCnlLink_2:\r\n                    Control: Classic/Button@2.2.0\r\n                    Properties:\r\n                      BorderColor: =ColorFade(Self.Fill, -15%)\r\n                      Color: =RGBA(50, 50, 50, 1)\r\n                      DisabledBorderColor: =RGBA(166, 166, 166, 1)\r\n                      Fill: =RGBA(200, 200, 200, 1)\r\n                      Font: =Font.'Open Sans'\r\n                      HoverBorderColor: =ColorFade(Self.BorderColor, 20%)\r\n                      HoverColor: =RGBA(255, 255, 255, 1)\r\n                      HoverFill: =RGBA(170, 170, 170, 1)\r\n                      OnSelect: |-\r\n                        =ResetForm(frmLink_2);\r\n                        Set(varShowLinkModal, false);\r\n                        Set(varSelectedLink, Blank())\r\n                      PressedBorderColor: =Self.Fill\r\n                      PressedColor: =Self.Fill\r\n                      PressedFill: =Self.Color\r\n                      RadiusBottomLeft: =4\r\n                      RadiusBottomRight: =4\r\n                      RadiusTopLeft: =4\r\n                      RadiusTopRight: =4\r\n                      Text: =\"Cancel\"\r\n                      Width: =150\r\n                - btnSaveLink_2:\r\n                    Control: Classic/Button@2.2.0\r\n                    Properties:\r\n                      BorderColor: =ColorFade(Self.Fill, -15%)\r\n                      Color: =RGBA(255, 255, 255, 1)\r\n                      DisabledBorderColor: =RGBA(166, 166, 166, 1)\r\n                      DisplayMode: =If(varSubmitting, DisplayMode.Disabled, DisplayMode.Edit)\r\n                      Fill: =RGBA(11, 74, 54, 1)\r\n                      Font: =Font.'Open Sans'\r\n                      HoverBorderColor: =ColorFade(Self.BorderColor, 20%)\r\n                      HoverColor: =RGBA(255, 255, 255, 1)\r\n                      HoverFill: =RGBA(9, 60, 44, 1)\r\n                      OnSelect: |-\r\n                        =If(\r\n                            !varSubmitting,\r\n                            Set(varSubmitting, true);\r\n                            SubmitForm(frmLink_2);\r\n                            // Do NOT refresh here\r\n                            Set(varSubmitting, false)\r\n                        )\r\n                      PressedBorderColor: =Self.Fill\r\n                      PressedColor: =Self.Fill\r\n                      PressedFill: =Self.Color\r\n                      RadiusBottomLeft: =4\r\n                      RadiusBottomRight: =4\r\n                      RadiusTopLeft: =4\r\n                      RadiusTopRight: =4\r\n                      Text: =\"Save\"\r\n                      Width: =150";
-async function copyLinkModalYAML() {
-  const status = document.getElementById('linkModalStatus');
-  try {
-    await navigator.clipboard.writeText(linkModalYAML);
-    status.textContent = '\u2713 Copied (CRLF). First line: ' + linkModalYAML.split(/\r?\n/)[0];
-    status.style.color = '#4caf7d';
-    setTimeout(() => { status.textContent = 'Click to copy again'; status.style.color = '#8fa0c0'; }, 4000);
-  } catch (e) {
-    status.textContent = 'Clipboard blocked - select the text below and copy manually.';
-    status.style.color = '#e85555';
-    const pre = document.createElement('pre');
-    pre.style = 'font-size:9px;max-height:200px;overflow:auto;background:#1a1a2e;padding:8px;border-radius:6px;text-align:left;color:#d8e9ff;';
-    pre.textContent = linkModalYAML;
-    status.parentElement.appendChild(pre);
-  }
-}
-</script>
-
 </body>
 </html>
