@@ -33,20 +33,25 @@
   <h1>Policy Tracker — Fix Guide</h1>
   <p class="subtitle">Fresh guide, one fix in it so far. Older entries have been retired.</p>
 
-  <h2>Duplicate button visible on unsaved items</h2>
-  <p class="meta">ViewItem &middot; property edit &middot; no risk</p>
+  <h2>"No releases" message didn't account for Future weeks</h2>
+  <p class="meta">Main &middot; property edit &middot; no risk</p>
 
-  <p>The Duplicate button (top-right, copy icon) had no <code>Visible</code> condition at all, so it showed even on a brand-new item that hasn't been saved yet — clicking it in that state isn't a tested path and shouldn't be reachable. Fixed by tying it to <code>varParentSaved</code>, the same flag the screen already uses elsewhere to mean "this item has actually been saved" (false on a new item, true once saved or opened from an existing record).</p>
+  <p><code>lblNoReleasesMain</code> only ever checked for the <code>Historic</code> tab, so it showed "No releases this week" for <em>both</em> the Current tab and the Future tab — wrong for Future, since it's not "this week" at all. There are actually four tabs (<code>Current</code>, <code>Future</code>, <code>UnapprovedHistoric</code>, <code>Historic</code>), so this now branches properly across all of them.</p>
 
   <ol class="steps">
-    <li>Open <strong>ViewItem</strong>, open any item.</li>
-    <li>In the Tree view, select <strong>btnDuplicate1</strong> (the copy-icon button, top-right of the header).</li>
-    <li>In the Properties dropdown, click <strong>+ Add property</strong> and choose <code>Visible</code> (it isn't set at all right now).</li>
-    <li>Set it to:</li>
+    <li>Open <strong>Main</strong>.</li>
+    <li>In the Tree view, select <strong>lblNoReleasesMain</strong> (inside the weekly release group's gallery template).</li>
+    <li>Select <code>Text</code> in the Properties dropdown, select all, and replace with:</li>
   </ol>
-  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>varParentSaved</pre></div>
+  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Switch(
+    varSelectedState,
+    "Historic", "No releases went out that week",
+    "UnapprovedHistoric", "No releases went out that week",
+    "Future", "No releases planned for that week",
+    "No releases this week"
+)</pre></div>
 
-  <div class="callout">Test: open a brand-new item (before saving) — the Duplicate button should be gone. Save it, or open any existing item — it should be back.</div>
+  <div class="callout">Test: check the message on each tab — Current says "No releases this week", Future says "No releases planned for that week", and both Historic/UnapprovedHistoric still say "No releases went out that week".</div>
 
 </main>
 <script>
