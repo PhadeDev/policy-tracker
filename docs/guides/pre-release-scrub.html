@@ -3,417 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document Link Modal — Manual Rebuild Guide</title>
+  <title>Policy Tracker — Fix Guide</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #10131b; color: #e7ebf0; line-height: 1.55; }
-    main { max-width: 940px; margin: 0 auto; padding: 34px 22px 90px; }
-    a { color: #8dc3ff; }
-    h1 { margin: 0 0 8px; color: #b7e4c7; font-size: 1.8rem; }
-    h2 { margin: 44px 0 6px; color: #f2f4f8; font-size: 1.3rem; border-bottom: 1px solid #2b3546; padding-bottom: 10px; }
-    h3 { margin: 26px 0 6px; color: #e7ebf0; font-size: 1.05rem; }
-    p, li { color: #b9c2cf; }
-    code { background: #1b2230; color: #d9ecff; padding: 2px 6px; border-radius: 4px; }
-    .note, .warn, .danger { border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
-    .note { background: #11291e; border-left: 4px solid #52b788; }
-    .warn { background: #2b1f14; border-left: 4px solid #e1963c; }
-    .danger { background: #2b1418; border-left: 4px solid #e15353; }
-    .code-block { position: relative; margin: 10px 0 22px; }
-    pre { overflow: auto; white-space: pre; background: #0b1020; color: #d8e9ff; border: 1px solid #28354a; border-radius: 8px; padding: 14px; font-size: .82rem; line-height: 1.45; margin: 0; }
-    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; background: #2d6a4f; color: white; padding: 5px 10px; cursor: pointer; font-size: .8rem; }
-    button.copy.ok { background: #40916c; }
-    button.copy.err { background: #b3542e; }
-    .test { background: #0e1a14; border: 1px dashed #2a5a3e; border-radius: 8px; padding: 12px 16px; margin: 12px 0 0; color: #9fc9ae; font-size: .85rem; }
-    .toc { background: #141a26; border: 1px solid #2b3546; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
-    .toc a { display: block; padding: 4px 0; font-size: .9rem; }
-    .toc .toc-num { color: #8a94a6; display: inline-block; width: 22px; }
-    .prio { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
-    .prio-1 { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
-    .prio-2 { background: #11291e; color: #8fd6ab; border: 1px solid #2f6b4a; }
-    .prio-3 { background: #141a26; color: #9aa7bb; border: 1px solid #2b3546; }
-    table.steps { width: 100%; border-collapse: collapse; margin: 12px 0 22px; font-size: .88rem; }
-    table.steps th, table.steps td { border: 1px solid #28354a; padding: 8px 10px; text-align: left; vertical-align: top; }
-    table.steps th { background: #141a26; color: #cdd6e4; }
-    table.steps td { background: #0d111a; color: #b9c2cf; }
-    table.steps code { display: block; margin: 2px 0; }
-    .tag { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
-    .tag-modern { background: #11291e; color: #8fd6ab; border: 1px solid #2f6b4a; }
-    .tag-classic { background: #1e2230; color: #a9b6d6; border: 1px solid #3a4260; }
-    .tag-new { background: #2b1f14; color: #f0c384; border: 1px solid #5a4324; }
-    .tag-existing { background: #141a26; color: #9aa7bb; border: 1px solid #2b3546; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #14151a; color: #dcdfe4; line-height: 1.6; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 24px 100px; }
+    a { color: #7cb3e8; }
+    h1 { margin: 0 0 6px; color: #eef0f3; font-size: 1.6rem; font-weight: 600; }
+    .subtitle { color: #8b8f98; margin: 0 0 40px; font-size: 0.95rem; }
+    h2 { margin: 48px 0 4px; color: #eef0f3; font-size: 1.15rem; font-weight: 600; }
+    .meta { color: #8b8f98; font-size: 0.82rem; margin: 0 0 16px; }
+    p { color: #c2c6cd; margin: 10px 0; }
+    code { background: #1e2027; color: #e8c78a; padding: 1px 6px; border-radius: 4px; font-size: 0.88em; }
+    hr { border: none; border-top: 1px solid #2a2c33; margin: 40px 0; }
+    .steps { margin: 14px 0; padding-left: 20px; color: #c2c6cd; }
+    .steps li { margin: 6px 0; }
+    pre { position: relative; overflow: auto; white-space: pre; background: #1a1b20; color: #d7dade; border: 1px solid #2a2c33; border-radius: 6px; padding: 14px 16px; font-size: 0.82rem; line-height: 1.5; margin: 12px 0; }
+    .copy-wrap { position: relative; }
+    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 5px; background: #2a2c33; color: #c2c6cd; padding: 4px 10px; cursor: pointer; font-size: 0.75rem; }
+    button.copy:hover { background: #34363e; }
+    button.copy.ok { background: #2f5741; color: #a6e0bd; }
+    button.copy.err { background: #5c3232; color: #e8a6a6; }
+    .callout { border-left: 3px solid #45607a; background: #1b222b; padding: 10px 14px; border-radius: 4px; margin: 12px 0; font-size: 0.9rem; color: #b7c2cc; }
   </style>
 </head>
 <body>
 <main>
   <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
-  <h1>Document Link Modal — Manual Rebuild Guide</h1>
-  <p>This replaces the previous version of this guide entirely. The previous approach tried to paste the whole redesigned modal in as one block of YAML — Studio rejected it (<code>PA1001 / YamlInvalidSyntax</code>) because a single-control YAML fragment pasted from outside Studio isn't something its clipboard-paste feature reliably accepts; it expects either a full <code>Screens:</code> document or a control it copied itself. That's on the guide, not on anything you did.</p>
-  <p><strong>Nothing here needs a paste of any kind.</strong> Every step below is either: select a control already in your app, change one property in the formula bar, or insert one new control from the Insert panel and set a couple of properties on it by hand. Nothing is deleted that doesn't already need deleting (nothing does, as it turns out), and nothing needs renaming except the two brand-new controls in Part 2.</p>
+  <h1>Policy Tracker — Fix Guide</h1>
+  <p class="subtitle">Fresh guide, one fix in it so far. Older entries have been retired.</p>
 
-  <div class="danger"><strong>You already have <code>ctnLinkModal_2</code> back (the version from before tonight's edits).</strong> That means the two real bugs from earlier — the display name field getting silently overwritten, and stale text showing up after Cancel — are <strong>still present</strong> in what you have right now. Part 1 below fixes those two things. Do Part 1 tonight regardless of anything else. Part 2 (visual restyle to match the rest of the screen) is lower priority — nice to have before the demo, not required for it to work correctly.</p>
+  <h2>Duplicate button visible on unsaved items</h2>
+  <p class="meta">ViewItem &middot; property edit &middot; no risk</p>
 
-  <div class="toc">
-    <strong>Jump to:</strong>
-    <a href="#p1"><span class="toc-num">1.</span> Fix the two real bugs <span class="prio prio-1">Do this tonight</span></a>
-    <a href="#p2"><span class="toc-num">2.</span> Visual restyle to match the rest of the screen <span class="prio prio-3">Optional, if there's time</span></a>
-    <a href="#p3"><span class="toc-num">3.</span> Link icons and "Open In App" don't recognise every Office file variant <span class="prio prio-2">Real bug</span></a>
-    <a href="#p4"><span class="toc-num">4.</span> Icons reset to the generic globe after Save <span class="prio prio-1">Real bug, do this one</span></a>
-    <a href="#p5"><span class="toc-num">5.</span> Duplicate now jumps straight to the new copy <span class="prio prio-3">Enhancement</span></a>
-    <a href="#p6"><span class="toc-num">6.</span> Overview's document link popup now shows file-type icons <span class="prio prio-3">Enhancement</span></a>
-  </div>
+  <p>The Duplicate button (top-right, copy icon) had no <code>Visible</code> condition at all, so it showed even on a brand-new item that hasn't been saved yet — clicking it in that state isn't a tested path and shouldn't be reachable. Fixed by tying it to <code>varParentSaved</code>, the same flag the screen already uses elsewhere to mean "this item has actually been saved" (false on a new item, true once saved or opened from an existing record).</p>
 
-  <h2 id="p1">Part 1 — Fix the two real bugs <span class="prio prio-1">~10 minutes, zero risk</span></h2>
-  <p>Every change below is a property edit on a control that already exists. No inserting, no deleting, no renaming.</p>
+  <ol class="steps">
+    <li>Open <strong>ViewItem</strong>, open any item.</li>
+    <li>In the Tree view, select <strong>btnDuplicate1</strong> (the copy-icon button, top-right of the header).</li>
+    <li>In the Properties dropdown, click <strong>+ Add property</strong> and choose <code>Visible</code> (it isn't set at all right now).</li>
+    <li>Set it to:</li>
+  </ol>
+  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>varParentSaved</pre></div>
 
-  <h3>1a. Display name field gets silently overwritten</h3>
-  <p><strong>What's wrong:</strong> the "Link Display Name" box falls back to a filename auto-guessed from the URL field whenever a context variable called <code>DisplayNamePrefill</code> changes — which happens live as you type the URL, even after you've already typed your own name in first.</p>
-  <table class="steps">
-    <tr><th>Where to click</th><th>What to do</th></tr>
-    <tr>
-      <td>Open <strong>ViewItem</strong> → open any item → click <strong>Add Link</strong> (or Edit on an existing link) to open the modal → in the Tree view, expand into <code>ctnLinkModal_2 → cardLinkModal_2 → frmLink_2 → LinkText_DataCard2_2</code> and click <strong>DataCardValue28_2</strong> (the actual text input, not the data card or its label).</td>
-      <td>In the Properties dropdown at the top of the formula bar, select <code>Default</code>. Select all in the formula bar (Ctrl+A), delete, and type exactly:
-        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Parent.Default</pre></div>
-      </td>
-    </tr>
-  </table>
-
-  <h3>1b. URL field OnChange (the thing that was pushing the bad value in) — remove it</h3>
-  <p>The <code>Default</code> fix above stops <code>DataCardValue28_2</code> from listening to <code>DisplayNamePrefill</code>, but the URL field is still setting that variable on every keystroke for no reason now. Clean it out so nothing's left half-wired.</p>
-  <table class="steps">
-    <tr><th>Where to click</th><th>What to do</th></tr>
-    <tr>
-      <td>Still inside the modal's Tree: <code>frmLink_2 → LinkUrl_DataCard2_2</code>, click <strong>DataCardValue29_2</strong> (the URL text input).</td>
-      <td>In the Properties dropdown, select <code>OnChange</code>. Select all in the formula bar (Ctrl+A) and press Delete, leaving it completely blank. Click away from the control to commit the blank formula.</td>
-    </tr>
-  </table>
-
-  <h3>1c. Stale text left over after Cancel, then Add</h3>
-  <p><strong>What's wrong:</strong> when you open the modal fresh (via Edit or Add), Power Apps doesn't automatically clear the text boxes just because the underlying record changed — you have to explicitly tell the form to refresh with <code>ResetForm(frmLink_2)</code>. Only the Cancel button does this today. The three places that <em>open</em> the modal don't, so whatever was last typed/shown just sits there.</p>
-  <table class="steps">
-    <tr><th>Where to click</th><th>What to do</th></tr>
-    <tr>
-      <td>On the links list, click the <strong>Edit</strong> icon (pencil) on any existing link row to select <strong>EditLink_2</strong> in the tree.</td>
-      <td>Select <code>OnSelect</code> in the Properties dropdown. Find the line <code>Set(varShowLinkModal, true)</code> at the end and add a new line <em>directly above it</em> reading:
-        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ResetForm(frmLink_2);</pre></div>
-        So the formula ends with:
-        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedLink, LookUp(PolicyLinks, ID = ThisItem.ID));
-ResetForm(frmLink_2);
-Set(varShowLinkModal, true)</pre></div>
-      </td>
-    </tr>
-    <tr>
-      <td>Select <strong>btnNewLink_1</strong> (the "Add Document Link" pill button near the link list).</td>
-      <td>Same fix: in <code>OnSelect</code>, find <code>Set(varSelectedLink, Defaults(PolicyLinks));</code> followed by <code>Set(varShowLinkModal, true)</code>, and insert the <code>ResetForm</code> line between them:
-        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varSelectedLink, Defaults(PolicyLinks));
-ResetForm(frmLink_2);
-Set(varShowLinkModal, true)</pre></div>
-      </td>
-    </tr>
-    <tr>
-      <td>Select <strong>btnAddLinkEmpty1</strong> (the "Add Document Link" button shown when the link list is empty).</td>
-      <td>This one has <em>two</em> spots with the same <code>Set(varSelectedLink, Defaults(PolicyLinks)); Set(varShowLinkModal, true)</code> pair inside its <code>OnSelect</code> — one near the top of the formula, one further down inside the nested save-then-open-modal branch. Add the same <code>ResetForm(frmLink_2);</code> line between the two <code>Set(...)</code> calls in <strong>both</strong> spots.</td>
-    </tr>
-  </table>
-  <div class="test">Test all three: (1) type a display name, then paste a SharePoint URL — the name you typed should stay put. (2) Edit a link, note its text, hit Cancel, then click Add — the Add form should be completely blank, not showing the link you just cancelled out of.</div>
-
-  <h2 id="p2">Part 2 — Visual restyle to match the rest of the screen <span class="prio prio-3">Optional</span></h2>
-  <p>This brings the look in line with the Duplicate/Delete popups elsewhere on this screen (dark dimmed background, rounded card, a proper title + close button) — but it's cosmetic. Skip this section entirely tonight if you're short on time; Part 1 is what actually matters for the demo working correctly.</p>
-  <p>To keep this low-risk, <strong>nothing gets deleted or converted</strong>. The modal stays a <code>ManualLayout</code> container (converting it to <code>AutoLayout</code> would mean deleting and rebuilding the whole thing from scratch, which is exactly the kind of risk we're avoiding tonight) — instead we restyle the existing pieces in place and add two small new controls for the title bar.</p>
-
-  <h3>2a. Restyle the dark background and the card</h3>
-  <table class="steps">
-    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
-    <tr><td><code>ctnLinkModal_2</code></td><td><code>Fill</code></td><td><code>RGBA(53, 61, 63, 0.84)</code></td></tr>
-    <tr><td><code>ctnLinkModal_2</code></td><td><code>Height</code></td><td><code>Parent.Height</code></td></tr>
-    <tr><td><code>ctnLinkModal_2</code></td><td><code>Y</code></td><td><code>0</code></td></tr>
-    <tr><td><code>cardLinkModal_2</code></td><td><code>Fill</code></td><td><code>RGBA(244, 246, 243, 1)</code></td></tr>
-    <tr><td><code>cardLinkModal_2</code></td><td><code>RadiusTopLeft</code>, <code>RadiusTopRight</code>, <code>RadiusBottomLeft</code>, <code>RadiusBottomRight</code></td><td><code>16</code> on all four (use "+ Add property" if not already listed)</td></tr>
-    <tr><td><code>cardLinkModal_2</code></td><td><code>DropShadow</code></td><td><code>DropShadow.Regular</code></td></tr>
-    <tr><td><code>cardLinkModal_2</code></td><td><code>Height</code></td><td><code>350</code> (was 303 — a bit taller to make room for the new title bar below)</td></tr>
-  </table>
-  <div class="note">Radius and DropShadow are ordinary properties on <code>GroupContainer@1.5.0</code> regardless of whether it's <code>ManualLayout</code> or <code>AutoLayout</code>, so these work without touching the container's Variant at all.</div>
-
-  <h3>2b. Add the title bar — two new controls</h3>
-  <table class="steps">
-    <tr><th>Insert</th><th>Type</th><th>Rename to</th><th>Properties to set</th></tr>
-    <tr>
-      <td>With <strong>cardLinkModal_2</strong> selected, go to <strong>Insert → Text → Text label</strong> (in the <em>Text</em> group, not "Classic label" — use the <span class="tag tag-modern">Modern</span> Text control, same one already used elsewhere on this screen for pill-style labels)</td>
-      <td><span class="tag tag-modern">Modern</span><br><code>ModernText</code></td>
-      <td>Right-click in the Tree → Rename → <code>lblLinkModalTitle1</code></td>
-      <td>
-        <code>Text: =If(IsBlank(varSelectedLink.ID), "Add Document Link", "Edit Document Link")</code><br>
-        <code>Font: =Font.'Lato Black'</code><br>
-        <code>FontWeight: =FontWeight.Bold</code><br>
-        <code>Size: =16</code><br>
-        <code>Color: =RGBA(22, 33, 28, 1)</code><br>
-        <code>X: =0</code>  <code>Y: =0</code>
-      </td>
-    </tr>
-    <tr>
-      <td>With <strong>cardLinkModal_2</strong> selected again, go to <strong>Insert → Icons/Buttons</strong> and choose the <span class="tag tag-modern">Modern</span> <strong>Button</strong> (icon-only style — the same control already used for <code>EditLink_2</code>/<code>DeleteLink_2</code> on this screen)</td>
-      <td><span class="tag tag-modern">Modern</span><br><code>ModernButton</code></td>
-      <td>Rename to <code>btnLinkModalClose1</code></td>
-      <td>
-        <code>Icon: ="Dismiss"</code><br>
-        <code>Layout: =ButtonLayout.IconOnly</code><br>
-        <code>Appearance: =ButtonAppearance.Subtle</code><br>
-        <code>OnSelect:</code>
-        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ResetForm(frmLink_2);
-Set(varShowLinkModal, false);
-Set(varSelectedLink, Blank())</pre></div>
-        <code>X: =Parent.Width - 40</code>  <code>Y: =0</code>
-      </td>
-    </tr>
-  </table>
-
-  <h3>2c. Make room for the title bar — shift the form and buttons down</h3>
-  <table class="steps">
-    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
-    <tr><td><code>frmLink_2</code></td><td><code>Y</code> (add via "+ Add property" if not listed)</td><td><code>45</code></td></tr>
-    <tr><td><code>btnSaveLink_2</code></td><td><code>Y</code></td><td><code>285</code> (was 240 — shifted down by the same 45px)</td></tr>
-    <tr><td><code>btnCnlLink_2</code></td><td><code>Y</code></td><td><code>285</code></td></tr>
-  </table>
-  <div class="warn">These exact numbers are estimates based on the original layout — I can't preview this live. If the buttons or form look cramped or overlap the title bar, nudge the <code>Y</code> values and <code>cardLinkModal_2.Height</code> a little; nothing here is fragile, it's just spacing.</div>
-
-  <h3>2d. Restyle the field labels (ALL CAPS, grey, smaller)</h3>
-  <table class="steps">
-    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
-    <tr><td><code>DataCardKey28_2</code></td><td><code>Text</code></td><td><code>"LINK DISPLAY NAME"</code></td></tr>
-    <tr><td><code>DataCardKey28_2</code></td><td><code>Color</code></td><td><code>RGBA(91, 105, 97, 1)</code></td></tr>
-    <tr><td><code>DataCardKey28_2</code></td><td><code>FontWeight</code></td><td><code>FontWeight.Bold</code></td></tr>
-    <tr><td><code>DataCardKey28_2</code></td><td><code>Size</code></td><td><code>9</code></td></tr>
-    <tr><td><code>DataCardKey29_2</code></td><td><code>Text</code></td><td><code>"DIRECT URL TO DOCUMENT"</code></td></tr>
-    <tr><td><code>DataCardKey29_2</code></td><td><code>Color</code></td><td><code>RGBA(91, 105, 97, 1)</code></td></tr>
-    <tr><td><code>DataCardKey29_2</code></td><td><code>FontWeight</code></td><td><code>FontWeight.Bold</code></td></tr>
-    <tr><td><code>DataCardKey29_2</code></td><td><code>Size</code></td><td><code>9</code></td></tr>
-    <tr><td><code>DataCardValue28_2</code>, <code>DataCardValue29_2</code></td><td><code>RadiusTopLeft</code>/<code>RadiusTopRight</code>/<code>RadiusBottomLeft</code>/<code>RadiusBottomRight</code></td><td><code>8</code> on all four, both controls</td></tr>
-  </table>
-
-  <h3>2e. Restyle Save/Cancel to the app's green/grey palette</h3>
-  <p>These stay exactly as they are — <span class="tag tag-classic">Button@0.0.45</span> — no need to swap control types, just recolour them.</p>
-  <table class="steps">
-    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
-    <tr><td><code>btnSaveLink_2</code></td><td><code>BasePaletteColor</code></td><td><code>RGBA(11, 74, 54, 1)</code></td></tr>
-    <tr><td><code>btnCnlLink_2</code></td><td><code>BasePaletteColor</code></td><td><code>RGBA(200, 200, 200, 1)</code></td></tr>
-  </table>
-
-  <div class="test">Test: open the modal (Add and Edit both) — dark dimmed background, rounded card, title reading "Add Document Link" or "Edit Document Link" correctly, &#10005; closes it the same as Cancel. Nothing here changes any Save/Delete/Duplicate behaviour — that's all still whatever Part 1 above left it as.</div>
-
-
-  <h2 id="p3">Part 3 — Link icons and "Open In App" don't recognise every Office file variant <span class="prio prio-2">Real bug</span></h2>
-  <p><strong>What's wrong:</strong> the file-type detection only ever recognised <code>doc, docx, xls, xlsx, ppt, pptx, pdf</code>. Anything else -- template files (<code>.potx</code>, <code>.dotx</code>, <code>.xltx</code>), macro-enabled files (<code>.docm</code>, <code>.xlsm</code>, <code>.pptm</code>), or the older 97-2003 template/show variants (<code>.dot</code>, <code>.xlt</code>, <code>.pot</code>, <code>.pps</code>, <code>.ppsx</code>, <code>.ppsm</code>) -- falls through to the generic link icon and the "Open In App" button doesn't show at all for those, even though the file genuinely is a Word/Excel/PowerPoint document. This is all three fixed in the same three places, plus the colour bonus: the "Open In App" button now switches between Word blue, Excel green, and PowerPoint red/orange based on the file type, instead of always being the same blue.</p>
-  <p>All three changes below are property edits on controls that already exist -- nothing new to insert, nothing to rename, no paste-a-whole-control risk like Part 2.</p>
-
-  <h3>3a. Named formula <code>GetFileExt</code> — recognise every variant</h3>
-  <div class="note"><strong>Where to click:</strong> in Studio's top menu, go to <strong>App</strong> (or the <strong>&lt;/&gt; Formulas</strong> icon depending on your Studio layout) to open <strong>App formulas</strong>. Find the <code>GetFileExt</code> named formula. Select all its text and replace with the block below.</div>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>GetFileExt(LinkUrl: Text): Text = With(
-    {FileParamStart: Find("file=", LinkUrl, 1)},
-    With(
-        {
-            FileNamePart: If(
-                FileParamStart &gt; 0,
-                With(
-                    {AmpPos: Find("&amp;", LinkUrl, FileParamStart + 5)},
-                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos &gt; 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                ),
-                If(Find("?", LinkUrl, 1) &gt; 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-            )
-        },
-        Switch(
-            true,
-            Right(FileNamePart, 5) = ".docx", "docx",
-            Right(FileNamePart, 5) = ".docm", "docm",
-            Right(FileNamePart, 5) = ".dotx", "dotx",
-            Right(FileNamePart, 5) = ".dotm", "dotm",
-            Right(FileNamePart, 4) = ".doc", "doc",
-            Right(FileNamePart, 4) = ".dot", "dot",
-            Right(FileNamePart, 5) = ".xlsx", "xlsx",
-            Right(FileNamePart, 5) = ".xlsm", "xlsm",
-            Right(FileNamePart, 5) = ".xltx", "xltx",
-            Right(FileNamePart, 5) = ".xltm", "xltm",
-            Right(FileNamePart, 4) = ".xls", "xls",
-            Right(FileNamePart, 4) = ".xlt", "xlt",
-            Right(FileNamePart, 5) = ".pptx", "pptx",
-            Right(FileNamePart, 5) = ".pptm", "pptm",
-            Right(FileNamePart, 5) = ".potx", "potx",
-            Right(FileNamePart, 5) = ".potm", "potm",
-            Right(FileNamePart, 5) = ".ppsx", "ppsx",
-            Right(FileNamePart, 5) = ".ppsm", "ppsm",
-            Right(FileNamePart, 4) = ".ppt", "ppt",
-            Right(FileNamePart, 4) = ".pot", "pot",
-            Right(FileNamePart, 4) = ".pps", "pps",
-            Right(FileNamePart, 4) = ".pdf", "pdf",
-            ""
-        )
-    )
-)</pre></div>
-  <div class="warn">This is the same named formula used by <code>BuildLinksForSource</code> and <code>RefreshActiveCache</code> to populate <code>FileExt</code> on every link row -- fixing it here fixes icons everywhere those two are used, you don't need to touch them separately.</div>
-
-  <h3>3b. Link row icon — recognise the same variants</h3>
-  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, on any link row in the tree find <strong>TypeIcon_2</strong> (the small file-type icon on the left of each link row) and select it. In the Properties dropdown select <code>Image</code>.</div>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    ThisItem.FileExt = "pdf", pdf_icon,
-    ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm", word_icon,
-    ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm", excel_icon,
-    ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm", ppt_icon,
-    html_icon
-)</pre></div>
-
-  <h3>3c. "Open In App" button — show for every variant, launch the right app, and colour by type</h3>
-  <div class="note"><strong>Where to click:</strong> same link row, select <strong>OpenDesktop_2</strong> (the "Open In app" button). Three separate properties need replacing on this one control: <code>Visible</code>, <code>OnSelect</code>, and <code>BasePaletteColor</code>.</div>
-  <p><code>Visible</code> -- so the button actually appears for the new variants too:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>(ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm" ||
-ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm" ||
-ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm") &amp;&amp;
-"modgovuk.sharepoint.com" in Lower(ThisItem.LinkUrl)</pre></div>
-  <p><code>OnSelect</code> -- so it launches the right desktop app for every variant, not just the six original ones:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Switch(
-    ThisItem.FileExt,
-    "docx", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "doc", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "docm", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "dot", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "dotx", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "dotm", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "xlsx", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "xls", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "xlsm", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "xlt", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "xltx", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "xltm", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "pptx", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "ppt", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "pptm", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "pot", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "potx", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "potm", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "pps", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "ppsx", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
-    "ppsm", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New)
-)</pre></div>
-  <p><code>BasePaletteColor</code> -- the colour-by-type bonus: Word blue, Excel green, PowerPoint red/orange:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm", RGBA(43, 87, 154, 1),
-    ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm", RGBA(33, 115, 70, 1),
-    ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm", RGBA(183, 71, 42, 1),
-    RGBA(5, 102, 178, 1)
-)</pre></div>
-  <div class="test">Test: your <code>.potx</code> PowerPoint template link should now show the PowerPoint icon (not the generic link icon), the "Open In app" button should appear in PowerPoint's red/orange, and clicking it should launch PowerPoint. Check a Word doc and Excel file too -- blue and green respectively. A plain PDF link should be unaffected (still shows the PDF icon, no "Open In app" button, since PDFs never had a desktop-launch protocol).</div>
-
-
-  <h2 id="p4">Part 4 — Icons reset to the generic globe after Save <span class="prio prio-1">Real bug, do this one</span></h2>
-  <p><strong>What's wrong:</strong> this is the same root cause as Part 3, just a different set of formulas. <code>colLinks</code> (the collection every link row and its icon reads from) gets its file-type column (<code>FileExt</code>) computed correctly when you first open the item -- but when you hit <strong>Save</strong> or <strong>Save &amp; Close</strong> on the item itself (not the link modal), the success handler repopulates <code>colLinks</code> from scratch <em>without</em> recomputing that column. Every icon's logic falls back to the generic globe the instant that happens, because there's no <code>FileExt</code> value to switch on any more. Closing and reopening the item "fixes" it only because that re-runs the correct population logic from scratch.</p>
-  <p>Three places do this -- the item's <strong>Save</strong> button, <strong>Save &amp; Close</strong> button, and the "Add Document Link" button's save-then-open-modal branch (for a brand new item that hasn't been saved yet). All three need the exact same one-line fix.</p>
-  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, open any item. You'll edit <code>OnSelect</code> on three different buttons in turn: <strong>btnSaveClose1</strong>, <strong>btnSave1</strong>, and <strong>btnAddLinkEmpty1</strong>. In each one's formula, find this exact line:</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID));</pre></div>
-  <p>...and replace it with this line (adds the same <code>FileExt</code> column that the "open item" path already computes correctly):</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>ClearCollect(colLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID), FileExt, GetFileExt(LinkUrl)));</pre></div>
-  <p>That's the entire fix, done identically three times. Nothing else in either button's formula changes.</p>
-  <div class="test">Test: open an item that already has a mix of Word/Excel/PowerPoint/PDF links, hit <strong>Save</strong> (not Save &amp; Close) -- the icons should stay exactly as they were, not flash to the generic globe. Then try <strong>Save &amp; Close</strong>, reopen, confirm still correct. Then try it on the "Add Document Link" first-save path on a brand new unsaved item.</div>
-
-  <h3>On the icon load delay</h3>
-  <p>You also mentioned the icons take a couple of seconds to actually render even when everything else on the row (text, buttons) appears instantly. I can't test this live, so this is my best honest read rather than a confirmed fix: <code>word_icon</code>/<code>excel_icon</code>/<code>ppt_icon</code>/<code>pdf_icon</code> aren't formulas, they're uploaded media assets in the app, and Power Apps fetches media assets over the network the first time each one is actually referenced in a session/screen load -- that's normal Player/Studio behaviour, not something introduced by any formula change here, and not something a Power Fx edit can speed up. The only lever I'm aware of (unverified, since I can't test it) is the file size of the actual icon images themselves -- if they're large PNGs, re-exporting them as small, compressed PNGs or SVGs in whatever tool you made them in might help. I'd treat this as a "live with it" cosmetic quirk rather than something worth spending more time on before tomorrow.</p>
-
-
-  <h2 id="p5">Part 5 — Duplicate now jumps straight to the new copy <span class="prio prio-3">Enhancement</span></h2>
-  <p><strong>What changed:</strong> hitting <strong>Duplicate</strong> used to close the modal, show a "Duplicated to [date]" toast, and leave you sitting on the original item -- you then had to close it, find the new copy on Main yourself, and open it to actually do anything with it. Now it does the whole job in one action: creates the copy, prefixes the title with <code>"Duplicate of: "</code> so it's obviously a fresh copy at a glance (freely editable, same as any other title), and navigates you straight into it, ready to edit.</p>
-  <p>No confirmation popup was added asking "do you want to go there?" -- duplicating is a deliberate one-off action, so that extra click would just be friction for a question you already know the answer to.</p>
-  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, open any item, click <strong>Duplicate</strong>, select <strong>btnDuplicateConfirm1</strong> in the tree (inside <code>DuplicateModal1 → conDupModalCard1 → conDupButtonRow1</code>). Select <code>OnSelect</code> and replace the whole formula with the block below.</p>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varDuplicating, true);
-Set(
-    varNewDuplicate,
-    Patch(
-        'Policy Proof Tracker',
-        Defaults('Policy Proof Tracker'),
-        {
-            Title: "Duplicate of: " &amp; varSelectedRelease.Title,
-            'Document Type': varSelectedRelease.'Document Type',
-            'Item summary': varSelectedRelease.'Item summary',
-            Owner: varSelectedRelease.Owner,
-            Audience: varSelectedRelease.Audience,
-            'External consultation details': varSelectedRelease.'External consultation details',
-            'External consultation required': varSelectedRelease.'External consultation required',
-            Remarks: varSelectedRelease.Remarks,
-            'Title for Newsletter': varSelectedRelease.'Title for Newsletter',
-            'High Priority': varSelectedRelease.'High Priority',
-            'Reason for High Priority': varSelectedRelease.'Reason for High Priority',
-            'Top Item': varSelectedRelease.'Top Item',
-            'Planned Publish Date': varSelectedDuplicateDate,
-            Published: false,
-            'Published Date': Blank(),
-            'Approved by Pillar Lead (Ready to Release)': false,
-            'Approved For Release By': Blank(),
-            EmailSent: false
-        }
-    )
-);
-If(
-    IsEmpty(Errors('Policy Proof Tracker')),
-    Set(varDuplicating, false);
-    Set(varShowDuplicateModal1, false);
-    ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
-    Set(varSelectedRelease, varNewDuplicate);
-    Set(varSelectedItem, varNewDuplicate);
-    Set(varSelectPolicy, "Filled");
-    Set(varParentSaved, true);
-    Set(varSourceScreen, "Main");
-    Navigate(ViewItem, ScreenTransition.Fade);
-    Notify(
-        "Duplicated to " &amp; Text(varSelectedDuplicateDate, "dddd d mmmm yyyy") &amp; ".",
-        NotificationType.Success
-    ),
-    Set(varDuplicating, false);
-    Notify(
-        "Error: " &amp; First(Errors('Policy Proof Tracker')).Message,
-        NotificationType.Error
-    )
-)</pre></div>
-  <div class="note">Nothing else needed changing. <code>ViewItem</code>'s <code>OnVisible</code> already recomputes owner defaults, publish date, and reloads the links list based on whichever record <code>varSelectedRelease</code> points to -- since we're setting that to the new duplicate before navigating, all of that happens automatically, exactly as if you'd freshly opened it from Main.</div>
-  <div class="warn"><strong>Update:</strong> the toast originally read the date from <code>colThursdays.ThursdayLabel</code>, which also carries the "N entries already scheduled" count used for the date-picker pills -- so the toast confusingly said things like "Duplicated to Thursday 13 August 2026 - 2 entries already scheduled." The code block above already has the fix: it formats <code>varSelectedDuplicateDate</code> directly instead, so the toast just reads "Duplicated to Thursday 13 August 2026." with no scheduling count attached.</div>
-  <div class="test">Test: duplicate an item to any future Thursday -- you should land directly on the new copy with the title reading "Duplicate of: [original title]", the correct date, owner, and document type carried over, and an empty links list (links aren't duplicated, only the item's own fields). Edit the title to whatever you actually want and save as normal.</div>
-
-
-  <h2 id="p6">Part 6 — Overview's document link popup now shows file-type icons <span class="prio prio-3">Enhancement</span></h2>
-  <p><strong>What changed:</strong> the "next four weeks" summary popup on Overview listed document links as plain text, no icons -- not because a reference broke, but because this popup's own link collection (<code>colOverviewLightboxLinks</code>) never computed the <code>FileExt</code> column that the icon logic needs in the first place. It's a completely separate collection from the one <code>ViewItem</code>'s link list uses, populated by its own button (<code>btnCardClick1</code>), so it just never got the same treatment. The icon images themselves (<code>word_icon</code>, <code>excel_icon</code>, <code>ppt_icon</code>, <code>pdf_icon</code>) are app-wide media assets, not screen-local, so reusing the same ones here is completely safe -- nothing to "copy" or risk breaking, just point new controls at the same shared assets.</p>
-  <p>Two changes, same screen: fix the collection, then add one small icon control to the popup's link row template.</p>
-
-  <h3>6a. Add the missing <code>FileExt</code> column</h3>
-  <div class="note"><strong>Where to click:</strong> open <strong>Overview</strong>. Find <strong>btnCardClick1</strong> (the full-card click target on each of the four weekly release cards) and select <code>OnSelect</code>.</div>
-  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varOverviewLightboxItem, ThisItem);
-ClearCollect(colOverviewLightboxLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID), FileExt, GetFileExt(LinkUrl)));
-Set(varOverviewLightboxOpen, true)</pre></div>
-
-  <h3>6b. Add the icon to the popup's link row</h3>
-  <div class="note"><strong>Where to click:</strong> still on <strong>Overview</strong>, expand into the popup's link gallery <code>galLightboxLinks1 → conLightboxLinkRow1</code>. With <strong>conLightboxLinkRow1</strong> selected, go to <strong>Insert → Media → Image</strong> to add a new image inside this row template.</div>
-  <table class="steps">
-    <tr><th>Insert</th><th>Type</th><th>Rename to</th><th>Properties to set</th></tr>
-    <tr>
-      <td>Image inside <code>conLightboxLinkRow1</code></td>
-      <td><span class="tag tag-existing">Image@2.2.3</span></td>
-      <td>Rename to <code>iconLightboxLinkType1</code></td>
-      <td>
-        <code>Height: =20</code>  <code>Width: =20</code><br>
-        <code>X: =12</code>  <code>Y: =(Parent.Height - 20) / 2</code><br>
-        <code>Image:</code>
-        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    ThisItem.FileExt = "pdf", pdf_icon,
-    ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm", word_icon,
-    ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm", excel_icon,
-    ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm", ppt_icon,
-    html_icon
-)</pre></div>
-        Same icon logic already used on <code>ViewItem</code>'s <code>TypeIcon_2</code> and the file-type detection guide above -- nothing new to invent, just the same rule applied here.
-      </td>
-    </tr>
-  </table>
-  <p>Then nudge the existing text label over to make room for the icon:</p>
-  <table class="steps">
-    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
-    <tr><td><code>lblLightboxLinkText1</code></td><td><code>X</code></td><td><code>40</code> (was 12)</td></tr>
-    <tr><td><code>lblLightboxLinkText1</code></td><td><code>Width</code></td><td><code>Parent.Width - 52</code> (was <code>Parent.Width - 24</code>)</td></tr>
-  </table>
-  <div class="note"><code>btnLightboxOpenLink1</code> (the transparent click-to-open overlay) needs no changes -- it already spans the full row width and sits last in the tree, so it stays clickable over the new icon too, exactly like clicking anywhere else on the row.</div>
-  <div class="test">Test: open the Overview summary popup for any release with a mix of file types -- Word/Excel/PowerPoint/PDF links should show their icons the same as they do on the item's own screen, and an "External Link / Non-MODNet" entry should show the generic globe icon (correct -- it isn't an Office file). Clicking anywhere on a row, icon included, should still launch the link.</div>
+  <div class="callout">Test: open a brand-new item (before saving) — the Duplicate button should be gone. Save it, or open any existing item — it should be back.</div>
 
 </main>
 <script>

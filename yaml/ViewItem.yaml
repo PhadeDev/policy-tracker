@@ -448,6 +448,7 @@ Screens:
                         FontWeight: =""
                         Height: =38
                         Icon: ="Copy"
+                        Visible: =varParentSaved
                         OnSelect: |-
                           =ClearCollect(
                               colUpcomingEntries,
