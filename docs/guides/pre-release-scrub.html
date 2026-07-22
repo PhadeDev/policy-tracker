@@ -358,7 +358,7 @@ If(
     Set(varSourceScreen, "Main");
     Navigate(ViewItem, ScreenTransition.Fade);
     Notify(
-        "Duplicated to " &amp; LookUp(colThursdays, ThursdayDate = varSelectedDuplicateDate).ThursdayLabel &amp; ".",
+        "Duplicated to " &amp; Text(varSelectedDuplicateDate, "dddd d mmmm yyyy") &amp; ".",
         NotificationType.Success
     ),
     Set(varDuplicating, false);
@@ -368,6 +368,7 @@ If(
     )
 )</pre></div>
   <div class="note">Nothing else needed changing. <code>ViewItem</code>'s <code>OnVisible</code> already recomputes owner defaults, publish date, and reloads the links list based on whichever record <code>varSelectedRelease</code> points to -- since we're setting that to the new duplicate before navigating, all of that happens automatically, exactly as if you'd freshly opened it from Main.</div>
+  <div class="warn"><strong>Update:</strong> the toast originally read the date from <code>colThursdays.ThursdayLabel</code>, which also carries the "N entries already scheduled" count used for the date-picker pills -- so the toast confusingly said things like "Duplicated to Thursday 13 August 2026 - 2 entries already scheduled." The code block above already has the fix: it formats <code>varSelectedDuplicateDate</code> directly instead, so the toast just reads "Duplicated to Thursday 13 August 2026." with no scheduling count attached.</div>
   <div class="test">Test: duplicate an item to any future Thursday -- you should land directly on the new copy with the title reading "Duplicate of: [original title]", the correct date, owner, and document type carried over, and an empty links list (links aren't duplicated, only the item's own fields). Edit the title to whatever you actually want and save as normal.</div>
 
 </main>

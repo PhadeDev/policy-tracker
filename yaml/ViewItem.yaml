@@ -3289,7 +3289,7 @@ Screens:
                                     Set(varSourceScreen, "Main");
                                     Navigate(ViewItem, ScreenTransition.Fade);
                                     Notify(
-                                        "Duplicated to " & LookUp(colThursdays, ThursdayDate = varSelectedDuplicateDate).ThursdayLabel & ".",
+                                        "Duplicated to " & Text(varSelectedDuplicateDate, "dddd d mmmm yyyy") & ".",
                                         NotificationType.Success
                                     ),
                                     Set(varDuplicating, false);
