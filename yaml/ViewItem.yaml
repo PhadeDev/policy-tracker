@@ -3256,7 +3256,7 @@ Screens:
                                         'Policy Proof Tracker',
                                         Defaults('Policy Proof Tracker'),
                                         {
-                                            Title: varSelectedRelease.Title,
+                                            Title: "Duplicate of: " & varSelectedRelease.Title,
                                             'Document Type': varSelectedRelease.'Document Type',
                                             'Item summary': varSelectedRelease.'Item summary',
                                             Owner: varSelectedRelease.Owner,
@@ -3282,8 +3282,14 @@ Screens:
                                     Set(varDuplicating, false);
                                     Set(varShowDuplicateModal1, false);
                                     ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+                                    Set(varSelectedRelease, varNewDuplicate);
+                                    Set(varSelectedItem, varNewDuplicate);
+                                    Set(varSelectPolicy, "Filled");
+                                    Set(varParentSaved, true);
+                                    Set(varSourceScreen, "Main");
+                                    Navigate(ViewItem, ScreenTransition.Fade);
                                     Notify(
-                                        "Duplicated to " & LookUp(colThursdays, ThursdayDate = varSelectedDuplicateDate).ThursdayLabel & ". Find it on the main screen.",
+                                        "Duplicated to " & LookUp(colThursdays, ThursdayDate = varSelectedDuplicateDate).ThursdayLabel & ".",
                                         NotificationType.Success
                                     ),
                                     Set(varDuplicating, false);

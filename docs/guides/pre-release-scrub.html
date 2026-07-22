@@ -58,6 +58,7 @@
     <a href="#p2"><span class="toc-num">2.</span> Visual restyle to match the rest of the screen <span class="prio prio-3">Optional, if there's time</span></a>
     <a href="#p3"><span class="toc-num">3.</span> Link icons and "Open In App" don't recognise every Office file variant <span class="prio prio-2">Real bug</span></a>
     <a href="#p4"><span class="toc-num">4.</span> Icons reset to the generic globe after Save <span class="prio prio-1">Real bug, do this one</span></a>
+    <a href="#p5"><span class="toc-num">5.</span> Duplicate now jumps straight to the new copy <span class="prio prio-3">Enhancement</span></a>
   </div>
 
   <h2 id="p1">Part 1 — Fix the two real bugs <span class="prio prio-1">~10 minutes, zero risk</span></h2>
@@ -311,6 +312,63 @@ ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "ppt
 
   <h3>On the icon load delay</h3>
   <p>You also mentioned the icons take a couple of seconds to actually render even when everything else on the row (text, buttons) appears instantly. I can't test this live, so this is my best honest read rather than a confirmed fix: <code>word_icon</code>/<code>excel_icon</code>/<code>ppt_icon</code>/<code>pdf_icon</code> aren't formulas, they're uploaded media assets in the app, and Power Apps fetches media assets over the network the first time each one is actually referenced in a session/screen load -- that's normal Player/Studio behaviour, not something introduced by any formula change here, and not something a Power Fx edit can speed up. The only lever I'm aware of (unverified, since I can't test it) is the file size of the actual icon images themselves -- if they're large PNGs, re-exporting them as small, compressed PNGs or SVGs in whatever tool you made them in might help. I'd treat this as a "live with it" cosmetic quirk rather than something worth spending more time on before tomorrow.</p>
+
+
+  <h2 id="p5">Part 5 — Duplicate now jumps straight to the new copy <span class="prio prio-3">Enhancement</span></h2>
+  <p><strong>What changed:</strong> hitting <strong>Duplicate</strong> used to close the modal, show a "Duplicated to [date]" toast, and leave you sitting on the original item -- you then had to close it, find the new copy on Main yourself, and open it to actually do anything with it. Now it does the whole job in one action: creates the copy, prefixes the title with <code>"Duplicate of: "</code> so it's obviously a fresh copy at a glance (freely editable, same as any other title), and navigates you straight into it, ready to edit.</p>
+  <p>No confirmation popup was added asking "do you want to go there?" -- duplicating is a deliberate one-off action, so that extra click would just be friction for a question you already know the answer to.</p>
+  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, open any item, click <strong>Duplicate</strong>, select <strong>btnDuplicateConfirm1</strong> in the tree (inside <code>DuplicateModal1 → conDupModalCard1 → conDupButtonRow1</code>). Select <code>OnSelect</code> and replace the whole formula with the block below.</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varDuplicating, true);
+Set(
+    varNewDuplicate,
+    Patch(
+        'Policy Proof Tracker',
+        Defaults('Policy Proof Tracker'),
+        {
+            Title: "Duplicate of: " &amp; varSelectedRelease.Title,
+            'Document Type': varSelectedRelease.'Document Type',
+            'Item summary': varSelectedRelease.'Item summary',
+            Owner: varSelectedRelease.Owner,
+            Audience: varSelectedRelease.Audience,
+            'External consultation details': varSelectedRelease.'External consultation details',
+            'External consultation required': varSelectedRelease.'External consultation required',
+            Remarks: varSelectedRelease.Remarks,
+            'Title for Newsletter': varSelectedRelease.'Title for Newsletter',
+            'High Priority': varSelectedRelease.'High Priority',
+            'Reason for High Priority': varSelectedRelease.'Reason for High Priority',
+            'Top Item': varSelectedRelease.'Top Item',
+            'Planned Publish Date': varSelectedDuplicateDate,
+            Published: false,
+            'Published Date': Blank(),
+            'Approved by Pillar Lead (Ready to Release)': false,
+            'Approved For Release By': Blank(),
+            EmailSent: false
+        }
+    )
+);
+If(
+    IsEmpty(Errors('Policy Proof Tracker')),
+    Set(varDuplicating, false);
+    Set(varShowDuplicateModal1, false);
+    ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
+    Set(varSelectedRelease, varNewDuplicate);
+    Set(varSelectedItem, varNewDuplicate);
+    Set(varSelectPolicy, "Filled");
+    Set(varParentSaved, true);
+    Set(varSourceScreen, "Main");
+    Navigate(ViewItem, ScreenTransition.Fade);
+    Notify(
+        "Duplicated to " &amp; LookUp(colThursdays, ThursdayDate = varSelectedDuplicateDate).ThursdayLabel &amp; ".",
+        NotificationType.Success
+    ),
+    Set(varDuplicating, false);
+    Notify(
+        "Error: " &amp; First(Errors('Policy Proof Tracker')).Message,
+        NotificationType.Error
+    )
+)</pre></div>
+  <div class="note">Nothing else needed changing. <code>ViewItem</code>'s <code>OnVisible</code> already recomputes owner defaults, publish date, and reloads the links list based on whichever record <code>varSelectedRelease</code> points to -- since we're setting that to the new duplicate before navigating, all of that happens automatically, exactly as if you'd freshly opened it from Main.</div>
+  <div class="test">Test: duplicate an item to any future Thursday -- you should land directly on the new copy with the title reading "Duplicate of: [original title]", the correct date, owner, and document type carried over, and an empty links list (links aren't duplicated, only the item's own fields). Edit the title to whatever you actually want and save as normal.</div>
 
 </main>
 <script>
