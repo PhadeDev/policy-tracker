@@ -134,12 +134,12 @@ Screens:
                               RadiusBottomRight: =11
                               RadiusTopLeft: =11
                               RadiusTopRight: =11
-                              Size: =9
+                              Size: =14
                               Text: =Text(CountRows(ThisItem.ItemsForDate))
                               Width: =32
                               Wrap: =false
                               X: =Parent.Width - 42
-                              Y: =9
+                              Y: =5
                   - galColCards1:
                       Control: Gallery@2.15.0
                       Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -148,7 +148,16 @@ Screens:
                         BorderThickness: =1
                         Fill: =RGBA(255, 255, 255, 1)
                         Height: =Parent.TemplateHeight - 40
-                        Items: =Sort(ThisItem.ItemsForDate, 'Document Type'.Value, SortOrder.Ascending)
+                        Items: |-
+                          =Sort(
+                              ThisItem.ItemsForDate,
+                              If(
+                                  'Top Item',
+                                  -1000,
+                                  Coalesce(LookUp(colChoiceColors, ChoiceValue = 'Document Type'.Value, SortOrder), 99)
+                              ),
+                              SortOrder.Ascending
+                          )
                         TemplateSize: =100
                         Width: =Parent.TemplateWidth - 16
                         X: =8
@@ -212,8 +221,8 @@ Screens:
                                     Size: =8
                                     Text: =If(Len(ThisItem.Title) > 60, Left(ThisItem.Title, 57) & "...", ThisItem.Title)
                                     VerticalAlign: =VerticalAlign.Top
-                                    Width: =Parent.Width - 24
-                                    X: =12
+                                    Width: =277
+                                    X: =4
                                     Y: =28
                               - imgCardOwner1:
                                   Control: Image@2.2.3
@@ -233,11 +242,77 @@ Screens:
                                     Color: =RGBA(91, 105, 97, 1)
                                     Font: =Font.'Open Sans'
                                     Height: =18
-                                    Size: =6
+                                    Size: =8
                                     Text: =ThisItem.Owner.DisplayName
                                     Width: =Parent.Width - 40
                                     X: =30
                                     Y: =66
+                              - TopItem_1:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Height: =40
+                                    Visible: =ThisItem.'Top Item'
+                                    Width: =100
+                                    X: =171
+                                  Children:
+                                    - TopItemBG_2:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderThickness: =0
+                                          Color: =RGBA(80, 50, 0, 1)
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisplayMode: =DisplayMode.View
+                                          Fill: =RGBA(255, 186, 8, 1)
+                                          Font: =Font.'Lato Black'
+                                          Height: =18
+                                          HoverBorderColor: =RGBA(0, 0, 0, 0)
+                                          HoverColor: =RGBA(80, 50, 0, 1)
+                                          HoverFill: =RGBA(255, 186, 8, 1)
+                                          OnSelect: =
+                                          PressedBorderColor: =RGBA(0, 0, 0, 0)
+                                          PressedColor: =RGBA(80, 50, 0, 1)
+                                          PressedFill: =RGBA(255, 186, 8, 1)
+                                          RadiusBottomLeft: =13
+                                          RadiusBottomRight: =13
+                                          RadiusTopLeft: =13
+                                          RadiusTopRight: =13
+                                          Text: =""
+                                          Visible: =ThisItem.'Top Item'
+                                          Width: =90
+                                          Y: =8
+                                    - TopItemTXT_2:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          AutoHeight: =true
+                                          Color: =RGBA(80, 50, 0, 1)
+                                          Fill: =RGBA(0, 0, 0, 0)
+                                          Font: =Font.Lato
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =18
+                                          OnSelect: =
+                                          PaddingTop: =2
+                                          Size: =10
+                                          Text: ="TOP ITEM"
+                                          Visible: =ThisItem.'Top Item'
+                                          Width: =75
+                                          X: =25
+                                          Y: =8
+                                    - TopItemTop_2:
+                                        Control: ModernIcon@1.1.1
+                                        Properties:
+                                          BorderThickness: =0
+                                          Height: =18
+                                          Icon: ="Star"
+                                          IconColor: =RGBA(80, 50, 0, 1)
+                                          IconStyle: =IconStyle.Filled
+                                          OnSelect: =
+                                          Visible: =ThisItem.'Top Item'
+                                          Width: =16
+                                          X: =10
+                                          Y: =8
                               - btnCardClick1:
                                   Control: Classic/Button@2.2.0
                                   Properties:
@@ -247,7 +322,7 @@ Screens:
                                     HoverFill: =RGBA(11, 74, 54, 0.05)
                                     OnSelect: |-
                                       =Set(varOverviewLightboxItem, ThisItem);
-                                      ClearCollect(colOverviewLightboxLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID));
+                                      ClearCollect(colOverviewLightboxLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID), FileExt, GetFileExt(LinkUrl)));
                                       Set(varOverviewLightboxOpen, true)
                                     PressedFill: =RGBA(11, 74, 54, 0.09)
                                     Text: =""
@@ -342,6 +417,72 @@ Screens:
                               Width: =Parent.Width - 70
                               X: =20
                               Y: =68
+                        - TopItem_2:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =40
+                              Visible: =If(IsBlank(varOverviewLightboxItem), "", varOverviewLightboxItem.'Top Item')
+                              Width: =100
+                              X: =445
+                            Children:
+                              - TopItemBG_3:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderThickness: =0
+                                    Color: =RGBA(80, 50, 0, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisplayMode: =DisplayMode.View
+                                    Fill: =RGBA(255, 186, 8, 1)
+                                    Font: =Font.'Lato Black'
+                                    Height: =18
+                                    HoverBorderColor: =RGBA(0, 0, 0, 0)
+                                    HoverColor: =RGBA(80, 50, 0, 1)
+                                    HoverFill: =RGBA(255, 186, 8, 1)
+                                    OnSelect: =
+                                    PressedBorderColor: =RGBA(0, 0, 0, 0)
+                                    PressedColor: =RGBA(80, 50, 0, 1)
+                                    PressedFill: =RGBA(255, 186, 8, 1)
+                                    RadiusBottomLeft: =13
+                                    RadiusBottomRight: =13
+                                    RadiusTopLeft: =13
+                                    RadiusTopRight: =13
+                                    Text: =""
+                                    Visible: =If(IsBlank(varOverviewLightboxItem), "", varOverviewLightboxItem.'Top Item')
+                                    Width: =90
+                                    Y: =8
+                              - TopItemTXT_3:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =RGBA(80, 50, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Font: =Font.Lato
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =18
+                                    OnSelect: =
+                                    PaddingTop: =2
+                                    Size: =10
+                                    Text: ="TOP ITEM"
+                                    Visible: =If(IsBlank(varOverviewLightboxItem), "", varOverviewLightboxItem.'Top Item')
+                                    Width: =75
+                                    X: =25
+                                    Y: =8
+                              - TopItemTop_3:
+                                  Control: ModernIcon@1.1.1
+                                  Properties:
+                                    BorderThickness: =0
+                                    Height: =18
+                                    Icon: ="Star"
+                                    IconColor: =RGBA(80, 50, 0, 1)
+                                    IconStyle: =IconStyle.Filled
+                                    OnSelect: =
+                                    Visible: =If(IsBlank(varOverviewLightboxItem), "", varOverviewLightboxItem.'Top Item')
+                                    Width: =16
+                                    X: =10
+                                    Y: =8
                   - conLightboxBody1:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -559,6 +700,21 @@ Screens:
                                     RadiusTopRight: =8
                                     Width: =Parent.TemplateWidth
                                   Children:
+                                    - iconLightboxLinkType1:
+                                        Control: Image@2.2.3
+                                        Properties:
+                                          Height: =20
+                                          Image: |-
+                                            =If(
+                                                ThisItem.FileExt = "pdf", pdf_icon,
+                                                ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm", word_icon,
+                                                ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm", excel_icon,
+                                                ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm", ppt_icon,
+                                                html_icon
+                                            )
+                                          Width: =20
+                                          X: =12
+                                          Y: =(Parent.Height - 20) / 2
                                     - lblLightboxLinkText1:
                                         Control: Label@2.5.1
                                         Properties:
@@ -567,8 +723,8 @@ Screens:
                                           Height: =Parent.Height
                                           Size: =9
                                           Text: =Coalesce(ThisItem.LinkText, ThisItem.LinkUrl)
-                                          Width: =Parent.Width - 24
-                                          X: =12
+                                          Width: =Parent.Width - 52
+                                          X: =40
                                     - btnLightboxOpenLink1:
                                         Control: Classic/Button@2.2.0
                                         Properties:

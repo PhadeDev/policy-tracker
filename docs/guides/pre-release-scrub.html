@@ -59,6 +59,7 @@
     <a href="#p3"><span class="toc-num">3.</span> Link icons and "Open In App" don't recognise every Office file variant <span class="prio prio-2">Real bug</span></a>
     <a href="#p4"><span class="toc-num">4.</span> Icons reset to the generic globe after Save <span class="prio prio-1">Real bug, do this one</span></a>
     <a href="#p5"><span class="toc-num">5.</span> Duplicate now jumps straight to the new copy <span class="prio prio-3">Enhancement</span></a>
+    <a href="#p6"><span class="toc-num">6.</span> Overview's document link popup now shows file-type icons <span class="prio prio-3">Enhancement</span></a>
   </div>
 
   <h2 id="p1">Part 1 — Fix the two real bugs <span class="prio prio-1">~10 minutes, zero risk</span></h2>
@@ -370,6 +371,49 @@ If(
   <div class="note">Nothing else needed changing. <code>ViewItem</code>'s <code>OnVisible</code> already recomputes owner defaults, publish date, and reloads the links list based on whichever record <code>varSelectedRelease</code> points to -- since we're setting that to the new duplicate before navigating, all of that happens automatically, exactly as if you'd freshly opened it from Main.</div>
   <div class="warn"><strong>Update:</strong> the toast originally read the date from <code>colThursdays.ThursdayLabel</code>, which also carries the "N entries already scheduled" count used for the date-picker pills -- so the toast confusingly said things like "Duplicated to Thursday 13 August 2026 - 2 entries already scheduled." The code block above already has the fix: it formats <code>varSelectedDuplicateDate</code> directly instead, so the toast just reads "Duplicated to Thursday 13 August 2026." with no scheduling count attached.</div>
   <div class="test">Test: duplicate an item to any future Thursday -- you should land directly on the new copy with the title reading "Duplicate of: [original title]", the correct date, owner, and document type carried over, and an empty links list (links aren't duplicated, only the item's own fields). Edit the title to whatever you actually want and save as normal.</div>
+
+
+  <h2 id="p6">Part 6 — Overview's document link popup now shows file-type icons <span class="prio prio-3">Enhancement</span></h2>
+  <p><strong>What changed:</strong> the "next four weeks" summary popup on Overview listed document links as plain text, no icons -- not because a reference broke, but because this popup's own link collection (<code>colOverviewLightboxLinks</code>) never computed the <code>FileExt</code> column that the icon logic needs in the first place. It's a completely separate collection from the one <code>ViewItem</code>'s link list uses, populated by its own button (<code>btnCardClick1</code>), so it just never got the same treatment. The icon images themselves (<code>word_icon</code>, <code>excel_icon</code>, <code>ppt_icon</code>, <code>pdf_icon</code>) are app-wide media assets, not screen-local, so reusing the same ones here is completely safe -- nothing to "copy" or risk breaking, just point new controls at the same shared assets.</p>
+  <p>Two changes, same screen: fix the collection, then add one small icon control to the popup's link row template.</p>
+
+  <h3>6a. Add the missing <code>FileExt</code> column</h3>
+  <div class="note"><strong>Where to click:</strong> open <strong>Overview</strong>. Find <strong>btnCardClick1</strong> (the full-card click target on each of the four weekly release cards) and select <code>OnSelect</code>.</div>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Set(varOverviewLightboxItem, ThisItem);
+ClearCollect(colOverviewLightboxLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = ThisItem.ID), FileExt, GetFileExt(LinkUrl)));
+Set(varOverviewLightboxOpen, true)</pre></div>
+
+  <h3>6b. Add the icon to the popup's link row</h3>
+  <div class="note"><strong>Where to click:</strong> still on <strong>Overview</strong>, expand into the popup's link gallery <code>galLightboxLinks1 → conLightboxLinkRow1</code>. With <strong>conLightboxLinkRow1</strong> selected, go to <strong>Insert → Media → Image</strong> to add a new image inside this row template.</div>
+  <table class="steps">
+    <tr><th>Insert</th><th>Type</th><th>Rename to</th><th>Properties to set</th></tr>
+    <tr>
+      <td>Image inside <code>conLightboxLinkRow1</code></td>
+      <td><span class="tag tag-existing">Image@2.2.3</span></td>
+      <td>Rename to <code>iconLightboxLinkType1</code></td>
+      <td>
+        <code>Height: =20</code>  <code>Width: =20</code><br>
+        <code>X: =12</code>  <code>Y: =(Parent.Height - 20) / 2</code><br>
+        <code>Image:</code>
+        <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    ThisItem.FileExt = "pdf", pdf_icon,
+    ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm", word_icon,
+    ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm", excel_icon,
+    ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm", ppt_icon,
+    html_icon
+)</pre></div>
+        Same icon logic already used on <code>ViewItem</code>'s <code>TypeIcon_2</code> and the file-type detection guide above -- nothing new to invent, just the same rule applied here.
+      </td>
+    </tr>
+  </table>
+  <p>Then nudge the existing text label over to make room for the icon:</p>
+  <table class="steps">
+    <tr><th>Control <span class="tag tag-existing">existing</span></th><th>Property</th><th>New value</th></tr>
+    <tr><td><code>lblLightboxLinkText1</code></td><td><code>X</code></td><td><code>40</code> (was 12)</td></tr>
+    <tr><td><code>lblLightboxLinkText1</code></td><td><code>Width</code></td><td><code>Parent.Width - 52</code> (was <code>Parent.Width - 24</code>)</td></tr>
+  </table>
+  <div class="note"><code>btnLightboxOpenLink1</code> (the transparent click-to-open overlay) needs no changes -- it already spans the full row width and sits last in the tree, so it stays clickable over the new icon too, exactly like clicking anywhere else on the row.</div>
+  <div class="test">Test: open the Overview summary popup for any release with a mix of file types -- Word/Excel/PowerPoint/PDF links should show their icons the same as they do on the item's own screen, and an "External Link / Non-MODNet" entry should show the generic globe icon (correct -- it isn't an Office file). Clicking anywhere on a row, icon included, should still launch the link.</div>
 
 </main>
 <script>
