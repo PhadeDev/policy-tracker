@@ -56,6 +56,7 @@
     <strong>Jump to:</strong>
     <a href="#p1"><span class="toc-num">1.</span> Fix the two real bugs <span class="prio prio-1">Do this tonight</span></a>
     <a href="#p2"><span class="toc-num">2.</span> Visual restyle to match the rest of the screen <span class="prio prio-3">Optional, if there's time</span></a>
+    <a href="#p3"><span class="toc-num">3.</span> Link icons and "Open In App" don't recognise every Office file variant <span class="prio prio-2">Real bug</span></a>
   </div>
 
   <h2 id="p1">Part 1 — Fix the two real bugs <span class="prio prio-1">~10 minutes, zero risk</span></h2>
@@ -194,6 +195,107 @@ Set(varSelectedLink, Blank())</pre></div>
   </table>
 
   <div class="test">Test: open the modal (Add and Edit both) — dark dimmed background, rounded card, title reading "Add Document Link" or "Edit Document Link" correctly, &#10005; closes it the same as Cancel. Nothing here changes any Save/Delete/Duplicate behaviour — that's all still whatever Part 1 above left it as.</div>
+
+
+  <h2 id="p3">Part 3 — Link icons and "Open In App" don't recognise every Office file variant <span class="prio prio-2">Real bug</span></h2>
+  <p><strong>What's wrong:</strong> the file-type detection only ever recognised <code>doc, docx, xls, xlsx, ppt, pptx, pdf</code>. Anything else -- template files (<code>.potx</code>, <code>.dotx</code>, <code>.xltx</code>), macro-enabled files (<code>.docm</code>, <code>.xlsm</code>, <code>.pptm</code>), or the older 97-2003 template/show variants (<code>.dot</code>, <code>.xlt</code>, <code>.pot</code>, <code>.pps</code>, <code>.ppsx</code>, <code>.ppsm</code>) -- falls through to the generic link icon and the "Open In App" button doesn't show at all for those, even though the file genuinely is a Word/Excel/PowerPoint document. This is all three fixed in the same three places, plus the colour bonus: the "Open In App" button now switches between Word blue, Excel green, and PowerPoint red/orange based on the file type, instead of always being the same blue.</p>
+  <p>All three changes below are property edits on controls that already exist -- nothing new to insert, nothing to rename, no paste-a-whole-control risk like Part 2.</p>
+
+  <h3>3a. Named formula <code>GetFileExt</code> — recognise every variant</h3>
+  <div class="note"><strong>Where to click:</strong> in Studio's top menu, go to <strong>App</strong> (or the <strong>&lt;/&gt; Formulas</strong> icon depending on your Studio layout) to open <strong>App formulas</strong>. Find the <code>GetFileExt</code> named formula. Select all its text and replace with the block below.</div>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>GetFileExt(LinkUrl: Text): Text = With(
+    {FileParamStart: Find("file=", LinkUrl, 1)},
+    With(
+        {
+            FileNamePart: If(
+                FileParamStart &gt; 0,
+                With(
+                    {AmpPos: Find("&amp;", LinkUrl, FileParamStart + 5)},
+                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos &gt; 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                ),
+                If(Find("?", LinkUrl, 1) &gt; 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+            )
+        },
+        Switch(
+            true,
+            Right(FileNamePart, 5) = ".docx", "docx",
+            Right(FileNamePart, 5) = ".docm", "docm",
+            Right(FileNamePart, 5) = ".dotx", "dotx",
+            Right(FileNamePart, 5) = ".dotm", "dotm",
+            Right(FileNamePart, 4) = ".doc", "doc",
+            Right(FileNamePart, 4) = ".dot", "dot",
+            Right(FileNamePart, 5) = ".xlsx", "xlsx",
+            Right(FileNamePart, 5) = ".xlsm", "xlsm",
+            Right(FileNamePart, 5) = ".xltx", "xltx",
+            Right(FileNamePart, 5) = ".xltm", "xltm",
+            Right(FileNamePart, 4) = ".xls", "xls",
+            Right(FileNamePart, 4) = ".xlt", "xlt",
+            Right(FileNamePart, 5) = ".pptx", "pptx",
+            Right(FileNamePart, 5) = ".pptm", "pptm",
+            Right(FileNamePart, 5) = ".potx", "potx",
+            Right(FileNamePart, 5) = ".potm", "potm",
+            Right(FileNamePart, 5) = ".ppsx", "ppsx",
+            Right(FileNamePart, 5) = ".ppsm", "ppsm",
+            Right(FileNamePart, 4) = ".ppt", "ppt",
+            Right(FileNamePart, 4) = ".pot", "pot",
+            Right(FileNamePart, 4) = ".pps", "pps",
+            Right(FileNamePart, 4) = ".pdf", "pdf",
+            ""
+        )
+    )
+)</pre></div>
+  <div class="warn">This is the same named formula used by <code>BuildLinksForSource</code> and <code>RefreshActiveCache</code> to populate <code>FileExt</code> on every link row -- fixing it here fixes icons everywhere those two are used, you don't need to touch them separately.</div>
+
+  <h3>3b. Link row icon — recognise the same variants</h3>
+  <div class="note"><strong>Where to click:</strong> open <strong>ViewItem</strong>, on any link row in the tree find <strong>TypeIcon_2</strong> (the small file-type icon on the left of each link row) and select it. In the Properties dropdown select <code>Image</code>.</div>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    ThisItem.FileExt = "pdf", pdf_icon,
+    ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm", word_icon,
+    ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm", excel_icon,
+    ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm", ppt_icon,
+    html_icon
+)</pre></div>
+
+  <h3>3c. "Open In App" button — show for every variant, launch the right app, and colour by type</h3>
+  <div class="note"><strong>Where to click:</strong> same link row, select <strong>OpenDesktop_2</strong> (the "Open In app" button). Three separate properties need replacing on this one control: <code>Visible</code>, <code>OnSelect</code>, and <code>BasePaletteColor</code>.</div>
+  <p><code>Visible</code> -- so the button actually appears for the new variants too:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>(ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm" ||
+ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm" ||
+ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm") &amp;&amp;
+"modgovuk.sharepoint.com" in Lower(ThisItem.LinkUrl)</pre></div>
+  <p><code>OnSelect</code> -- so it launches the right desktop app for every variant, not just the six original ones:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>Switch(
+    ThisItem.FileExt,
+    "docx", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "doc", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "docm", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "dot", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "dotx", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "dotm", Launch("ms-word:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "xlsx", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "xls", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "xlsm", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "xlt", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "xltx", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "xltm", Launch("ms-excel:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "pptx", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "ppt", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "pptm", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "pot", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "potx", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "potm", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "pps", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "ppsx", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New),
+    "ppsm", Launch("ms-powerpoint:ofe|u|" &amp; ThisItem.LinkUrl, {}, LaunchTarget.New)
+)</pre></div>
+  <p><code>BasePaletteColor</code> -- the colour-by-type bonus: Word blue, Excel green, PowerPoint red/orange:</p>
+  <div class="code-block"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    ThisItem.FileExt = "doc" || ThisItem.FileExt = "docx" || ThisItem.FileExt = "docm" || ThisItem.FileExt = "dot" || ThisItem.FileExt = "dotx" || ThisItem.FileExt = "dotm", RGBA(43, 87, 154, 1),
+    ThisItem.FileExt = "xls" || ThisItem.FileExt = "xlsx" || ThisItem.FileExt = "xlsm" || ThisItem.FileExt = "xlt" || ThisItem.FileExt = "xltx" || ThisItem.FileExt = "xltm", RGBA(33, 115, 70, 1),
+    ThisItem.FileExt = "ppt" || ThisItem.FileExt = "pptx" || ThisItem.FileExt = "pptm" || ThisItem.FileExt = "pot" || ThisItem.FileExt = "potx" || ThisItem.FileExt = "potm" || ThisItem.FileExt = "pps" || ThisItem.FileExt = "ppsx" || ThisItem.FileExt = "ppsm", RGBA(183, 71, 42, 1),
+    RGBA(5, 102, 178, 1)
+)</pre></div>
+  <div class="test">Test: your <code>.potx</code> PowerPoint template link should now show the PowerPoint icon (not the generic link icon), the "Open In app" button should appear in PowerPoint's red/orange, and clicking it should launch PowerPoint. Check a Word doc and Excel file too -- blue and green respectively. A plain PDF link should be unaffected (still shows the PDF icon, no "Open In app" button, since PDFs never had a desktop-launch protocol).</div>
 
 </main>
 <script>

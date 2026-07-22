@@ -1,44 +1,73 @@
+GetFileExt(LinkUrl: Text): Text = With(
+    {FileParamStart: Find("file=", LinkUrl, 1)},
+    With(
+        {
+            FileNamePart: If(
+                FileParamStart > 0,
+                With(
+                    {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
+                    Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
+                ),
+                If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
+            )
+        },
+        Switch(
+            true,
+            Right(FileNamePart, 5) = ".docx", "docx",
+            Right(FileNamePart, 5) = ".docm", "docm",
+            Right(FileNamePart, 5) = ".dotx", "dotx",
+            Right(FileNamePart, 5) = ".dotm", "dotm",
+            Right(FileNamePart, 4) = ".doc", "doc",
+            Right(FileNamePart, 4) = ".dot", "dot",
+            Right(FileNamePart, 5) = ".xlsx", "xlsx",
+            Right(FileNamePart, 5) = ".xlsm", "xlsm",
+            Right(FileNamePart, 5) = ".xltx", "xltx",
+            Right(FileNamePart, 5) = ".xltm", "xltm",
+            Right(FileNamePart, 4) = ".xls", "xls",
+            Right(FileNamePart, 4) = ".xlt", "xlt",
+            Right(FileNamePart, 5) = ".pptx", "pptx",
+            Right(FileNamePart, 5) = ".pptm", "pptm",
+            Right(FileNamePart, 5) = ".potx", "potx",
+            Right(FileNamePart, 5) = ".potm", "potm",
+            Right(FileNamePart, 5) = ".ppsx", "ppsx",
+            Right(FileNamePart, 5) = ".ppsm", "ppsm",
+            Right(FileNamePart, 4) = ".ppt", "ppt",
+            Right(FileNamePart, 4) = ".pot", "pot",
+            Right(FileNamePart, 4) = ".pps", "pps",
+            Right(FileNamePart, 4) = ".pdf", "pdf",
+            ""
+        )
+    )
+)
 BuildLinksForSource(SourceID: Number): Boolean = {
     ClearCollect(
         colLinks,
         AddColumns(
             Filter(PolicyLinks, PolicyTrackerSource.Id = SourceID),
             FileExt,
-            With(
-                {FileParamStart: Find("file=", LinkUrl, 1)},
-                With(
-                    {
-                        FileNamePart: If(
-                            FileParamStart > 0,
-                            With(
-                                {AmpPos: Find("&", LinkUrl, FileParamStart + 5)},
-                                Mid(LinkUrl, FileParamStart + 5, If(AmpPos > 0, AmpPos - (FileParamStart + 5), Len(LinkUrl) - (FileParamStart + 5) + 1))
-                            ),
-                            If(Find("?", LinkUrl, 1) > 0, Left(LinkUrl, Find("?", LinkUrl, 1) - 1), LinkUrl)
-                        )
-                    },
-                    Switch(
-                        true,
-                        Right(FileNamePart, 5) = ".docx", "docx",
-                        Right(FileNamePart, 4) = ".doc", "doc",
-                        Right(FileNamePart, 5) = ".xlsx", "xlsx",
-                        Right(FileNamePart, 4) = ".xls", "xls",
-                        Right(FileNamePart, 5) = ".pptx", "pptx",
-                        Right(FileNamePart, 4) = ".ppt", "ppt",
-                        Right(FileNamePart, 4) = ".pdf", "pdf",
-                        ""
-                    )
-                )
-            )
+            GetFileExt(LinkUrl)
         )
     );
+    Set(varLinksSourceID, SourceID);
     true
 };
-
-ShowToast(Heading: Text, Message: Text, Type: Text): Boolean = {
-    Set(varToastHeading, Heading);
-    Set(varToastMessage, Message);
-    Set(varToastType, Type);
-    Set(varToastVisible, true);
+RefreshActiveCache(): Boolean = {
+    ClearCollect(
+        colActiveItems,
+        Filter(
+            'Policy Proof Tracker',
+            'Planned Publish Date' >= Today() &&
+            'Planned Publish Date' <= DateAdd(Today(), 28, "Days")
+        )
+    );
+    ClearCollect(
+        colActiveLinks,
+        AddColumns(
+            Filter(PolicyLinks, PolicyTrackerSource.Id in colActiveItems.ID),
+            FileExt,
+            GetFileExt(LinkUrl)
+        )
+    );
+    Set(varActiveCacheReady, true);
     true
 };
