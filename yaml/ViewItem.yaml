@@ -274,7 +274,7 @@ Screens:
                                       Set(varParentSaved, true);
                                       Set(varUnsavedChanges, false);
                                       ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
-                                      ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID));
+                                      ClearCollect(colLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID), FileExt, GetFileExt(LinkUrl)));
                                       Set(varErrTitle, false);
                                       Set(varErrOwner, false);
                                       Set(varErrDocType, false);
@@ -369,7 +369,7 @@ Screens:
                                       Set(varParentSaved, true);
                                       Set(varUnsavedChanges, false);
                                       ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
-                                      ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID));
+                                      ClearCollect(colLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID), FileExt, GetFileExt(LinkUrl)));
                                       Set(varErrTitle, false);
                                       Set(varErrOwner, false);
                                       Set(varErrDocType, false);
@@ -2027,7 +2027,7 @@ Screens:
                                                       Set(varParentSaved, true);
                                                       Set(varUnsavedChanges, false);
                                                       ClearCollect(colUnpublishedPolicies, Filter('Policy Proof Tracker', Published = false));
-                                                      ClearCollect(colLinks, Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID));
+                                                      ClearCollect(colLinks, AddColumns(Filter(PolicyLinks, PolicyTrackerSource.Id = varSavedRecord.ID), FileExt, GetFileExt(LinkUrl)));
                                                       Set(varSaving, false);
                                                       Notify("Saved - you can now add links.", NotificationType.Success);
                                                       Set(varSelectedLink, Defaults(PolicyLinks));
