@@ -33,29 +33,19 @@
   <h1>Policy Tracker — Fix Guide</h1>
   <p class="subtitle">Fresh guide, one fix in it so far. Older entries have been retired.</p>
 
-  <h2>"No releases" message didn't account for Future weeks</h2>
+  <h2>Owner avatar picture missing/flaky on Main</h2>
   <p class="meta">Main &middot; property edit &middot; no risk</p>
 
-  <p>First attempt checked which <strong>tab</strong> was selected (<code>varSelectedState</code>), but the Current tab shows up to four weeks at once — so a group for next Thursday still said "this week" just because the Current tab was open. Fixed properly this time by comparing each group's own date (<code>ThisItem.PlannedDate</code>) against today's calendar week directly, the same week-start technique already used by the Duplicate modal's date chips elsewhere in this app. This no longer depends on which tab is open at all — it's correct regardless.</p>
+  <p>The owner picture on Main (<code>UsrIMG</code>) was bound to <code>ThisItem.Owner.Picture</code> — the raw SharePoint Person-column picture reference, which depends on SharePoint's own thumbnail/claims cache and is well known for returning blank on a fresh load or for some users regardless of retries. ViewItem never has this issue because it uses a different, reliable source: a direct Microsoft Graph call, <code>Office365Users.UserPhotoV2(...)</code>. Switched Main to use the same Graph call instead of the SharePoint field.</p>
 
   <ol class="steps">
     <li>Open <strong>Main</strong>.</li>
-    <li>In the Tree view, select <strong>lblNoReleasesMain</strong> (inside the weekly release group's gallery template).</li>
-    <li>Select <code>Text</code> in the Properties dropdown, select all, and replace with:</li>
+    <li>In the Tree view, select <strong>UsrIMG</strong> (the round owner avatar image inside the release card gallery template).</li>
+    <li>Select <code>Image</code> in the Properties dropdown, select all, and replace with:</li>
   </ol>
-  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>With(
-    {
-        _thisWeekStart: DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), "Days"),
-        _itemWeekStart: DateAdd(ThisItem.PlannedDate, -(Weekday(ThisItem.PlannedDate, StartOfWeek.Monday) - 1), "Days")
-    },
-    If(
-        _itemWeekStart < _thisWeekStart, "No releases went out that week",
-        _itemWeekStart = _thisWeekStart, "No releases this week",
-        "No releases planned for that week"
-    )
-)</pre></div>
+  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(!IsBlank(ThisItem.Owner.Email), Office365Users.UserPhotoV2(ThisItem.Owner.Email), "")</pre></div>
 
-  <div class="callout">Test: on the Current tab, find the group for the actual current calendar week — it should say "No releases this week". Any other empty group with a later date (like next Thursday) should now say "No releases planned for that week" instead. Historic/UnapprovedHistoric groups should still say "No releases went out that week".</div>
+  <div class="callout">Test: scroll through the release list on Main and confirm every owner's photo now loads consistently (matching what already worked reliably on ViewItem), instead of sometimes appearing blank.</div>
 
 </main>
 <script>

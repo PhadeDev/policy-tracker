@@ -1234,7 +1234,7 @@ Screens:
                                                             BorderThickness: =2
                                                             Height: =25
                                                             Image: |+
-                                                              =ThisItem.Owner.Picture
+                                                              =If(!IsBlank(ThisItem.Owner.Email), Office365Users.UserPhotoV2(ThisItem.Owner.Email), "")
                                                             RadiusBottomLeft: =50
                                                             RadiusBottomRight: =50
                                                             RadiusTopLeft: =50
