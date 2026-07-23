@@ -33,19 +33,37 @@
   <h1>Policy Tracker — Fix Guide</h1>
   <p class="subtitle">Fresh guide, one fix in it so far. Older entries have been retired.</p>
 
-  <h2>Owner avatar picture missing/flaky on Main</h2>
-  <p class="meta">Main &middot; property edit &middot; no risk</p>
+  <h2>Block saving personal OneDrive links as document links</h2>
+  <p class="meta">ViewItem &middot; property edit &middot; no risk</p>
 
-  <p>The owner picture on Main (<code>UsrIMG</code>) was bound to <code>ThisItem.Owner.Picture</code> — the raw SharePoint Person-column picture reference, which depends on SharePoint's own thumbnail/claims cache and is well known for returning blank on a fresh load or for some users regardless of retries. ViewItem never has this issue because it uses a different, reliable source: a direct Microsoft Graph call, <code>Office365Users.UserPhotoV2(...)</code>. Switched Main to use the same Graph call instead of the SharePoint field.</p>
+  <p>The Open In App icon-scan already looks for the real SharePoint document-library domain (<code>modgovuk.sharepoint.com</code>) on <code>OpenDesktop_2.Visible</code>. A personal OneDrive share link (e.g. <code>https://modgovuk-my.sharepoint.com/:w:/r/personal/...</code>) uses a different domain — the <code>-my.sharepoint.com</code> "my site" domain, not the document library — so it was never going to be recognised, and worse, it's not something colleagues should be linking to from a tracked policy item anyway (personal OneDrive isn't shared storage). First attempt used a toast on Save, but toasts are easy to miss. Replaced it with a persistent inline text block under the URL field itself (reusing the existing error-label spot, so it shows live as soon as the link is typed/pasted, not just on Save). <strong>Save itself still re-checks the same condition independently as a fallback</strong> — it doesn't just rely on the label being visible, so even if the inline warning were somehow not showing, Save would still silently refuse to submit a personal OneDrive link.</p>
 
   <ol class="steps">
-    <li>Open <strong>Main</strong>.</li>
-    <li>In the Tree view, select <strong>UsrIMG</strong> (the round owner avatar image inside the release card gallery template).</li>
-    <li>Select <code>Image</code> in the Properties dropdown, select all, and replace with:</li>
+    <li>Open <strong>ViewItem</strong>.</li>
+    <li>In the Tree view, find <strong>ErrorMessage29_2</strong> (the small text under the "Direct URL to document" field).</li>
+    <li>Select <code>Text</code> in the Properties dropdown, select all, and replace with:</li>
   </ol>
-  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(!IsBlank(ThisItem.Owner.Email), Office365Users.UserPhotoV2(ThisItem.Owner.Email), "")</pre></div>
+  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    "modgovuk-my.sharepoint.com" in Lower(DataCardValue29_2.Text),
+    "This is a personal OneDrive link. Please save this document into SharePoint first, then paste the SharePoint link here.",
+    frmLink_2.Valid = false &amp;&amp; !IsBlank(frmLink_2.Error),
+    "URL is required.",
+    ""
+)</pre></div>
+  <ol class="steps" start="4">
+    <li>Still on <strong>ErrorMessage29_2</strong>, select <code>Wrap</code> in the Properties dropdown and set it to <code>true</code> (the message is longer than the old "URL is required." text, so it needs to wrap onto a second line instead of being cut off).</li>
+    <li>Now find <strong>btnSaveLink_2</strong> (the Save button in the same modal). This is the fallback check — it runs the same domain test again independently, so Save still refuses to submit even if the inline warning above wasn't showing.</li>
+    <li>Select <code>OnSelect</code> in the Properties dropdown, select all, and replace with:</li>
+  </ol>
+  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
+    !varSubmitting &amp;&amp; !("modgovuk-my.sharepoint.com" in Lower(DataCardValue29_2.Text)),
+    Set(varSubmitting, true);
+    SubmitForm(frmLink_2);
+    // Do NOT refresh here
+    Set(varSubmitting, false)
+)</pre></div>
 
-  <div class="callout">Test: scroll through the release list on Main and confirm every owner's photo now loads consistently (matching what already worked reliably on ViewItem), instead of sometimes appearing blank.</div>
+  <div class="callout">Test: paste a <code>modgovuk-my.sharepoint.com/:w:/r/personal/...</code> link into the URL field — the warning text should appear straight away under the field, wrapped onto two lines, and hitting Save should do nothing while it's showing. A normal <code>modgovuk.sharepoint.com</code> document-library link should show no message and still save as before.</div>
 
 </main>
 <script>

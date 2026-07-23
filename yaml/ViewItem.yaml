@@ -2345,12 +2345,15 @@ Screens:
                                                       Size: =9
                                                       Text: |
                                                         =If(
+                                                            "modgovuk-my.sharepoint.com" in Lower(DataCardValue29_2.Text),
+                                                            "This is a personal OneDrive link. Please save this document into SharePoint first, then paste the SharePoint link here.",
                                                             frmLink_2.Valid = false && !IsBlank(frmLink_2.Error),
                                                             "URL is required.",
                                                             ""
                                                         )
                                                       Visible: =Parent.DisplayMode=DisplayMode.Edit
                                                       Width: =Parent.Width - 60
+                                                      Wrap: =true
                                                       X: =0
                                                       Y: =DataCardValue29_2.Y + DataCardValue29_2.Height
                                                 - InfoButtonCanvas2_3:
@@ -2505,7 +2508,7 @@ Screens:
                                                 HoverFill: =RGBA(9, 60, 44, 1)
                                                 OnSelect: |-
                                                   =If(
-                                                      !varSubmitting,
+                                                      !varSubmitting && !("modgovuk-my.sharepoint.com" in Lower(DataCardValue29_2.Text)),
                                                       Set(varSubmitting, true);
                                                       SubmitForm(frmLink_2);
                                                       // Do NOT refresh here
