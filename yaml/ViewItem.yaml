@@ -2066,6 +2066,19 @@ Screens:
                                     X: =212
                                     Y: |
                                       =75
+                              - lblLinkCopyHint1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    AutoHeight: =true
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =RGBA(91, 105, 97, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =9
+                                    Text: |-
+                                      ="Tip - use Share > Copy Link on the document, not the browser address bar. Address bar links still save, but the app can only show the correct file icon when copied this way."
+                                    Width: =380
+                                    Wrap: =true
                         - ctnLinkModal_2:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
