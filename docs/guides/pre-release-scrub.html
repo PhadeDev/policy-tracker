@@ -3,91 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Policy Tracker — Fix Guide</title>
+  <meta http-equiv="refresh" content="3; url=https://phaderon.github.io/PowerApps/policy-tracker/">
+  <title>Policy Tracker — Fix Guide Moved</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #14151a; color: #dcdfe4; line-height: 1.6; }
-    main { max-width: 760px; margin: 0 auto; padding: 48px 24px 100px; }
+    main { max-width: 640px; margin: 0 auto; padding: 80px 24px; text-align: center; }
     a { color: #7cb3e8; }
-    h1 { margin: 0 0 6px; color: #eef0f3; font-size: 1.6rem; font-weight: 600; }
-    .subtitle { color: #8b8f98; margin: 0 0 40px; font-size: 0.95rem; }
-    h2 { margin: 48px 0 4px; color: #eef0f3; font-size: 1.15rem; font-weight: 600; }
-    .meta { color: #8b8f98; font-size: 0.82rem; margin: 0 0 16px; }
-    p { color: #c2c6cd; margin: 10px 0; }
-    code { background: #1e2027; color: #e8c78a; padding: 1px 6px; border-radius: 4px; font-size: 0.88em; }
-    hr { border: none; border-top: 1px solid #2a2c33; margin: 40px 0; }
-    .steps { margin: 14px 0; padding-left: 20px; color: #c2c6cd; }
-    .steps li { margin: 6px 0; }
-    pre { position: relative; overflow: auto; white-space: pre; background: #1a1b20; color: #d7dade; border: 1px solid #2a2c33; border-radius: 6px; padding: 14px 16px; font-size: 0.82rem; line-height: 1.5; margin: 12px 0; }
-    .copy-wrap { position: relative; }
-    button.copy { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 5px; background: #2a2c33; color: #c2c6cd; padding: 4px 10px; cursor: pointer; font-size: 0.75rem; }
-    button.copy:hover { background: #34363e; }
-    button.copy.ok { background: #2f5741; color: #a6e0bd; }
-    button.copy.err { background: #5c3232; color: #e8a6a6; }
-    .callout { border-left: 3px solid #45607a; background: #1b222b; padding: 10px 14px; border-radius: 4px; margin: 12px 0; font-size: 0.9rem; color: #b7c2cc; }
+    h1 { color: #eef0f3; font-size: 1.4rem; font-weight: 600; }
+    p { color: #c2c6cd; }
   </style>
 </head>
 <body>
 <main>
-  <p><a href="../index.html">&larr; Back to Policy Tracker guide</a></p>
-  <h1>Policy Tracker — Fix Guide</h1>
-  <p class="subtitle">Fresh guide, one fix in it so far. Older entries have been retired.</p>
-
-  <h2>Block saving personal OneDrive links as document links</h2>
-  <p class="meta">ViewItem &middot; property edit &middot; no risk</p>
-
-  <p>The Open In App icon-scan already looks for the real SharePoint document-library domain (<code>modgovuk.sharepoint.com</code>) on <code>OpenDesktop_2.Visible</code>. A personal OneDrive share link (e.g. <code>https://modgovuk-my.sharepoint.com/:w:/r/personal/...</code>) uses a different domain — the <code>-my.sharepoint.com</code> "my site" domain, not the document library — so it was never going to be recognised, and worse, it's not something colleagues should be linking to from a tracked policy item anyway (personal OneDrive isn't shared storage). First attempt used a toast on Save, but toasts are easy to miss. Replaced it with a persistent inline text block under the URL field itself (reusing the existing error-label spot, so it shows live as soon as the link is typed/pasted, not just on Save). <strong>Save itself still re-checks the same condition independently as a fallback</strong> — it doesn't just rely on the label being visible, so even if the inline warning were somehow not showing, Save would still silently refuse to submit a personal OneDrive link.</p>
-
-  <ol class="steps">
-    <li>Open <strong>ViewItem</strong>.</li>
-    <li>In the Tree view, find <strong>ErrorMessage29_2</strong> (the small text under the "Direct URL to document" field).</li>
-    <li>Select <code>Text</code> in the Properties dropdown, select all, and replace with:</li>
-  </ol>
-  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    "modgovuk-my.sharepoint.com" in Lower(DataCardValue29_2.Text),
-    "This is a personal OneDrive link. Please save this document into SharePoint first, then paste the SharePoint link here.",
-    frmLink_2.Valid = false &amp;&amp; !IsBlank(frmLink_2.Error),
-    "URL is required.",
-    ""
-)</pre></div>
-  <ol class="steps" start="4">
-    <li>Still on <strong>ErrorMessage29_2</strong>, select <code>Wrap</code> in the Properties dropdown and set it to <code>true</code> (the message is longer than the old "URL is required." text, so it needs to wrap onto a second line instead of being cut off).</li>
-    <li>Now find <strong>btnSaveLink_2</strong> (the Save button in the same modal). This is the fallback check — it runs the same domain test again independently, so Save still refuses to submit even if the inline warning above wasn't showing.</li>
-    <li>Select <code>OnSelect</code> in the Properties dropdown, select all, and replace with:</li>
-  </ol>
-  <div class="copy-wrap"><button class="copy" onclick="copyBlock(this)">Copy</button><pre>If(
-    !varSubmitting &amp;&amp; !("modgovuk-my.sharepoint.com" in Lower(DataCardValue29_2.Text)),
-    Set(varSubmitting, true);
-    SubmitForm(frmLink_2);
-    // Do NOT refresh here
-    Set(varSubmitting, false)
-)</pre></div>
-
-  <div class="callout">Test: paste a <code>modgovuk-my.sharepoint.com/:w:/r/personal/...</code> link into the URL field — the warning text should appear straight away under the field, wrapped onto two lines, and hitting Save should do nothing while it's showing. A normal <code>modgovuk.sharepoint.com</code> document-library link should show no message and still save as before.</div>
-
+  <h1>This guide has moved</h1>
+  <p>The Policy Tracker fix guide now lives in the PowerApps Bible, where every fix is kept in one running page instead of being replaced one at a time.</p>
+  <p><a href="https://phaderon.github.io/PowerApps/policy-tracker/">https://phaderon.github.io/PowerApps/policy-tracker/</a></p>
+  <p>Redirecting automatically in a few seconds&hellip;</p>
 </main>
-<script>
-function copyBlock(btn) {
-  var pre = btn.nextElementSibling;
-  var text = pre.innerText || pre.textContent;
-  function showResult(ok) {
-    btn.classList.remove('ok', 'err');
-    if (ok) { btn.classList.add('ok'); btn.textContent = 'Copied'; }
-    else { btn.classList.add('err'); btn.textContent = 'Select + Ctrl+C'; }
-    setTimeout(function () { btn.classList.remove('ok', 'err'); btn.textContent = 'Copy'; }, 1600);
-  }
-  var range = document.createRange();
-  range.selectNodeContents(pre);
-  var sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
-  var legacyCopied = false;
-  try { legacyCopied = document.execCommand('copy'); } catch (e) { legacyCopied = false; }
-  if (legacyCopied) { showResult(true); return; }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function () { showResult(true); }, function () { showResult(false); });
-  } else { showResult(false); }
-}
-</script>
 </body>
 </html>

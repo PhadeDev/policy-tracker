@@ -2264,14 +2264,21 @@ Screens:
                                                 DisplayName: =DataSourceInfo([@PolicyLinks],DataSourceInfo.DisplayName,LinkUrl)
                                                 Required: =true
                                                 Update: |
-                                                  =If(
-                                                      IsBlank(DataCardValue29_2.Text),
-                                                      Blank(),
-                                                      Left(DataCardValue29_2.Text, 
-                                                          If(
-                                                              Find("&action", DataCardValue29_2.Text) > 0,
-                                                              Find("&action", DataCardValue29_2.Text) - 1,
-                                                              Len(DataCardValue29_2.Text)
+                                                  =With(
+                                                      {
+                                                          fullUrl: DataCardValue29_2.Text
+                                                      },
+                                                      If(
+                                                          IsBlank(fullUrl),
+                                                          Blank(),
+                                                          Left(
+                                                              fullUrl,
+                                                              Min(
+                                                                  If(Find("&action", fullUrl) > 0, Find("&action", fullUrl) - 1, Len(fullUrl)),
+                                                                  If(Find("&clickparams", fullUrl) > 0, Find("&clickparams", fullUrl) - 1, Len(fullUrl)),
+                                                                  If(Find("&CID=", fullUrl) > 0, Find("&CID=", fullUrl) - 1, Len(fullUrl)),
+                                                                  If(Find("&wdLOR", fullUrl) > 0, Find("&wdLOR", fullUrl) - 1, Len(fullUrl))
+                                                              )
                                                           )
                                                       )
                                                   )
