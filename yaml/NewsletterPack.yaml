@@ -62,7 +62,7 @@ Screens:
             "<br><b>Previous Newsletters:</b><br>" &
             "All the previous weekly policy updates are available via the links below<br>" &
             "MODNet users: <a href=""https://modgovuk.sharepoint.com/teams/1598/SitePages/Weekly-Policy-Updates---Archive.aspx"">Weekly Policy Updates (sharepoint.com)</a><br>" &
-            "Resource Centre users: Navigate to: Westminster " & Char(8594) & " Resource Centre " & Char(8594) & " Organisation " & Char(8594) & " Cadets Branch Weekly Policy Updates<br><br>" &
+            "Resource Centre users: Navigate to: Westminster → Resource Centre → Organisation → Cadets Branch Weekly Policy Updates<br><br>" &
             "<b>About the Newsletter:</b><br>" &
             "This newsletter works on both MODNet and personal systems, and all policies included will also be uploaded on to both MODNet and the Resource Centre for routine accessing.<br>" &
             "Each week we will send out a version of this email, to the usual recipients, providing a link to the latest policy newsletter and a summary of what items have been included.<br>" &
@@ -213,6 +213,43 @@ Screens:
                                   SortKey,
                                   SortOrder.Ascending
                               )
+                          );
+                          ClearCollect(colBatchGroups, AddColumns(Sort('BM Groups', SortOrder, SortOrder.Ascending), Ticked, false));
+                          ClearCollect(colBatchMemberships, Filter('BM Memberships', false));
+                          ForAll(colBatchGroups As grp, Collect(colBatchMemberships, Filter('BM Memberships', GroupName = grp.Title)));
+                          Set(varNewsletterSubject, Text(Today(), "yyyymmdd") & " - Cadets Branch weekly policy updates");
+                          Set(
+                              varNewsletterBodyLead,
+                              "Good afternoon all,<br><br>" &
+                              "Please find a link to this week's releases here - <a href=""PASTE-THIS-WEEKS-LINK-HERE"">PASTE THIS WEEK'S LINK TEXT HERE</a><br>" &
+                              "Below is a summary of this week's releases from Cadets Branch:<br><br>"
+                          );
+                          Set(
+                              varNewsletterBodyStatic,
+                              "<br><b>Previous Newsletters:</b><br>" &
+                              "All the previous weekly policy updates are available via the links below<br>" &
+                              "MODNet users: <a href=""https://modgovuk.sharepoint.com/teams/1598/SitePages/Weekly-Policy-Updates---Archive.aspx"">Weekly Policy Updates (sharepoint.com)</a><br>" &
+                              "Resource Centre users: Navigate to: Westminster → Resource Centre → Organisation → Cadets Branch Weekly Policy Updates<br><br>" &
+                              "<b>About the Newsletter:</b><br>" &
+                              "This newsletter works on both MODNet and personal systems, and all policies included will also be uploaded on to both MODNet and the Resource Centre for routine accessing.<br>" &
+                              "Each week we will send out a version of this email, to the usual recipients, providing a link to the latest policy newsletter and a summary of what items have been included.<br>" &
+                              "This email has been sent to the groups listed below but please feel free to forward on as you deem necessary, emailed recipients:<br><br>" &
+                              "ACF CEOs (ex-HQ SE)<br>" &
+                              "JMC SO2's<br>" &
+                              "JMC OC CTT's<br>" &
+                              "---<br>" &
+                              "JMC Cadets Branch 0mailboxes<br>" &
+                              "JMC CTT 0mailboxes<br>" &
+                              "JMC Col Cadets (including Col Ashley Fulford)<br>" &
+                              "JMC RAL members<br>" &
+                              "JMC SCEOs<br>" &
+                              "Cadets Branch<br>" &
+                              "CTC Frimley<br>" &
+                              "CCAT<br>" &
+                              "CRFCA (Sam Plant and Simon Estick)<br>" &
+                              "ACCT UK (Murdo Urquhart and Richard Walton)<br>" &
+                              "CCRS (Shooting Manager - Daf Marston)<br>" &
+                              "CCF RAF &amp; RN leads"
                           )
                         PressedBorderColor: =RGBA(9, 60, 44, 1)
                         PressedFill: =RGBA(9, 60, 44, 1)
@@ -526,7 +563,7 @@ Screens:
                               Office365Outlook.DraftEmail(
                                   "",
                                   varNewsletterSubject,
-                                  varNewsletterBodyLead & Concat(colNewsletterPack, Char(8226) & " <b>" & PackTitle & "</b><br>&nbsp;&nbsp;&nbsp;&nbsp;" & Char(9702) & " Intended audience: " & PackAudience & "<br><br>") & varNewsletterBodyStatic,
+                                  varNewsletterBodyLead & Concat(colNewsletterPack, "• <b>" & PackTitle & "</b><br>&nbsp;&nbsp;&nbsp;&nbsp;◦ Intended audience: " & PackAudience & "<br><br>") & varNewsletterBodyStatic,
                                   {Bcc: varBatch1Bcc}
                               );
                               Notify("Thursday Batch 1 draft created - check Outlook Drafts.", NotificationType.Success)
@@ -567,7 +604,7 @@ Screens:
                               Office365Outlook.DraftEmail(
                                   "",
                                   varNewsletterSubject,
-                                  varNewsletterBodyLead & Concat(colNewsletterPack, Char(8226) & " <b>" & PackTitle & "</b><br>&nbsp;&nbsp;&nbsp;&nbsp;" & Char(9702) & " Intended audience: " & PackAudience & "<br><br>") & varNewsletterBodyStatic,
+                                  varNewsletterBodyLead & Concat(colNewsletterPack, "• <b>" & PackTitle & "</b><br>&nbsp;&nbsp;&nbsp;&nbsp;◦ Intended audience: " & PackAudience & "<br><br>") & varNewsletterBodyStatic,
                                   {Bcc: varBatch2Bcc}
                               );
                               Notify("Thursday Batch 2 draft created - check Outlook Drafts.", NotificationType.Success)
