@@ -73,12 +73,28 @@
       white-space: pre-wrap;
       text-align: left;
     }
+    .update-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #1a2a1a;
+      border: 1px solid #2a7d4e;
+      color: #4caf7d;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .update-pill::before { content: "●"; font-size: 0.6rem; }
+    .badge-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
   </style>
 </head>
 <body>
   <h1>PowerApps Screen</h1>
   <div class="name">NewsletterPack</div>
-  <div class="version-badge">v3.8  —  Built 15 Aug 2026</div>
+  <div class="badge-row">
+    <div class="version-badge" id="version-badge" data-updated="2026-08-15T13:32:00Z">v3.8  —  Built 15 Aug 2026, 14:32 BST</div>
+  </div>
   <button onclick="copyYAML()">Copy YAML to Clipboard</button>
   <div id="status">Click to copy — PowerApps-ready (CRLF, UTF-8)</div>
   <div class="info">
@@ -125,6 +141,20 @@
     }
 
     document.getElementById('preview').textContent = 'Clipboard payload preview (' + stamp + ')\n' + firstLines();
+
+    (function () {
+      var badge = document.getElementById('version-badge');
+      var updated = new Date(badge.getAttribute('data-updated')).getTime();
+      if (isNaN(updated)) return;
+      var ageMs = Date.now() - updated;
+      if (ageMs < 0 || ageMs >= 48 * 60 * 60 * 1000) return; // only show within 48h
+      var mins = Math.round(ageMs / 60000);
+      var text = mins < 1 ? 'just now' : mins < 60 ? mins + 'm ago' : Math.round(mins / 60) < 24 ? Math.round(mins / 60) + 'h ago' : Math.round(mins / 1440) + 'd ago';
+      var pill = document.createElement('span');
+      pill.className = 'update-pill';
+      pill.textContent = 'Updated ' + text;
+      badge.after(pill);
+    })();
   </script>
 </body>
 </html>
