@@ -114,8 +114,8 @@
 <body>
 
 <a class="back" href="https://phaderon.github.io/PowerApps/">&larr; Guide Library</a>
-<h1>Policy Tracker <span class="version-tag">V3.6</span></h1>
-<p class="build-stamp">Built 2 Jul 2026 &mdash; v3.6: NewsletterPack rework from GitHub issue thread — Copy buttons (Title/Audience/Summary) moved to the left "Plain text reference" gallery, removed the broken/unwanted access-check wrapper from OnVisible, fixed the ReadyForRelease OR-logic bug so only approved items show (not "ready" alone). Right panel email preview reverted to its original unstyled layout.</p>
+<h1>Policy Tracker <span class="version-tag">V3.7</span></h1>
+<p class="build-stamp">Built 15 Aug 2026 &mdash; v3.7: NewsletterPack now drafts the weekly Thursday Batch 1/2 emails directly via the Office 365 Outlook connector's DraftEmail action — bold HTML body built from this week's newsletter items plus a fixed footer, BCC pulled from Branch Contact Groups' BM Groups/BM Memberships SharePoint lists (per-user identity, no shared connection). Requires those two lists added as data sources before pasting. Manual step still required: paste this week's release link into the placeholder in the drafted body, and set the OFFICIAL sensitivity label before sending.</p>
 <p class="subtitle">Canvas app tracking ACCT UK policy documents through the release pipeline. V2 is a complete redesign: dominant type-colour card panels, segmented type filter, inline search, owner initials circles, status dots, Newsletter Pack screen, and a new cool-grey palette throughout. Wraps the <code>Policy Proof Tracker</code> SharePoint list with a <code>PolicyLinks</code> child list.</p>
 
 <!-- BUILD PROGRESS -->
@@ -354,12 +354,12 @@ Set(
     <div class="screen-cta green">Open and copy &rarr;</div>
   </a>
 
-  <a class="screen-card done" href="screens/NewsletterPack.html?v=3.4" target="_blank">
+  <a class="screen-card done" href="screens/NewsletterPack.html?v=3.7" target="_blank">
     <div>
-      <div class="status-pill pill-done">&#10003; V3.4 ready</div>
+      <div class="status-pill pill-done">&#10003; V3.7 ready</div>
       <div class="screen-number">Screen 6</div>
       <div class="screen-name">Newsletter Pack</div>
-      <div class="screen-desc">Dual-panel screen. Left: plain reference text with Item summary and separators. Right: email-ready bullet preview with Copy All using an indented intended-audience bullet.</div>
+      <div class="screen-desc">Dual-panel screen. Left: plain reference text with Item summary and separators. Right: email-ready bullet preview with Copy All using an indented intended-audience bullet, plus Thursday Batch 1/2 Email buttons that draft an HTML email via the Office 365 Outlook connector (bold titles, BCC pulled from Branch Contact Groups' BM Groups/BM Memberships lists). Requires those two SharePoint lists added as data sources first.</div>
     </div>
     <div class="screen-cta green">Open and copy &rarr;</div>
   </a>
