@@ -91,7 +91,7 @@ Screens:
                       Variant: Horizontal
                       Properties:
                         BorderColor: =RGBA(0, 18, 107, 1)
-                        Items: =colChoiceColors
+                        Items: =Sort(colChoiceColors, SortOrder, SortOrder.Ascending)
                         ShowScrollbar: =false
                         TemplateSize: =105
                         Width: =Parent.Width - 650

@@ -1,7 +1,7 @@
 Screens:
   StartScreen:
     Properties:
-      LoadingSpinnerColor: =RGBA(11, 74, 54, 1)
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
       OnVisible: |-
         =Set(
             varStartDestination,
@@ -9,7 +9,6 @@ Screens:
         );
         Set(varSplashMinTimeElapsed, false);
         Set(varActiveCacheReady, false);
-        Set(varSkipMainInitialRefresh, false);
         If(
             varStartDestination = "Main",
             Refresh('Policy Proof Tracker');
@@ -31,9 +30,9 @@ Screens:
             Height: =App.Height
             LoadingSteps: |-
               =Table(
-                  {msg: "Loading colour palette..."},
-                  {msg: "Loading document list..."},
-                  {msg: "Checking staff access..."}
+                  {msg: "Loading colour palette…"},
+                  {msg: "Loading document list…"},
+                  {msg: "Checking staff access…"}
               )
             LogoLetter: ="P"
             MinDisplayTime: =400

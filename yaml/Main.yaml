@@ -1543,8 +1543,7 @@ Screens:
                                                       Visible: |-
                                                         =!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &&
                                                         ThisItem.'Planned Publish Date' <= Today() &&
-                                                        ThisItem.Published = false &&
-                                                        ThisItem.'External consultation required' = false
+                                                        ThisItem.Published = false
                                                       Width: =110
                                                       X: =740
                                                       Y: =6
@@ -1739,10 +1738,10 @@ Screens:
                                           OnSelect: |-
                                             =// PublishAllBtn.OnSelect
                                             Set(varPublishGroupDate, ThisItem.PlannedDate);
-                                            Set(varPublishGroupCount, CountRows(Filter(ThisItem.GroupedItems, 'External consultation required' = false)));
+                                            Set(varPublishGroupCount, CountRows(Filter(ThisItem.GroupedItems, Published = false)));
                                             Clear(colPublishFailures);
                                             ForAll(
-                                                Filter(ThisItem.GroupedItems, 'External consultation required' = false) As PubItem,
+                                                Filter(ThisItem.GroupedItems, Published = false) As PubItem,
                                                 IfError(
                                                     Patch(
                                                         'Policy Proof Tracker',
@@ -1777,11 +1776,11 @@ Screens:
                                           RadiusTopLeft: =6
                                           RadiusTopRight: =6
                                           Size: =11
-                                          Text: ="Publish All (" & CountRows(Filter(ThisItem.GroupedItems, Published = false && 'External consultation required' = false)) & ")"
+                                          Text: ="Publish All (" & CountRows(Filter(ThisItem.GroupedItems, Published = false)) & ")"
                                           Visible: |-
                                             =!IsEmpty(Filter(colBossButtonUsers, Lower(Email) = Lower(User().Email))) &&
                                             ThisItem.PlannedDate <= Today() &&
-                                            CountRows(Filter(ThisItem.GroupedItems, Published = false && 'External consultation required' = false)) > 0
+                                            CountRows(Filter(ThisItem.GroupedItems, Published = false)) > 0
                                           Width: =150
                                           X: =950
                                           Y: =12

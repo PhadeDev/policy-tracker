@@ -5,6 +5,7 @@ Screens:
       LoadingSpinnerColor: =RGBA(11, 74, 54, 1)
       OnVisible: |-
         =Set(varLoadingLinks, varLinksSourceID <> varSelectedRelease.ID || IsBlank(varSelectedRelease.ID));
+        Set(varClosingViewItem, false);
         Set(varSaving, false);
         Set(varShowLinkModal, false);
         Set(varSelectedLink, Blank());
@@ -147,6 +148,7 @@ Screens:
                   RadiusTopRight: =14
                   Visible: |-
                     =!(
+                        !Coalesce(varClosingViewItem, false) &&
                         varSelectPolicy <> "Filled" &&
                         DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
                         DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
@@ -421,11 +423,12 @@ Screens:
                           =If(
                               varUnsavedChanges,
                               UpdateContext({locDisplayDiscardPopUp: true}),
+                              Set(varClosingViewItem, true);
+                              If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade));
                               Set(varSelectPolicy, "Empty");
                               Set(varSelectedRelease, Blank());
                               Set(varUnsavedChanges, false);
-                              Set(varShowLinkModal, false);
-                              If(varSourceScreen = "Historic", Navigate(Historic, ScreenTransition.Fade), Navigate(Main, ScreenTransition.Fade))
+                              Set(varShowLinkModal, false)
                           )
                         PressedBorderColor: =RGBA(223, 229, 224, 1)
                         PressedColor: =RGBA(91, 105, 97, 1)
@@ -528,7 +531,8 @@ Screens:
                   RadiusTopLeft: =14
                   RadiusTopRight: =14
                   Visible: |-
-                    =varSelectPolicy <> "Filled" &&
+                    =!Coalesce(varClosingViewItem, false) &&
+                    varSelectPolicy <> "Filled" &&
                     DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") >= 0 &&
                     DateDiff(Today(), dpkPublishDate1.SelectedDate, "Days") < 10 &&
                     !ckbHighPriority1.Value &&
@@ -2915,6 +2919,7 @@ Screens:
                               FontWeight: =""
                               OnSelect: |-
                                 =UpdateContext({locDisplayDiscardPopUp: false});
+                                Set(varClosingViewItem, true);
                                 Set(varSelectPolicy, "Empty");
                                 Set(varSelectedRelease, Blank());
                                 Set(varUnsavedChanges, false);

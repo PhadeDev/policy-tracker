@@ -2,13 +2,14 @@ Set(
     varSelectedState,
     "Current"
 );
+Set(varShowTypeFilterPopover, false);
 Set(varTypeFilter, "");
 Set(varFilterOwner, false);
-ClearCollect( 
-     colBossButtonUsers, 
-     {Email: "allan.hamilton775@mod.gov.uk"}, 
-     {Email: "dan.smith391@mod.gov.uk"} 
- ); 
+ClearCollect(
+     colBossButtonUsers,
+     {Email: "allan.hamilton775@mod.gov.uk"},
+     {Email: "dan.smith391@mod.gov.uk"}
+ );
 
 Set(
     varShowSearch,
